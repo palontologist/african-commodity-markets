@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TrendingUp, TrendingDown, Coffee, Leaf, Apple, Nut, Award } from "lucide-react"
+import { AppHeader } from "@/components/app-header"
 import Link from "next/link"
 
 const commodities = [
@@ -67,33 +68,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">AfriMarkets</h1>
-                <p className="text-sm text-muted-foreground">African Commodity Prediction Platform</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" asChild className="hidden sm:inline-flex bg-transparent">
-                <Link href="/grades">
-                  <Award className="w-4 h-4 mr-2" />
-                  Quality Grades
-                </Link>
-              </Button>
-              <Badge variant="secondary" className="hidden sm:inline-flex">
-                Live Markets
-              </Badge>
-              <Button>Connect Wallet</Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
