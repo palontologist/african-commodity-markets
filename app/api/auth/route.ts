@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sign, verify } from 'jsonwebtoken'
-
-// Mock user database - in production this would be a real database
-const users: Record<string, any> = {}
+import { users } from '@/lib/data/store'
 
 // Simple JWT secret - in production this should be from environment variables
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production'

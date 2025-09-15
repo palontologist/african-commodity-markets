@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Mock user portfolio data - in production this would come from a database
-let userPortfolios: Record<string, any> = {}
-
-// Mock transaction history
-let transactionHistory: any[] = []
+import { userPortfolios, transactionHistory } from '@/lib/data/store'
 
 // Simple price calculation based on current market state
 function calculateNewPrice(currentPrice: number, orderType: 'yes' | 'no', orderAmount: number, totalVolume: number) {

@@ -1,24 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Mock user portfolio data - shared with trades API
-// In production, this would be stored in a database
-const userPortfolios: Record<string, any> = {}
-
-// Mock market prices for calculating current values
-const currentMarketPrices = {
-  'tea_1_yes': 0.67,
-  'tea_1_no': 0.33,
-  'tea_2_yes': 0.42,
-  'tea_2_no': 0.58,
-  'coffee_1_yes': 0.73,
-  'coffee_1_no': 0.27,
-  'coffee_2_yes': 0.38,
-  'coffee_2_no': 0.62,
-  'avocado_1_yes': 0.55,
-  'avocado_1_no': 0.45,
-  'macadamia_1_yes': 0.61,
-  'macadamia_1_no': 0.39,
-}
+import { userPortfolios, currentMarketPrices } from '@/lib/data/store'
 
 export async function GET(request: NextRequest) {
   try {
@@ -32,25 +13,17 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    const portfolio = userPortfolios[userId]
+    let portfolio = userPortfolios[userId]
     
     if (!portfolio) {
-      // Return empty portfolio for new users
-      return NextResponse.json({
-        userId,
+      // Initialize portfolio for new users
+      portfolio = {
         totalInvested: 0,
-        currentValue: 0,
-        totalReturn: 0,
-        totalReturnPercentage: 0,
-        positions: [],
-        performance: {
-          totalTrades: 0,
-          winningTrades: 0,
-          losingTrades: 0,
-          winRate: 0,
-        },
-        recentTransactions: [],
-      })
+        positions: {},
+        transactions: [],
+        createdAt: new Date().toISOString(),
+      }
+      userPortfolios[userId] = portfolio
     }
     
     // Calculate current values for all positions
@@ -59,7 +32,7 @@ export async function GET(request: NextRequest) {
       const currentPrice = currentMarketPrices[priceKey as keyof typeof currentMarketPrices] || position.averagePrice
       const currentValue = position.shares * currentPrice
       const unrealizedPnL = currentValue - position.totalCost
-      const unrealizedPnLPercentage = (unrealizedPnL / position.totalCost) * 100
+      const unrealizedPnLPercentage = position.totalCost > 0 ? (unrealizedPnL / position.totalCost) * 100 : 0
       
       return {
         ...position,

@@ -1,19 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Mock data for platform statistics
-// In production, this would aggregate data from the database
-let platformStats = {
-  totalVolume: 5540000, // $5.54M
-  activeMarkets: 12,
-  totalTraders: 2847,
-  averageReturn: 12.4,
-  last24hVolume: 890000, // $890K
-  last24hTrades: 156,
-  topPerformingCommodity: 'avocado',
-  mostActiveCommodity: 'coffee',
-  marketSentiment: 'bullish', // bullish, bearish, neutral
-  lastUpdated: new Date().toISOString(),
-}
+import { platformStats } from '@/lib/data/store'
 
 // Mock historical data for charts
 const historicalData = {

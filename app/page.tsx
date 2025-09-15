@@ -62,6 +62,13 @@ export default function Dashboard() {
                   Quality Grades
                 </Link>
               </Button>
+              {isAuthenticated && (
+                <Button variant="outline" asChild className="hidden sm:inline-flex bg-transparent">
+                  <Link href="/portfolio">
+                    Portfolio
+                  </Link>
+                </Button>
+              )}
               <Badge variant="secondary" className="hidden sm:inline-flex">
                 Live Markets
               </Badge>
