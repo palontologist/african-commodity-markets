@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TradingModal } from "@/components/trading-modal"
-import { TrendingUp, TrendingDown, ArrowLeft, Info, Calendar, DollarSign, Users, BarChart3 } from "lucide-react"
+import { TrendingUp, TrendingDown, ArrowLeft, Info, Calendar, DollarSign, Users, BarChart3, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { useMarketPredictions } from "@/hooks/useMarkets"
 
 const commodityData = {
   tea: {
@@ -160,10 +161,22 @@ export default function CommodityPage({ params }: PageProps) {
   const [selectedMarket, setSelectedMarket] = useState<any>(null)
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false)
 
+  const { predictions, loading, error } = useMarketPredictions(params.commodity)
   const commodity = commodityData[params.commodity as keyof typeof commodityData]
 
   if (!commodity) {
     notFound()
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading market data...</p>
+        </div>
+      </div>
+    )
   }
 
   const TrendIcon = commodity.trend === "up" ? TrendingUp : TrendingDown
@@ -172,6 +185,9 @@ export default function CommodityPage({ params }: PageProps) {
     setSelectedMarket(market)
     setIsTradeModalOpen(true)
   }
+
+  // Use backend data if available, otherwise fall back to static data
+  const marketsToDisplay = predictions.length > 0 ? predictions : commodity.markets
 
   return (
     <div className="min-h-screen bg-background">
@@ -271,10 +287,17 @@ export default function CommodityPage({ params }: PageProps) {
           </Card>
         </div>
 
+        {/* Error handling */}
+        {error && (
+          <div className="mb-8 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-red-700 dark:text-red-400">{error}</p>
+          </div>
+        )}
+
         {/* Active Markets */}
         <div className="space-y-6">
           <h2 className="text-3xl font-bold text-foreground">Active Markets</h2>
-          {commodity.markets.map((market) => (
+          {marketsToDisplay.map((market) => (
             <Card key={market.id} className="hover:shadow-lg transition-shadow duration-200">
               <CardHeader>
                 <div className="flex items-start justify-between">
