@@ -1,12 +1,25 @@
-import { currentUser } from '@clerk/nextjs/server'
+'use client'
+
+import { useUser } from '@clerk/nextjs'
 import { redirect } from 'next/navigation'
 import { AppHeader } from '@/components/app-header'
+import { useEffect } from 'react'
 
-export default async function DashboardPage() {
-  const user = await currentUser()
+export default function DashboardPage() {
+  const { user, isLoaded, isSignedIn } = useUser()
   
-  if (!user) {
-    redirect('/sign-in')
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      redirect('/sign-in')
+    }
+  }, [isLoaded, isSignedIn])
+
+  if (!isLoaded) {
+    return <div>Loading...</div>
+  }
+
+  if (!isSignedIn) {
+    return <div>Redirecting to sign in...</div>
   }
 
   return (

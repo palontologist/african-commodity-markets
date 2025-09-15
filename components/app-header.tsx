@@ -2,10 +2,15 @@
 
 import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 export function AppHeader() {
-  const hasAuth = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && 
-                  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== 'pk_test_placeholder'
+  const [hasAuth, setHasAuth] = useState(true) // Default to true for build
+
+  useEffect(() => {
+    const key = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+    setHasAuth(!!key && key !== 'pk_test_Y2xlcmsuYWZyaWNhbm1hcmtldHMuZGV2JA') // Exclude default build key
+  }, [])
 
   return (
     <header className="border-b bg-white">
@@ -58,9 +63,9 @@ export function AppHeader() {
               </SignedIn>
             </>
           ) : (
-            <button className="bg-gray-400 text-white px-4 py-2 rounded-md cursor-not-allowed" disabled>
-              Auth Setup Required
-            </button>
+            <div className="text-sm text-gray-500">
+              Setup Clerk auth to sign in
+            </div>
           )}
         </div>
       </div>
