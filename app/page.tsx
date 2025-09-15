@@ -1,69 +1,45 @@
+'use client'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { TrendingUp, TrendingDown, Coffee, Leaf, Apple, Nut, Award } from "lucide-react"
+import { TrendingUp, TrendingDown, Coffee, Leaf, Apple, Nut, Award, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { useMarkets } from "@/hooks/useMarkets"
+import { useStats } from "@/hooks/useStats"
+import { useAuth } from "@/hooks/useAuth"
 
-const commodities = [
-  {
-    id: "tea",
-    name: "Tea",
-    icon: Leaf,
-    description: "CTC grades prediction market",
-    currentPrice: "$2.45/kg",
-    change: "+5.2%",
-    trend: "up",
-    volume: "$1.2M",
-    activeMarkets: 3,
-    nextSettlement: "Jan 15, 2025",
-    grade: "BOP Grade",
-    color: "bg-green-100 text-green-800",
-  },
-  {
-    id: "coffee",
-    name: "Coffee",
-    icon: Coffee,
-    description: "SCA score-based futures",
-    currentPrice: "$4.80/lb",
-    change: "-2.1%",
-    trend: "down",
-    volume: "$2.8M",
-    activeMarkets: 5,
-    nextSettlement: "Feb 20, 2025",
-    grade: "Specialty 84+",
-    color: "bg-amber-100 text-amber-800",
-  },
-  {
-    id: "avocado",
-    name: "Avocado",
-    icon: Apple,
-    description: "Export grade predictions",
-    currentPrice: "$1.85/kg",
-    change: "+8.7%",
-    trend: "up",
-    volume: "$890K",
-    activeMarkets: 2,
-    nextSettlement: "Mar 10, 2025",
-    grade: "Grade A",
-    color: "bg-emerald-100 text-emerald-800",
-  },
-  {
-    id: "macadamia",
-    name: "Macadamia",
-    icon: Nut,
-    description: "MQA quality standards",
-    currentPrice: "$12.30/kg",
-    change: "+3.4%",
-    trend: "up",
-    volume: "$650K",
-    activeMarkets: 2,
-    nextSettlement: "Apr 5, 2025",
-    grade: "MQA_I",
-    color: "bg-orange-100 text-orange-800",
-  },
-]
+const commodityIcons = {
+  tea: Leaf,
+  coffee: Coffee,
+  avocado: Apple,
+  macadamia: Nut,
+}
 
 export default function Dashboard() {
+  const { markets, loading: marketsLoading, error: marketsError } = useMarkets()
+  const { stats, loading: statsLoading, error: statsError } = useStats()
+  const { user, connectWallet, disconnectWallet, isAuthenticated, loading: authLoading } = useAuth()
+
+  const handleWalletAction = async () => {
+    if (isAuthenticated) {
+      await disconnectWallet()
+    } else {
+      await connectWallet()
+    }
+  }
+
+  if (marketsLoading || statsLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading markets...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -89,7 +65,17 @@ export default function Dashboard() {
               <Badge variant="secondary" className="hidden sm:inline-flex">
                 Live Markets
               </Badge>
-              <Button>Connect Wallet</Button>
+              <Button onClick={handleWalletAction} disabled={authLoading}>
+                {authLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : null}
+                {isAuthenticated ? 'Disconnect' : 'Connect Wallet'}
+              </Button>
+              {isAuthenticated && (
+                <div className="text-sm text-muted-foreground">
+                  Balance: ${user?.balance.toFixed(2)}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -123,7 +109,9 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Volume</p>
-                  <p className="text-2xl font-bold text-foreground">$5.54M</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {stats ? `$${(stats.totalVolume / 1000000).toFixed(2)}M` : '$5.54M'}
+                  </p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-primary" />
               </div>
@@ -134,7 +122,9 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Active Markets</p>
-                  <p className="text-2xl font-bold text-foreground">12</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {stats ? stats.activeMarkets : '12'}
+                  </p>
                 </div>
                 <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                   <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
@@ -147,7 +137,9 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Traders</p>
-                  <p className="text-2xl font-bold text-foreground">2,847</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {stats ? stats.totalTraders.toLocaleString() : '2,847'}
+                  </p>
                 </div>
                 <div className="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center">
                   <span className="text-sm font-semibold text-secondary-foreground">👥</span>
@@ -160,7 +152,9 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Avg. Return</p>
-                  <p className="text-2xl font-bold text-primary">+12.4%</p>
+                  <p className="text-2xl font-bold text-primary">
+                    +{stats ? stats.averageReturn.toFixed(1) : '12.4'}%
+                  </p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-primary" />
               </div>
@@ -168,12 +162,21 @@ export default function Dashboard() {
           </Card>
         </div>
 
+        {/* Error handling */}
+        {(marketsError || statsError) && (
+          <div className="mb-8 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-red-700 dark:text-red-400">
+              {marketsError || statsError}
+            </p>
+          </div>
+        )}
+
         {/* Commodity Markets Grid */}
         <div id="markets">
           <h3 className="text-3xl font-bold text-foreground mb-8 text-center">Active Commodity Markets</h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {commodities.map((commodity) => {
-              const IconComponent = commodity.icon
+            {markets.map((commodity) => {
+              const IconComponent = commodityIcons[commodity.id as keyof typeof commodityIcons] || Leaf
               const TrendIcon = commodity.trend === "up" ? TrendingUp : TrendingDown
 
               return (
