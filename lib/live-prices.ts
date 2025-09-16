@@ -70,15 +70,23 @@ export async function getLivePrice(symbol: CommoditySymbol, region: Region): Pro
       note: map.note,
     }
   }
-  const baseline: Record<CommoditySymbol, { price: number; unit: string; note: string }> = {
-    TEA: { price: 2.45, unit: 'kg', note: 'EATTA avg est.' },
-    AVOCADO: { price: 1.85, unit: 'kg', note: 'Export avg est.' },
-    MACADAMIA: { price: 12.3, unit: 'kg', note: 'Industry avg est.' },
+  const baselineAfrica: Record<CommoditySymbol, { price: number; unit: string; note: string }> = {
+    TEA: { price: 2.45, unit: 'kg', note: 'EATTA avg est. (Africa)' },
+    AVOCADO: { price: 1.85, unit: 'kg', note: 'Export avg est. (Africa)' },
+    MACADAMIA: { price: 12.3, unit: 'kg', note: 'Industry avg est. (Africa)' },
     COCOA: { price: 0, unit: 'MT', note: '' },
     COFFEE: { price: 0, unit: 'lb', note: '' },
     GOLD: { price: 0, unit: 'oz', note: '' },
   }
-  const b = baseline[symbol]
+  const baselineLatam: Record<CommoditySymbol, { price: number; unit: string; note: string }> = {
+    TEA: { price: 2.10, unit: 'kg', note: 'Regional avg est. (LATAM)' },
+    AVOCADO: { price: 2.10, unit: 'kg', note: 'Export avg est. (LATAM)' },
+    MACADAMIA: { price: 11.9, unit: 'kg', note: 'Industry avg est. (LATAM)' },
+    COCOA: { price: 0, unit: 'MT', note: '' },
+    COFFEE: { price: 0, unit: 'lb', note: '' },
+    GOLD: { price: 0, unit: 'oz', note: '' },
+  }
+  const b = (region === 'LATAM' ? baselineLatam : baselineAfrica)[symbol]
   return {
     symbol,
     price: b.price,

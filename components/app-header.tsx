@@ -26,6 +26,9 @@ export function AppHeader() {
             <Link href="/grades" className="text-gray-600 hover:text-gray-900">
               Grades
             </Link>
+            <Link href="/compare" className="text-gray-600 hover:text-gray-900">
+              Compare
+            </Link>
             {hasAuth && (
               <>
                 <SignedIn>
