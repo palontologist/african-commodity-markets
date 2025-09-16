@@ -5,6 +5,7 @@ import { TrendingUp, TrendingDown, Coffee, Leaf, Apple, Nut, Award } from "lucid
 import { AppHeader } from "@/components/app-header"
 import Link from "next/link"
 import { getLivePrice, type Region, type CommoditySymbol } from "@/lib/live-prices"
+import { HomeInlineTrade } from "@/components/home-inline-trade"
 
 const commodities = [
   {
@@ -88,6 +89,57 @@ export default async function Dashboard({
       return getLivePrice(symbol, region)
     })
   )
+  const defaultMarkets: Record<string, {
+    id: number,
+    question: string,
+    yesPrice: number,
+    noPrice: number,
+    volume: string,
+    participants: number,
+    deadline: string,
+    description: string,
+  }> = {
+    tea: {
+      id: 1,
+      question: "Will Kenya Tea Board auction average exceed $2.50/kg by Jan 15, 2025?",
+      yesPrice: 0.67,
+      noPrice: 0.33,
+      volume: "$450K",
+      participants: 156,
+      deadline: "Jan 15, 2025",
+      description: "Based on CTC BOP grade tea from Mombasa auctions",
+    },
+    coffee: {
+      id: 2,
+      question: "Will Kenyan AA coffee price exceed $6.00/lb by Feb 28, 2025?",
+      yesPrice: 0.38,
+      noPrice: 0.62,
+      volume: "$890K",
+      participants: 189,
+      deadline: "Feb 28, 2025",
+      description: "Nairobi Coffee Exchange auction prices for AA grade",
+    },
+    avocado: {
+      id: 3,
+      question: "Will Kenya avocado exports exceed 50,000 tons by Apr 30, 2025?",
+      yesPrice: 0.55,
+      noPrice: 0.45,
+      volume: "$520K",
+      participants: 123,
+      deadline: "Apr 30, 2025",
+      description: "Based on Kenya Plant Health Inspectorate Service export data",
+    },
+    macadamia: {
+      id: 4,
+      question: "Will South African macadamia price exceed $13.00/kg by May 15, 2025?",
+      yesPrice: 0.61,
+      noPrice: 0.39,
+      volume: "$650K",
+      participants: 145,
+      deadline: "May 15, 2025",
+      description: "Based on South African Macadamia Growers Association pricing",
+    },
+  }
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -240,6 +292,9 @@ export default async function Dashboard({
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-sm text-muted-foreground">Next Settlement</span>
                         <span className="text-sm font-medium text-foreground">{commodity.nextSettlement}</span>
+                      </div>
+                      <div className="mb-3">
+                        <HomeInlineTrade commodityName={commodity.name} market={defaultMarkets[commodity.id]} />
                       </div>
                       <div className="flex space-x-2">
                         <Button asChild className="flex-1">
