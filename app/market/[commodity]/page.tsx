@@ -11,7 +11,39 @@ import { TrendingUp, TrendingDown, ArrowLeft, Info, Calendar, DollarSign, Users,
 import Link from "next/link"
 import { notFound, useSearchParams } from "next/navigation"
 
-const commodityData = {
+type CommodityMarket = {
+  id: number
+  question: string
+  yesPrice: number
+  noPrice: number
+  volume: string
+  participants: number
+  deadline: string
+  description: string
+}
+
+type CommodityView = {
+  name: string
+  description: string
+  currentPrice: string
+  change: string
+  trend: "up" | "down"
+  volume: string
+  totalVolume: string
+  participants: number
+  grade: string
+  color: string
+  markets: CommodityMarket[]
+  qualityInfo: {
+    grades: string[]
+    standards: string
+    sources: string
+  }
+}
+
+type CommodityDataMap = Record<"tea" | "coffee" | "avocado" | "macadamia", CommodityView>
+
+const commodityDataAfrica: CommodityDataMap = {
   tea: {
     name: "Tea",
     description: "CTC grades prediction market",
@@ -150,6 +182,145 @@ const commodityData = {
   },
 }
 
+const commodityDataLatam: CommodityDataMap = {
+  tea: {
+    name: "Tea",
+    description: "Argentina Misiones tea auction predictions",
+    currentPrice: "$2.10/kg",
+    change: "+3.1%",
+    trend: "up",
+    volume: "$420K",
+    totalVolume: "$420K",
+    participants: 128,
+    grade: "BOP Grade",
+    color: "bg-green-100 text-green-800",
+    markets: [
+      {
+        id: 101,
+        question: "Will Argentina Misiones tea auction avg exceed $2.20/kg by Jan 31, 2025?",
+        yesPrice: 0.54,
+        noPrice: 0.46,
+        volume: "$180K",
+        participants: 72,
+        deadline: "Jan 31, 2025",
+        description: "Based on provincial auction averages from Misiones",
+      },
+    ],
+    qualityInfo: {
+      grades: ["OP", "BOP", "Fannings", "Dust"],
+      standards: "Regional grading aligned with international black tea standards",
+      sources: "Misiones Tea Auctions, Argentina tea industry reports",
+    },
+  },
+  coffee: {
+    name: "Coffee",
+    description: "LATAM coffee markets (Brazil, Colombia)",
+    currentPrice: "$4.60/lb",
+    change: "+1.5%",
+    trend: "up",
+    volume: "$3.2M",
+    totalVolume: "$3.2M",
+    participants: 612,
+    grade: "Specialty 84+",
+    color: "bg-amber-100 text-amber-800",
+    markets: [
+      {
+        id: 102,
+        question: "Will Brazil CECAFÉ exports exceed 3.5M bags by Mar 31, 2025?",
+        yesPrice: 0.58,
+        noPrice: 0.42,
+        volume: "$1.2M",
+        participants: 280,
+        deadline: "Mar 31, 2025",
+        description: "Based on CECAFÉ monthly export data",
+      },
+      {
+        id: 103,
+        question: "Will Colombia FNC internal price exceed 1,500,000 COP/125kg by Feb 28, 2025?",
+        yesPrice: 0.41,
+        noPrice: 0.59,
+        volume: "$950K",
+        participants: 204,
+        deadline: "Feb 28, 2025",
+        description: "Based on Federación Nacional de Cafeteros daily price",
+      },
+    ],
+    qualityInfo: {
+      grades: ["Specialty (84+)", "Premium (80-84)", "Commercial (<80)"],
+      standards: "SCA cupping standards used across LATAM specialty markets",
+      sources: "CECAFÉ, FNC Colombia, ICO reports",
+    },
+  },
+  avocado: {
+    name: "Avocado",
+    description: "Mexico and Peru export grade predictions",
+    currentPrice: "$2.10/kg",
+    change: "+4.2%",
+    trend: "up",
+    volume: "$1.1M",
+    totalVolume: "$1.1M",
+    participants: 236,
+    grade: "Grade A",
+    color: "bg-emerald-100 text-emerald-800",
+    markets: [
+      {
+        id: 104,
+        question: "Will Mexico avocado export avg exceed $2.20/kg by Apr 30, 2025?",
+        yesPrice: 0.57,
+        noPrice: 0.43,
+        volume: "$600K",
+        participants: 130,
+        deadline: "Apr 30, 2025",
+        description: "Based on Avocados From Mexico export pricing",
+      },
+      {
+        id: 105,
+        question: "Will Peru avocado shipments exceed 600k MT by 2025 season end?",
+        yesPrice: 0.35,
+        noPrice: 0.65,
+        volume: "$500K",
+        participants: 106,
+        deadline: "Aug 31, 2025",
+        description: "Based on Peru exporters’ association seasonal reports",
+      },
+    ],
+    qualityInfo: {
+      grades: ["Grade A (Premium)", "Grade B (Standard)", "Grade C (Processing)"],
+      standards: "Mexico and Peru export standards based on size, defects, and firmness",
+      sources: "Avocados From Mexico, SENASA Peru",
+    },
+  },
+  macadamia: {
+    name: "Macadamia",
+    description: "LATAM macadamia markets (Brazil, Guatemala)",
+    currentPrice: "$11.90/kg",
+    change: "+2.0%",
+    trend: "up",
+    volume: "$520K",
+    totalVolume: "$520K",
+    participants: 132,
+    grade: "MQA_I",
+    color: "bg-orange-100 text-orange-800",
+    markets: [
+      {
+        id: 106,
+        question: "Will Brazil macadamia farmgate exceed $13.00/kg by May 15, 2025?",
+        yesPrice: 0.46,
+        noPrice: 0.54,
+        volume: "$320K",
+        participants: 88,
+        deadline: "May 15, 2025",
+        description: "Based on regional processors’ price bulletins in Bahia/Minas Gerais",
+      },
+    ],
+    qualityInfo: {
+      grades: ["MQA_I (Premium)", "MQA_II (Standard)", "MQA_III (Processing)"],
+      standards: "MQA standards applied by LATAM processors",
+      sources: "Brazilian Macadamia sector reports, regional processors",
+    },
+  },
+}
+
 interface PageProps {
   params: {
     commodity: string
@@ -163,7 +334,8 @@ export default function CommodityPage({ params }: PageProps) {
   const searchParams = useSearchParams()
   const region = (searchParams.get('region')?.toUpperCase() === 'LATAM' ? 'LATAM' : 'AFRICA')
 
-  const commodity = commodityData[params.commodity as keyof typeof commodityData]
+  const selectedCommodityData: CommodityDataMap = region === 'LATAM' ? commodityDataLatam : commodityDataAfrica
+  const commodity = selectedCommodityData[params.commodity as keyof CommodityDataMap]
 
   if (!commodity) {
     notFound()
