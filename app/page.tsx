@@ -354,7 +354,7 @@ export default async function Dashboard({
       <footer className="border-t bg-card/30 mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-muted-foreground">
-            <p className="mb-2">Powered by Chainlink Oracles • Data from FAO, ICE, and African Export Boards</p>
+            <p className="mb-2">Powered by palontologist • Data from FAO, ICE, and African Export Boards</p>
             <p className="text-sm">© 2025 AfriMarkets. Building the future of African commodity trading.</p>
           </div>
         </div>
