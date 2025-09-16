@@ -43,6 +43,38 @@ type CommodityView = {
 
 type CommodityDataMap = Record<"tea" | "coffee" | "avocado" | "macadamia", CommodityView>
 
+function formatDate(d: Date) {
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function nextMonthEnd(offsetMonths = 1) {
+  const now = new Date()
+  const y = now.getFullYear()
+  const m = now.getMonth()
+  // Last day of target month: new Date(year, month+1, 0)
+  const target = new Date(y, m + offsetMonths + 1, 0)
+  return formatDate(target)
+}
+
+function nextQuarterEnd() {
+  const now = new Date()
+  const qEnds = [new Date(now.getFullYear(), 2, 31), new Date(now.getFullYear(), 5, 30), new Date(now.getFullYear(), 8, 30), new Date(now.getFullYear(), 11, 31)]
+  let next = qEnds.find(d => d > now)
+  if (!next) {
+    next = new Date(now.getFullYear() + 1, 2, 31)
+  }
+  return formatDate(next)
+}
+
+function nextFixedMonthDay(monthIndex: number, day: number) {
+  const now = new Date()
+  let d = new Date(now.getFullYear(), monthIndex, day)
+  if (d <= now) {
+    d = new Date(now.getFullYear() + 1, monthIndex, day)
+  }
+  return formatDate(d)
+}
+
 const commodityDataAfrica: CommodityDataMap = {
   tea: {
     name: "Tea",
@@ -58,22 +90,22 @@ const commodityDataAfrica: CommodityDataMap = {
     markets: [
       {
         id: 1,
-        question: "Will Kenya Tea Board auction average exceed $2.50/kg by Jan 15, 2025?",
+        question: `Will Kenya Tea Board auction average exceed $2.50/kg by ${nextFixedMonthDay(0, 15)}?`,
         yesPrice: 0.67,
         noPrice: 0.33,
         volume: "$450K",
         participants: 156,
-        deadline: "Jan 15, 2025",
+        deadline: nextFixedMonthDay(0, 15),
         description: "Based on CTC BOP grade tea from Mombasa auctions",
       },
       {
         id: 2,
-        question: "Will Tanzania Tea Board report >85% Grade 1 tea by Feb 1, 2025?",
+        question: `Will Tanzania Tea Board report >85% Grade 1 tea by ${nextFixedMonthDay(1, 1)}?`,
         yesPrice: 0.42,
         noPrice: 0.58,
         volume: "$380K",
         participants: 98,
-        deadline: "Feb 1, 2025",
+        deadline: nextFixedMonthDay(1, 1),
         description: "Quality grade percentage from Tanzania Tea Board monthly reports",
       },
     ],
@@ -97,22 +129,22 @@ const commodityDataAfrica: CommodityDataMap = {
     markets: [
       {
         id: 1,
-        question: "Will Ethiopian coffee average SCA score exceed 85 by Mar 20, 2025?",
+        question: `Will Ethiopian coffee average SCA score exceed 85 by ${nextFixedMonthDay(2, 20)}?`,
         yesPrice: 0.73,
         noPrice: 0.27,
         volume: "$1.1M",
         participants: 234,
-        deadline: "Mar 20, 2025",
+        deadline: nextFixedMonthDay(2, 20),
         description: "Based on Ethiopian Commodity Exchange specialty coffee auctions",
       },
       {
         id: 2,
-        question: "Will Kenyan AA coffee price exceed $6.00/lb by Feb 28, 2025?",
+        question: `Will Kenyan AA coffee price exceed $6.00/lb by ${nextFixedMonthDay(1, 28)}?`,
         yesPrice: 0.38,
         noPrice: 0.62,
         volume: "$890K",
         participants: 189,
-        deadline: "Feb 28, 2025",
+        deadline: nextFixedMonthDay(1, 28),
         description: "Nairobi Coffee Exchange auction prices for AA grade",
       },
     ],
@@ -136,12 +168,12 @@ const commodityDataAfrica: CommodityDataMap = {
     markets: [
       {
         id: 1,
-        question: "Will Kenya avocado exports exceed 50,000 tons by Apr 30, 2025?",
+        question: `Will Kenya avocado exports exceed 50,000 tons by ${nextFixedMonthDay(3, 30)}?`,
         yesPrice: 0.55,
         noPrice: 0.45,
         volume: "$520K",
         participants: 123,
-        deadline: "Apr 30, 2025",
+        deadline: nextFixedMonthDay(3, 30),
         description: "Based on Kenya Plant Health Inspectorate Service export data",
       },
     ],
@@ -165,12 +197,12 @@ const commodityDataAfrica: CommodityDataMap = {
     markets: [
       {
         id: 1,
-        question: "Will South African macadamia price exceed $13.00/kg by May 15, 2025?",
+        question: `Will South African macadamia price exceed $13.00/kg by ${nextFixedMonthDay(4, 15)}?`,
         yesPrice: 0.61,
         noPrice: 0.39,
         volume: "$650K",
         participants: 145,
-        deadline: "May 15, 2025",
+        deadline: nextFixedMonthDay(4, 15),
         description: "Based on South African Macadamia Growers Association pricing",
       },
     ],
@@ -226,22 +258,22 @@ const commodityDataLatam: CommodityDataMap = {
     markets: [
       {
         id: 102,
-        question: "Will Brazil CECAFÉ exports exceed 3.5M bags by Mar 31, 2025?",
+        question: `Will Brazil CECAFÉ exports exceed 3.5M bags by ${nextQuarterEnd()}?`,
         yesPrice: 0.58,
         noPrice: 0.42,
         volume: "$1.2M",
         participants: 280,
-        deadline: "Mar 31, 2025",
+        deadline: nextQuarterEnd(),
         description: "Based on CECAFÉ monthly export data",
       },
       {
         id: 103,
-        question: "Will Colombia FNC internal price exceed 1,500,000 COP/125kg by Feb 28, 2025?",
+        question: `Will Colombia FNC internal price exceed 1,500,000 COP/125kg by ${nextMonthEnd(2)}?`,
         yesPrice: 0.41,
         noPrice: 0.59,
         volume: "$950K",
         participants: 204,
-        deadline: "Feb 28, 2025",
+        deadline: nextMonthEnd(2),
         description: "Based on Federación Nacional de Cafeteros daily price",
       },
     ],
@@ -265,22 +297,22 @@ const commodityDataLatam: CommodityDataMap = {
     markets: [
       {
         id: 104,
-        question: "Will Mexico avocado export avg exceed $2.20/kg by Apr 30, 2025?",
+        question: `Will Mexico avocado export avg exceed $2.20/kg by ${nextMonthEnd(4)}?`,
         yesPrice: 0.57,
         noPrice: 0.43,
         volume: "$600K",
         participants: 130,
-        deadline: "Apr 30, 2025",
+        deadline: nextMonthEnd(4),
         description: "Based on Avocados From Mexico export pricing",
       },
       {
         id: 105,
-        question: "Will Peru avocado shipments exceed 600k MT by 2025 season end?",
+        question: "Will Peru avocado shipments exceed 600k MT by the 2025-2026 season end?",
         yesPrice: 0.35,
         noPrice: 0.65,
         volume: "$500K",
         participants: 106,
-        deadline: "Aug 31, 2025",
+        deadline: nextMonthEnd(11),
         description: "Based on Peru exporters’ association seasonal reports",
       },
     ],
@@ -304,12 +336,12 @@ const commodityDataLatam: CommodityDataMap = {
     markets: [
       {
         id: 106,
-        question: "Will Brazil macadamia farmgate exceed $13.00/kg by May 15, 2025?",
+        question: `Will Brazil macadamia farmgate exceed $13.00/kg by ${nextFixedMonthDay(4, 15)}?`,
         yesPrice: 0.46,
         noPrice: 0.54,
         volume: "$320K",
         participants: 88,
-        deadline: "May 15, 2025",
+        deadline: nextFixedMonthDay(4, 15),
         description: "Based on regional processors’ price bulletins in Bahia/Minas Gerais",
       },
     ],
