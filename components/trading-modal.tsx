@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -25,13 +25,18 @@ interface TradingModalProps {
     description: string
   }
   commodity: string
+  initialTradeType?: "yes" | "no"
 }
 
-export function TradingModal({ isOpen, onClose, market, commodity }: TradingModalProps) {
-  const [tradeType, setTradeType] = useState<"yes" | "no">("yes")
+export function TradingModal({ isOpen, onClose, market, commodity, initialTradeType = "yes" }: TradingModalProps) {
+  const [tradeType, setTradeType] = useState<"yes" | "no">(initialTradeType)
   const [amount, setAmount] = useState("")
   const [shares, setShares] = useState(0)
   const [slippage, setSlippage] = useState([0.5])
+
+  useEffect(() => {
+    setTradeType(initialTradeType)
+  }, [initialTradeType, market?.id])
 
   const currentPrice = tradeType === "yes" ? market.yesPrice : market.noPrice
   const potentialShares = amount ? Math.floor(Number.parseFloat(amount) / currentPrice) : 0

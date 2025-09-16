@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TradingModal } from "@/components/trading-modal"
 import { TrendingUp, TrendingDown, ArrowLeft, Info, Calendar, DollarSign, Users, BarChart3 } from "lucide-react"
 import Link from "next/link"
-import { notFound } from "next/navigation"
+import { notFound, useSearchParams } from "next/navigation"
 
 const commodityData = {
   tea: {
@@ -159,6 +159,9 @@ interface PageProps {
 export default function CommodityPage({ params }: PageProps) {
   const [selectedMarket, setSelectedMarket] = useState<any>(null)
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false)
+  const [livePrice, setLivePrice] = useState<{ price: number | null; unit?: string } | null>(null)
+  const searchParams = useSearchParams()
+  const region = (searchParams.get('region')?.toUpperCase() === 'LATAM' ? 'LATAM' : 'AFRICA')
 
   const commodity = commodityData[params.commodity as keyof typeof commodityData]
 
@@ -167,6 +170,29 @@ export default function CommodityPage({ params }: PageProps) {
   }
 
   const TrendIcon = commodity.trend === "up" ? TrendingUp : TrendingDown
+
+  useEffect(() => {
+    async function loadLive() {
+      const idToSymbol: Record<string, string> = {
+        tea: 'TEA',
+        coffee: 'COFFEE',
+        avocado: 'AVOCADO',
+        macadamia: 'MACADAMIA',
+      }
+      const symbol = idToSymbol[params.commodity]
+      if (!symbol) return
+      try {
+        const res = await fetch(`/api/live-prices?symbol=${symbol}&region=${region}`, { cache: 'no-store' })
+        if (!res.ok) return
+        const json = await res.json()
+        const data = json?.data
+        if (data) {
+          setLivePrice({ price: data.price ?? null, unit: data.unit })
+        }
+      } catch {}
+    }
+    loadLive()
+  }, [params.commodity, region])
 
   const handleTradeClick = (market: any) => {
     setSelectedMarket(market)
@@ -181,7 +207,7 @@ export default function CommodityPage({ params }: PageProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/">
+                <Link href={{ pathname: '/', query: { region } }}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Markets
                 </Link>
@@ -213,7 +239,11 @@ export default function CommodityPage({ params }: PageProps) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground">Current Price</p>
-                  <p className="text-2xl font-bold text-foreground">{commodity.currentPrice}</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {livePrice && livePrice.price !== null
+                      ? `$${livePrice.price.toFixed(2)}${livePrice.unit ? `/${livePrice.unit}` : ''}`
+                      : commodity.currentPrice}
+                  </p>
                   <div className="flex items-center justify-center space-x-1 mt-1">
                     <TrendIcon className={`w-4 h-4 ${commodity.trend === "up" ? "text-green-600" : "text-red-600"}`} />
                     <span

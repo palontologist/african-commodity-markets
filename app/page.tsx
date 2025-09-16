@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button"
 import { TrendingUp, TrendingDown, Coffee, Leaf, Apple, Nut, Award } from "lucide-react"
 import { AppHeader } from "@/components/app-header"
 import Link from "next/link"
+import { getLivePrice, type Region, type CommoditySymbol } from "@/lib/live-prices"
+import { HomeInlineTrade } from "@/components/home-inline-trade"
 
 const commodities = [
   {
@@ -64,7 +66,80 @@ const commodities = [
   },
 ]
 
-export default function Dashboard() {
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined }
+}) {
+  const region = ((typeof searchParams?.region === 'string' ? searchParams?.region : '')?.toUpperCase() === 'LATAM'
+    ? 'LATAM'
+    : 'AFRICA') as Region
+
+  const idToSymbol: Record<string, CommoditySymbol> = {
+    tea: 'TEA',
+    coffee: 'COFFEE',
+    avocado: 'AVOCADO',
+    macadamia: 'MACADAMIA',
+  }
+
+  const livePrices = await Promise.all(
+    commodities.map(async (c) => {
+      const symbol = idToSymbol[c.id as keyof typeof idToSymbol]
+      if (!symbol) return null
+      return getLivePrice(symbol, region)
+    })
+  )
+  const defaultMarkets: Record<string, {
+    id: number,
+    question: string,
+    yesPrice: number,
+    noPrice: number,
+    volume: string,
+    participants: number,
+    deadline: string,
+    description: string,
+  }> = {
+    tea: {
+      id: 1,
+      question: "Will Kenya Tea Board auction average exceed $2.50/kg by Jan 15, 2025?",
+      yesPrice: 0.67,
+      noPrice: 0.33,
+      volume: "$450K",
+      participants: 156,
+      deadline: "Jan 15, 2025",
+      description: "Based on CTC BOP grade tea from Mombasa auctions",
+    },
+    coffee: {
+      id: 2,
+      question: "Will Kenyan AA coffee price exceed $6.00/lb by Feb 28, 2025?",
+      yesPrice: 0.38,
+      noPrice: 0.62,
+      volume: "$890K",
+      participants: 189,
+      deadline: "Feb 28, 2025",
+      description: "Nairobi Coffee Exchange auction prices for AA grade",
+    },
+    avocado: {
+      id: 3,
+      question: "Will Kenya avocado exports exceed 50,000 tons by Apr 30, 2025?",
+      yesPrice: 0.55,
+      noPrice: 0.45,
+      volume: "$520K",
+      participants: 123,
+      deadline: "Apr 30, 2025",
+      description: "Based on Kenya Plant Health Inspectorate Service export data",
+    },
+    macadamia: {
+      id: 4,
+      question: "Will South African macadamia price exceed $13.00/kg by May 15, 2025?",
+      yesPrice: 0.61,
+      noPrice: 0.39,
+      volume: "$650K",
+      participants: 145,
+      deadline: "May 15, 2025",
+      description: "Based on South African Macadamia Growers Association pricing",
+    },
+  }
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -81,6 +156,14 @@ export default function Dashboard() {
             Predict commodity prices and quality grades for Tea, Coffee, Avocado, and Macadamia. Powered by real market
             data and quality standards from across Africa.
           </p>
+          <div className="flex flex-col sm:flex-row gap-2 justify-center mt-6">
+            <Button variant={region === 'AFRICA' ? 'default' : 'outline'} asChild>
+              <Link href={{ pathname: '/', query: { region: 'AFRICA' } }}>Africa</Link>
+            </Button>
+            <Button variant={region === 'LATAM' ? 'default' : 'outline'} asChild>
+              <Link href={{ pathname: '/', query: { region: 'LATAM' } }}>LATAM</Link>
+            </Button>
+          </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
             <Button asChild size="lg">
               <Link href="#markets">Explore Markets</Link>
@@ -147,7 +230,7 @@ export default function Dashboard() {
         <div id="markets">
           <h3 className="text-3xl font-bold text-foreground mb-8 text-center">Active Commodity Markets</h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {commodities.map((commodity) => {
+            {commodities.map((commodity, idx) => {
               const IconComponent = commodity.icon
               const TrendIcon = commodity.trend === "up" ? TrendingUp : TrendingDown
 
@@ -171,7 +254,16 @@ export default function Dashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">Current Price</p>
-                        <p className="text-2xl font-bold text-foreground">{commodity.currentPrice}</p>
+                        <p className="text-2xl font-bold text-foreground">
+                          {(() => {
+                            const lp = livePrices[idx] as Awaited<ReturnType<typeof getLivePrice>> | null
+                            if (lp && lp.price !== null) {
+                              const unit = lp.unit ? `/${lp.unit}` : ''
+                              return `$${lp.price.toFixed(2)}${unit}`
+                            }
+                            return commodity.currentPrice
+                          })()}
+                        </p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <TrendIcon
@@ -201,12 +293,15 @@ export default function Dashboard() {
                         <span className="text-sm text-muted-foreground">Next Settlement</span>
                         <span className="text-sm font-medium text-foreground">{commodity.nextSettlement}</span>
                       </div>
+                      <div className="mb-3">
+                        <HomeInlineTrade commodityName={commodity.name} market={defaultMarkets[commodity.id]} />
+                      </div>
                       <div className="flex space-x-2">
                         <Button asChild className="flex-1">
-                          <Link href={`/market/${commodity.id}`}>Trade Now</Link>
+                          <Link href={{ pathname: `/market/${commodity.id}`, query: { region } }}>Trade Now</Link>
                         </Button>
                         <Button variant="outline" asChild>
-                          <Link href={`/market/${commodity.id}`}>View Details</Link>
+                          <Link href={{ pathname: `/market/${commodity.id}`, query: { region } }}>View Details</Link>
                         </Button>
                       </div>
                     </div>
