@@ -9,7 +9,7 @@ export async function seedDatabase() {
   try {
     console.log('Seeding database...');
 
-    // Seed Countries
+    // Seed Countries (Africa + LATAM)
     const countryData = await db.insert(countries).values([
       {
         name: 'Ghana',
@@ -46,6 +46,31 @@ export async function seedDatabase() {
         code: 'ET',
         region: 'East Africa',
         currency: 'ETB',
+      },
+      // LATAM
+      {
+        name: 'Brazil',
+        code: 'BR',
+        region: 'LATAM',
+        currency: 'BRL',
+      },
+      {
+        name: 'Colombia',
+        code: 'CO',
+        region: 'LATAM',
+        currency: 'COP',
+      },
+      {
+        name: 'Peru',
+        code: 'PE',
+        region: 'LATAM',
+        currency: 'PEN',
+      },
+      {
+        name: 'Mexico',
+        code: 'MX',
+        region: 'LATAM',
+        currency: 'MXN',
       },
     ]).returning();
 
@@ -99,7 +124,7 @@ export async function seedDatabase() {
 
     console.log('Commodities seeded:', commodityData.length);
 
-    // Seed Markets
+    // Seed Markets (Africa + LATAM)
     const marketData = await db.insert(markets).values([
       {
         name: 'Ghana Cocoa Board',
@@ -132,6 +157,39 @@ export async function seedDatabase() {
         type: 'Exchange',
         operatingHours: '9:00 AM - 5:00 PM',
         contactInfo: 'info@jse.co.za',
+      },
+      // LATAM
+      {
+        name: 'Brazil Coffee Exchange (CECAFÉ proxy)',
+        location: 'São Paulo',
+        countryId: countryData.find(c => c.code === 'BR')!.id,
+        type: 'Exchange',
+        operatingHours: '9:00 AM - 5:00 PM',
+        contactInfo: 'info@cecafe.com.br',
+      },
+      {
+        name: 'Colombia National Coffee Federation',
+        location: 'Bogotá',
+        countryId: countryData.find(c => c.code === 'CO')!.id,
+        type: 'Exchange',
+        operatingHours: '9:00 AM - 5:00 PM',
+        contactInfo: 'info@federaciondecafeteros.org',
+      },
+      {
+        name: 'Peru Agricultural Exchange',
+        location: 'Lima',
+        countryId: countryData.find(c => c.code === 'PE')!.id,
+        type: 'Exchange',
+        operatingHours: '9:00 AM - 5:00 PM',
+        contactInfo: 'info@agromercado.pe',
+      },
+      {
+        name: 'Mexico Avocado Board Market',
+        location: 'Michoacán',
+        countryId: countryData.find(c => c.code === 'MX')!.id,
+        type: 'Auction',
+        operatingHours: '9:00 AM - 5:00 PM',
+        contactInfo: 'info@avocadosfrommexico.com',
       },
     ]).returning();
 
