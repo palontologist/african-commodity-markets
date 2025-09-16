@@ -122,9 +122,6 @@ importers:
       dotenv:
         specifier: ^17.2.2
         version: 17.2.2
-      drizzle-kit:
-        specifier: ^0.31.4
-        version: 0.31.4
       drizzle-orm:
         specifier: ^0.44.5
         version: 0.44.5(@libsql/client@0.15.15)
@@ -198,6 +195,9 @@ importers:
       '@types/react-dom':
         specifier: ^18
         version: 18.0.0
+      drizzle-kit:
+        specifier: ^0.31.4
+        version: 0.31.4
       postcss:
         specifier: ^8.5
         version: 8.5.0
