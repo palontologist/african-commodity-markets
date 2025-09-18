@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TradingModal } from "@/components/trading-modal"
+import { WalletConnect } from "@/components/wallet-connect"
 import { TrendingUp, TrendingDown, ArrowLeft, Info, Calendar, DollarSign, Users, BarChart3 } from "lucide-react"
 import Link from "next/link"
 import { notFound, useSearchParams } from "next/navigation"
@@ -421,7 +422,7 @@ export default function CommodityPage({ params }: PageProps) {
                 <p className="text-sm text-muted-foreground">{commodity.description}</p>
               </div>
             </div>
-            <Button>Connect Wallet</Button>
+            <WalletConnect />
           </div>
         </div>
       </header>

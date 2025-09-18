@@ -1,11 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { TrendingUp, TrendingDown, Coffee, Leaf, Apple, Nut, Award } from "lucide-react"
+import { TrendingUp, TrendingDown, Coffee, Leaf, Apple, Nut } from "lucide-react"
 import { AppHeader } from "@/components/app-header"
 import Link from "next/link"
 import { getLivePrice, type Region, type CommoditySymbol } from "@/lib/live-prices"
-import { HomeInlineTrade } from "@/components/home-inline-trade"
 
 const commodities = [
   {
@@ -66,7 +65,7 @@ const commodities = [
   },
 ]
 
-export default async function Dashboard({
+export default async function MarketsPage({
   searchParams,
 }: {
   searchParams?: { [key: string]: string | string[] | undefined }
@@ -89,57 +88,7 @@ export default async function Dashboard({
       return getLivePrice(symbol, region)
     })
   )
-  const defaultMarkets: Record<string, {
-    id: number,
-    question: string,
-    yesPrice: number,
-    noPrice: number,
-    volume: string,
-    participants: number,
-    deadline: string,
-    description: string,
-  }> = {
-    tea: {
-      id: 1,
-      question: "Will Kenya Tea Board auction average exceed $2.50/kg by Oct 15, 2025?",
-      yesPrice: 0.67,
-      noPrice: 0.33,
-      volume: "$450K",
-      participants: 156,
-      deadline: "Oct 15, 2025",
-      description: "Based on CTC BOP grade tea from Mombasa auctions",
-    },
-    coffee: {
-      id: 2,
-      question: "Will Kenyan AA coffee price exceed $6.00/lb by Feb 28, 2025?",
-      yesPrice: 0.38,
-      noPrice: 0.62,
-      volume: "$890K",
-      participants: 189,
-      deadline: "Nov 28, 2025",
-      description: "Nairobi Coffee Exchange auction prices for AA grade",
-    },
-    avocado: {
-      id: 3,
-      question: "Will Kenya avocado exports exceed 50,000 tons by Dec 30, 2025?",
-      yesPrice: 0.55,
-      noPrice: 0.45,
-      volume: "$520K",
-      participants: 123,
-      deadline: "Dec 30, 2025",
-      description: "Based on Kenya Plant Health Inspectorate Service export data",
-    },
-    macadamia: {
-      id: 4,
-      question: "Will South African macadamia price exceed $13.00/kg by Jan 15, 2026?",
-      yesPrice: 0.61,
-      noPrice: 0.39,
-      volume: "$650K",
-      participants: 145,
-      deadline: "Jan 15, 2026",
-      description: "Based on South African Macadamia Growers Association pricing",
-    },
-  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -147,29 +96,20 @@ export default async function Dashboard({
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-foreground mb-4 text-balance">
-            Trade the Future of African Agriculture
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-pretty">
-            Predict commodity prices and quality grades for Tea, Coffee, Avocado, and Macadamia. Powered by real market
-            data and quality standards from across Africa.
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-foreground mb-4">
+            African Commodity Markets
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Explore all available prediction markets for Tea, Coffee, Avocado, and Macadamia commodities across Africa and LATAM.
           </p>
           <div className="flex flex-col sm:flex-row gap-2 justify-center mt-6">
             <Button variant={region === 'AFRICA' ? 'default' : 'outline'} asChild>
-              <Link href={{ pathname: '/', query: { region: 'AFRICA' } }}>Africa</Link>
+              <Link href={{ pathname: '/market', query: { region: 'AFRICA' } }}>Africa</Link>
             </Button>
             <Button variant={region === 'LATAM' ? 'default' : 'outline'} asChild>
-              <Link href={{ pathname: '/', query: { region: 'LATAM' } }}>LATAM</Link>
-            </Button>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <Button asChild size="lg">
-              <Link href="#markets">Explore Markets</Link>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link href="/grades">Learn Quality Grades</Link>
+              <Link href={{ pathname: '/market', query: { region: 'LATAM' } }}>LATAM</Link>
             </Button>
           </div>
         </div>
@@ -227,8 +167,8 @@ export default async function Dashboard({
         </div>
 
         {/* Commodity Markets Grid */}
-        <div id="markets">
-          <h3 className="text-3xl font-bold text-foreground mb-8 text-center">Active Commodity Markets</h3>
+        <div>
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">All Commodity Markets</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {commodities.map((commodity, idx) => {
               const IconComponent = commodity.icon
@@ -293,9 +233,6 @@ export default async function Dashboard({
                         <span className="text-sm text-muted-foreground">Next Settlement</span>
                         <span className="text-sm font-medium text-foreground">{commodity.nextSettlement}</span>
                       </div>
-                      <div className="mb-3">
-                        <HomeInlineTrade commodityName={commodity.name} market={defaultMarkets[commodity.id]} />
-                      </div>
                       <div className="flex space-x-2">
                         <Button asChild className="flex-1">
                           <Link href={{ pathname: `/market/${commodity.id}`, query: { region } }}>Trade Now</Link>
@@ -312,53 +249,49 @@ export default async function Dashboard({
           </div>
         </div>
 
-        {/* How It Works Section */}
-        <div className="mt-16 text-center">
-          <h3 className="text-3xl font-bold text-foreground mb-8">How AfriMarkets Works</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <span className="text-2xl font-bold text-primary">1</span>
+        {/* Additional Market Information */}
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Market Hours</CardTitle>
+              <CardDescription>When markets are active for trading</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Africa Markets</span>
+                  <span className="font-medium">24/7 Trading</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">LATAM Markets</span>
+                  <span className="font-medium">24/7 Trading</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Settlement Times</span>
+                  <span className="font-medium">12:00 UTC</span>
+                </div>
               </div>
-              <h4 className="text-xl font-semibold text-foreground">Choose Your Market</h4>
-              <p className="text-muted-foreground text-pretty">
-                Select from Tea, Coffee, Avocado, or Macadamia prediction markets based on real quality grades and
-                export data.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <span className="text-2xl font-bold text-primary">2</span>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Market Data Sources</CardTitle>
+              <CardDescription>Trusted sources for price and quality data</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-sm">
+                <div>• Kenya Tea Board & Tanzania Tea Board</div>
+                <div>• Ethiopian Commodity Exchange</div>
+                <div>• Nairobi Coffee Exchange</div>
+                <div>• Kenya Plant Health Inspectorate (KEPHIS)</div>
+                <div>• South African Macadamia Growers Association</div>
+                <div>• FAO & ICE Market Data</div>
               </div>
-              <h4 className="text-xl font-semibold text-foreground">Make Your Prediction</h4>
-              <p className="text-muted-foreground text-pretty">
-                Buy "Yes" or "No" shares on whether prices or quality metrics will hit specific thresholds by settlement
-                dates.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <span className="text-2xl font-bold text-primary">3</span>
-              </div>
-              <h4 className="text-xl font-semibold text-foreground">Earn Returns</h4>
-              <p className="text-muted-foreground text-pretty">
-                When markets settle using verified data from auction houses and export boards, correct predictions earn
-                profits.
-              </p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t bg-card/30 mt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-muted-foreground">
-            <p className="mb-2">Powered by palontologist • Data from FAO, ICE, and African Export Boards</p>
-            <p className="text-sm">© 2025 AfriMarkets. Building the future of African commodity trading.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
