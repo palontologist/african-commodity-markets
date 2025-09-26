@@ -30,6 +30,9 @@ export function AppHeader() {
             <Link href="/compare" className="text-gray-600 hover:text-gray-900">
               Compare
             </Link>
+            <Link href="/whitepaper" className="text-gray-600 hover:text-gray-900">
+              Whitepaper
+            </Link>
             {hasAuth && (
               <>
                 <SignedIn>
