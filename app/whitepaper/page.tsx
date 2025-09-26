@@ -471,12 +471,202 @@ export default function WhitepaperPage() {
           </CardContent>
         </Card>
 
+        {/* Interoperability & Multichain Strategy Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5" />
+              9. Interoperability & Multichain Strategy
+            </CardTitle>
+            <CardDescription>Leveraging Wormhole for cross-chain asset mobility and global liquidity</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+                <p className="text-muted-foreground leading-relaxed">
+                  Wormhole is the leading cross-chain messaging protocol trusted by global asset platforms (BlackRock, Securitize, Centrifuge, etc.) for interoperability. By integrating Wormhole, Afrifutures can:
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                    <p className="text-sm text-muted-foreground">
+                      Let tokenized commodities and platform tokens ($AFF) move securely between 30+ blockchains (Ethereum, Solana, BNB Chain, Polygon, Avalanche, etc.), eliminating liquidity silos and enabling global access.
+                    </p>
+                  </div>
+                  <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                    <p className="text-sm text-muted-foreground">
+                      List African commodity tokens for sale/staking on multiple chains and DeFi platforms, so buyers, investors, and liquidity pools anywhere can participate with their preferred infrastructure.
+                    </p>
+                  </div>
+                  <div className="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                    <p className="text-sm text-muted-foreground">
+                      Unlock fractional ownership, lending, and yield opportunities—e.g., gum arabic NFTs or cocoa tokens can trade, stake, and earn yield on diverse platforms.
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+                    <p className="text-sm text-muted-foreground">
+                      Use multichain governance—Afrifutures DAO voting and reward programs span all chains seamlessly, expanding community reach.
+                    </p>
+                  </div>
+                  <div className="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                    <p className="text-sm text-muted-foreground">
+                      Grow and scale across new markets/regions quickly—if buyers in Asia, Europe, or LATAM prefer other blockchain rails, assets bridge instantly via Wormhole.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cross-Chain RWA Liquidity */}
+              <div className="border-t pt-6">
+                <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Badge variant="outline">1</Badge>
+                  Cross-Chain RWA (Real World Asset) Liquidity
+                </h4>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Commodity tokens (RWA: grains, oil, metals, cocoa, gum arabic, platform token $AFF) can move between chains.
+                </p>
+                <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg">
+                  <h5 className="font-medium text-foreground mb-2">Example</h5>
+                  <p className="text-sm text-muted-foreground">
+                    A Cocoa batch NFT originated on Afrifutures (Solana) can be instantly ported to Ethereum for sale/trade, or to Avalanche for DeFi staking, giving global investors/buyers access.
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    This enables fractional ownership/trading on multiple DeFi platforms: Investors may buy and provide liquidity anywhere—not just on your home chain.
+                  </p>
+                </div>
+              </div>
+
+              {/* Attracting Global Capital */}
+              <div className="border-t pt-6">
+                <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Badge variant="outline">2</Badge>
+                  Attracting Global Capital & Institutional Partners
+                </h4>
+                <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    Wormhole's institutional toolkit is trusted by top platforms—used by BlackRock, Securitize, Centrifuge for their billions in tokenized RWAs.
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Afrifutures assets can be listed, staked, or used on global platforms (DeFi, exchanges, asset management tools) without siloing liquidity or buyers.
+                  </p>
+                </div>
+              </div>
+
+              {/* User Experience */}
+              <div className="border-t pt-6">
+                <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Badge variant="outline">3</Badge>
+                  User Experience: Seamless Asset Mobility
+                </h4>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Onchain assets are "wrapped" and transferred securely.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-3 bg-teal-50 rounded-lg">
+                    <h5 className="font-medium text-foreground text-sm mb-2">Example 1</h5>
+                    <p className="text-xs text-muted-foreground">
+                      A farmer mints a gum arabic NFT; a trader moves it to Polygon for instant liquidity or lending pool options.
+                    </p>
+                  </div>
+                  <div className="p-3 bg-emerald-50 rounded-lg">
+                    <h5 className="font-medium text-foreground text-sm mb-2">Example 2</h5>
+                    <p className="text-xs text-muted-foreground">
+                      Stablecoin settlement on Solana can be ported to BNB Chain or Celo for payment payout.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Governance & Community */}
+              <div className="border-t pt-6">
+                <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Badge variant="outline">4</Badge>
+                  Governance & Community
+                </h4>
+                <div className="p-4 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    Afrifutures DAO voting ($AFF governance) can become multichain. Users/stakeholders across any chain can participate in proposals, voting, or staking. Community rewards and yield programs get broader reach and higher liquidity.
+                  </p>
+                </div>
+              </div>
+
+              {/* De-risking and Scaling */}
+              <div className="border-t pt-6">
+                <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Badge variant="outline">5</Badge>
+                  De-risking and Scaling
+                </h4>
+                <div className="p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    There is no vendor lock-in—if new chains or regions (Asia, LATAM) need a different tech or regulatory framework, assets move instantly. Wormhole partners offer audited, trusted interoperability for institutional-grade asset movement and compliance.
+                  </p>
+                </div>
+              </div>
+
+              {/* Why Wormhole */}
+              <div className="border-t pt-6">
+                <h4 className="font-semibold text-foreground mb-4">Why Wormhole?</h4>
+                <div className="p-4 bg-gradient-to-r from-violet-50 to-purple-50 rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Wormhole supports over 30 blockchains with secure, fast, low-fee cross-chain transfers—now adopted as official infrastructure by leading RWA and asset platforms. It allows for "Issue once, access everywhere"—liquidity, market reach, and flexibility.
+                  </p>
+                  <p className="text-sm text-muted-foreground font-medium">
+                    This boosts the value, utility, and accessibility of African tokenized commodities.
+                  </p>
+                </div>
+              </div>
+
+              {/* How This Makes Afrifutures Win */}
+              <div className="border-t pt-6">
+                <h4 className="font-semibold text-foreground mb-4">How This Makes Afrifutures Win</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-green-50 rounded-lg text-center">
+                    <Shield className="w-6 h-6 mx-auto mb-2 text-green-600" />
+                    <h5 className="font-medium text-foreground text-sm mb-2">No Liquidity Silos</h5>
+                    <p className="text-xs text-muted-foreground">
+                      All your tokenized assets and platform tokens are accessible by global buyers, investors, and DeFi pools—maximizing liquidity and price discovery.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-blue-50 rounded-lg text-center">
+                    <Zap className="w-6 h-6 mx-auto mb-2 text-blue-600" />
+                    <h5 className="font-medium text-foreground text-sm mb-2">Ultimate Flexibility</h5>
+                    <p className="text-xs text-muted-foreground">
+                      Scale across Africa, then bridge to Europe, Asia, LATAM easily via supported chains and partners.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg text-center">
+                    <Users className="w-6 h-6 mx-auto mb-2 text-purple-600" />
+                    <h5 className="font-medium text-foreground text-sm mb-2">Unmatched User/Investor Access</h5>
+                    <p className="text-xs text-muted-foreground">
+                      Any user (retail, institutional, DeFi) can join with the chain, wallet, or tech they prefer—driving exponential adoption.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Line */}
+              <div className="border-t pt-6">
+                <div className="p-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg text-center">
+                  <h4 className="font-semibold text-foreground mb-3">Bottom Line</h4>
+                  <p className="text-muted-foreground">
+                    Integrating Wormhole positions Afrifutures as Africa's most interoperable, liquid, and global-ready commodity marketplace—connecting producers, traders, buyers, and liquidity across the world instantly.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Roadmap Section */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
-              9. Roadmap
+              10. Roadmap
             </CardTitle>
             <CardDescription>Development timeline and key milestones</CardDescription>
           </CardHeader>
@@ -534,7 +724,7 @@ export default function WhitepaperPage() {
         {/* Use Case Section */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>10. Use Case: "From Farm to Finance, Onchain"</CardTitle>
+            <CardTitle>11. Use Case: "From Farm to Finance, Onchain"</CardTitle>
             <CardDescription>A real-world example of our platform in action</CardDescription>
           </CardHeader>
           <CardContent>
@@ -551,7 +741,7 @@ export default function WhitepaperPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Globe className="w-5 h-5" />
-              11. Conclusion
+              12. Conclusion
             </CardTitle>
           </CardHeader>
           <CardContent>
