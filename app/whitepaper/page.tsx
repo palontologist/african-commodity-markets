@@ -131,10 +131,93 @@ export default function WhitepaperPage() {
           </CardContent>
         </Card>
 
+        {/* How Tokenization Works Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              3. How Tokenization Works on Afrifutures
+            </CardTitle>
+            <CardDescription>Blockchain-powered commodity trading and community rewards system</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                <h4 className="font-semibold text-foreground mb-3">Commodity Tokenization</h4>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Each physical batch (grain, oil, metals, etc.) is represented as a unique, traceable digital asset (token/NFT) onchain, recording origin, ownership, value-addition, and certifications.
+                </p>
+              </div>
+              
+              <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
+                <h4 className="font-semibold text-foreground mb-3">Platform Utility Token</h4>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Launch of an Afrifutures Token ($AFF), serving as the utility and governance backbone of the marketplace. All user actions (listing, bidding, settlement, trade financing) are facilitated by or rewarded with tokens.
+                </p>
+              </div>
+              
+              <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg">
+                <h4 className="font-semibold text-foreground mb-3">Trade Settlement</h4>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Use of stablecoins (e.g., USDC), local currency-pegged tokens, and $AFF for instant, global settlement—removing delays and FX risk.
+                </p>
+              </div>
+              
+              <div className="mt-6">
+                <h4 className="font-semibold text-foreground mb-4">Liquidity Creation</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-3 border rounded-lg bg-blue-50">
+                    <h5 className="font-medium text-foreground text-sm mb-2">Fractional Trading</h5>
+                    <p className="text-xs text-muted-foreground">
+                      Tokenization allows users to trade fractional shares in commodity lots, attracting more buyers and improving secondary market activity.
+                    </p>
+                  </div>
+                  <div className="p-3 border rounded-lg bg-purple-50">
+                    <h5 className="font-medium text-foreground text-sm mb-2">Market-Making Pools</h5>
+                    <p className="text-xs text-muted-foreground">
+                      RWA (real world asset) tokens can be staked into DeFi liquidity pools, where users earn yield for providing market liquidity to the marketplace and to institutional or DeFi partners.
+                    </p>
+                  </div>
+                  <div className="p-3 border rounded-lg bg-green-50">
+                    <h5 className="font-medium text-foreground text-sm mb-2">Trade Finance Access</h5>
+                    <p className="text-xs text-muted-foreground">
+                      Commodities staked as RWA tokens can be used as collateral for instant trade loans, supplier credit, or insurance, supporting working capital needs for producers and traders.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <h4 className="font-semibold text-foreground mb-4">RWA Staking & Community Rewards</h4>
+                <div className="space-y-3">
+                  <div className="p-3 bg-indigo-50 rounded-lg">
+                    <h5 className="font-medium text-foreground text-sm mb-2">Stake-and-Earn</h5>
+                    <p className="text-xs text-muted-foreground">
+                      Users (farmers, traders, community members) can stake $AFF or RWA tokens to earn premium features, yield, or shared trading revenue—aligning interests across the ecosystem.
+                    </p>
+                  </div>
+                  <div className="p-3 bg-cyan-50 rounded-lg">
+                    <h5 className="font-medium text-foreground text-sm mb-2">Onchain Escrow & Insurance</h5>
+                    <p className="text-xs text-muted-foreground">
+                      Staked tokens act as escrow, reducing counterparty risk in trades. Community-verified staking allows for group insurance or "risk pools" against weather/logistics loss.
+                    </p>
+                  </div>
+                  <div className="p-3 bg-teal-50 rounded-lg">
+                    <h5 className="font-medium text-foreground text-sm mb-2">Network Bootstrapping</h5>
+                    <p className="text-xs text-muted-foreground">
+                      Early power users, partner co-ops, and liquidity providers receive $AFF airdrops and bonding curve incentives to kickstart platform activity.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Marketplace Scope Section */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>3. Marketplace Scope</CardTitle>
+            <CardTitle>4. Marketplace Scope</CardTitle>
             <CardDescription>What commodities to launch with</CardDescription>
           </CardHeader>
           <CardContent>
@@ -174,7 +257,7 @@ export default function WhitepaperPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5" />
-              4. Ideal Customer Profiles (ICP)
+              5. Ideal Customer Profiles (ICP)
             </CardTitle>
             <CardDescription>Who we serve across the African commodity value chain</CardDescription>
           </CardHeader>
@@ -217,7 +300,7 @@ export default function WhitepaperPage() {
         {/* Business Model Section */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>5. Business Model</CardTitle>
+            <CardTitle>6. Business Model</CardTitle>
             <CardDescription>Revenue streams and monetization strategy</CardDescription>
           </CardHeader>
           <CardContent>
@@ -254,12 +337,146 @@ export default function WhitepaperPage() {
           </CardContent>
         </Card>
 
+        {/* Afrifutures Will Win Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5" />
+              7. Afrifutures Will Win
+            </CardTitle>
+            <CardDescription>Our competitive advantages in the African commodity market</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="border-l-4 border-green-500 pl-4">
+                <h4 className="font-semibold text-foreground mb-2">1. Regionally Tailored, Multi-Commodity Platform</h4>
+                <p className="text-muted-foreground text-sm">
+                  Unlike global platforms, Afrifutures is bespoke for African realities—multi-lingual, supports local currencies, and covers oil/metals/agri/niche value chains in one ecosystem. Entry built for rural/mobile-first users and also scalable for international traders/investors.
+                </p>
+              </div>
+              
+              <div className="border-l-4 border-blue-500 pl-4">
+                <h4 className="font-semibold text-foreground mb-2">2. Direct Access and Disintermediation</h4>
+                <p className="text-muted-foreground text-sm">
+                  Farmers, co-ops, and domestic traders connect directly with global buyers, banks, and insurers—cutting out costly middlemen. Onchain automation (smart contracts, digital escrow, programmable finance) brings trust and speed.
+                </p>
+              </div>
+              
+              <div className="border-l-4 border-purple-500 pl-4">
+                <h4 className="font-semibold text-foreground mb-2">3. Instant, Transparent Payments</h4>
+                <p className="text-muted-foreground text-sm">
+                  Stablecoin/local token settlement allows for near-instant payment—solving one of the biggest pain points for African producers and SMEs.
+                </p>
+              </div>
+              
+              <div className="border-l-4 border-amber-500 pl-4">
+                <h4 className="font-semibold text-foreground mb-2">4. Data & Intelligence as a Differentiator</h4>
+                <p className="text-muted-foreground text-sm">
+                  Real-time price, weather, risk, and logistics analytics—delivered via dashboards with actionable, localized insights (not global generalities).
+                </p>
+              </div>
+              
+              <div className="border-l-4 border-cyan-500 pl-4">
+                <h4 className="font-semibold text-foreground mb-2">5. Tokenization and Community Ownership</h4>
+                <p className="text-muted-foreground text-sm">
+                  Commodity and platform tokenization unlocks supply chain liquidity and broadens investment—users can stake, earn, and participate in governance. Early adopters (farm co-ops, traders, fintechs) receive incentives/rewards and become ecosystem champions.
+                </p>
+              </div>
+              
+              <div className="border-l-4 border-teal-500 pl-4">
+                <h4 className="font-semibold text-foreground mb-2">6. ESG and Traceability for Premium Market Access</h4>
+                <p className="text-muted-foreground text-sm">
+                  Integrated impact and traceability metrics empower African producers to access ESG-driven and premium international markets, not just bulk commodity export.
+                </p>
+              </div>
+              
+              <div className="border-l-4 border-red-500 pl-4">
+                <h4 className="font-semibold text-foreground mb-2">7. Ecosystem Partnerships</h4>
+                <p className="text-muted-foreground text-sm">
+                  APIs and partnerships: Banks, logistics firms, insurance, and data partners plug in easily—Afrifutures becomes the go-to "infrastructure layer" for African commodity digitization.
+                </p>
+              </div>
+              
+              <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
+                <p className="text-muted-foreground text-sm font-medium text-center">
+                  <strong>In short:</strong> Afrifutures focuses on the high-value, export, and digitally ready segment of African commodities, especially where traceability, instant payment, and price efficiency can unlock value. We will win by combining deep regional context, mobile-first access, onchain liquidity, and a tokenized community model with advanced data and an open partner ecosystem.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Market Size Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5" />
+              8. Market Size for Afrifutures
+            </CardTitle>
+            <CardDescription>African commodity marketplace & tokenization opportunity</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-semibold text-foreground mb-2">Africa's Total Commodity Market Value</h4>
+                  <p className="text-lg font-bold text-blue-600 mb-2">$2.23 trillion in 2025</p>
+                  <p className="text-sm text-muted-foreground">
+                    Projected to reach US$2.23 trillion in 2025 (energy, metals, agriculture, niche commodities) with a steady annual growth rate (~3.3% CAGR through 2030).
+                  </p>
+                </div>
+                
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <h4 className="font-semibold text-foreground mb-2">Active Market Participants</h4>
+                  <p className="text-lg font-bold text-green-600 mb-2">500,000+ traders</p>
+                  <p className="text-sm text-muted-foreground">
+                    Over 500,000 commodity traders in Africa (including farmers, SMEs, brokers, and corporates), with numbers expected to cross 1 million by 2030 as digital platforms expand and entry barriers fall.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="p-4 bg-purple-50 rounded-lg">
+                  <h4 className="font-semibold text-foreground mb-2">Digital Platform Penetration</h4>
+                  <p className="text-lg font-bold text-purple-600 mb-2">&lt;10% currently</p>
+                  <p className="text-sm text-muted-foreground">
+                    Currently, less than 10% of agri/product trades go through formal platforms—multiple millions of smallholder farmers, co-ops, and artisanal miners remain underserved.
+                  </p>
+                </div>
+                
+                <div className="p-4 bg-amber-50 rounded-lg">
+                  <h4 className="font-semibold text-foreground mb-2">Tokenized Real-World Assets (RWA)</h4>
+                  <p className="text-lg font-bold text-amber-600 mb-2">$24B → $30T by 2035</p>
+                  <p className="text-sm text-muted-foreground">
+                    RWA tokenization globally is $24 billion in 2025, expected to reach $1.2 trillion by 2030 and possibly $30 trillion in total by 2035. Commodities make up a fast-growing segment in Africa, LATAM, and Asia.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6 p-6 bg-gradient-to-r from-gray-50 to-slate-50 rounded-lg">
+              <h4 className="font-semibold text-foreground mb-3 text-center">Summary</h4>
+              <div className="text-center space-y-2">
+                <p className="text-muted-foreground text-sm">
+                  <strong>Afrifutures addresses a market worth $2.23 trillion annually</strong>, serving up to a million African traders and producers in the next few years.
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  The <strong>UNLOCKED and underserved segment</strong> (with digital, onchain penetration still below 10%) means huge upside for first-movers.
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  <strong>By 2030, tokenized commodity trading volume and platform activity could represent tens of billions in Africa alone</strong>, aligning with global trends.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Roadmap Section */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
-              6. Roadmap
+              9. Roadmap
             </CardTitle>
             <CardDescription>Development timeline and key milestones</CardDescription>
           </CardHeader>
@@ -317,7 +534,7 @@ export default function WhitepaperPage() {
         {/* Use Case Section */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>7. Use Case: "From Farm to Finance, Onchain"</CardTitle>
+            <CardTitle>10. Use Case: "From Farm to Finance, Onchain"</CardTitle>
             <CardDescription>A real-world example of our platform in action</CardDescription>
           </CardHeader>
           <CardContent>
@@ -334,7 +551,7 @@ export default function WhitepaperPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Globe className="w-5 h-5" />
-              8. Conclusion
+              11. Conclusion
             </CardTitle>
           </CardHeader>
           <CardContent>
