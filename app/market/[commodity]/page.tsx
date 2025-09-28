@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TradingModal } from "@/components/trading-modal"
 import { WalletConnect } from "@/components/wallet-connect"
+import { MarketHealthIndicator } from "@/components/market-health-indicator"
 import { TrendingUp, TrendingDown, ArrowLeft, Info, Calendar, DollarSign, Users, BarChart3 } from "lucide-react"
 import Link from "next/link"
 import { notFound, useSearchParams } from "next/navigation"
@@ -524,6 +525,11 @@ export default function CommodityPage({ params }: PageProps) {
                 </div>
               </CardHeader>
               <CardContent>
+                {/* Market Health Indicator */}
+                <div className="mb-6">
+                  <MarketHealthIndicator market={market} />
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* YES/NO Prices */}
                   <div className="space-y-4">

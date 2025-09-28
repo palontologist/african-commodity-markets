@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TrendingUp, TrendingDown, Coffee, Leaf, Apple, Nut, Award } from "lucide-react"
 import { AppHeader } from "@/components/app-header"
+import { MarketTimingWidget } from "@/components/market-timing-widget"
 import Link from "next/link"
 import { getLivePrice, type Region, type CommoditySymbol } from "@/lib/live-prices"
 import { HomeInlineTrade } from "@/components/home-inline-trade"
@@ -224,6 +225,11 @@ export default async function Dashboard({
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Market Timing Widget */}
+        <div className="mb-8">
+          <MarketTimingWidget markets={defaultMarkets} />
         </div>
 
         {/* Commodity Markets Grid */}
