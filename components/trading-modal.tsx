@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Slider } from "@/components/ui/slider"
+import { MarketHealthIndicator } from "@/components/market-health-indicator"
 import { AlertTriangle, TrendingUp, TrendingDown, Wallet, Calculator } from "lucide-react"
 
 interface TradingModalProps {
@@ -67,6 +68,11 @@ export function TradingModal({ isOpen, onClose, market, commodity, initialTradeT
           <DialogTitle className="text-xl">Trade Market Position</DialogTitle>
           <DialogDescription className="text-balance">{market.question}</DialogDescription>
         </DialogHeader>
+
+        {/* Market Health Indicator */}
+        <div className="mb-4">
+          <MarketHealthIndicator market={market} />
+        </div>
 
         <Tabs value={tradeType} onValueChange={(value) => setTradeType(value as "yes" | "no")} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
