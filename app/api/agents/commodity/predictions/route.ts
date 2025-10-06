@@ -6,8 +6,8 @@ import { z } from 'zod'
  * Query parameters validation schema
  */
 const paramsSchema = z.object({
-  commodityId: z.string().optional(),
-  region: z.enum(['AFRICA', 'LATAM']).optional(),
+  commodityId: z.string().nullable().optional(),
+  region: z.enum(['AFRICA', 'LATAM']).nullable().optional(),
   limit: z.string().transform(val => Math.min(parseInt(val, 10), 100)).default('10')
 })
 
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     // Fetch predictions from database
     const predictions = await listRecentPredictions({
       commodityId: params.commodityId ? parseInt(params.commodityId, 10) : undefined,
-      region: params.region,
+      region: params.region || undefined,
       limit: Math.min(params.limit, 100) // Cap at 100
     })
     
