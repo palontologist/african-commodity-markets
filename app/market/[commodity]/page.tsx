@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TradingModal } from "@/components/trading-modal"
 import { WalletConnect } from "@/components/wallet-connect"
-import { TrendingUp, TrendingDown, ArrowLeft, Info, Calendar, DollarSign, Users, BarChart3 } from "lucide-react"
+import { TrendingUp, TrendingDown, ArrowLeft, Info, Calendar, DollarSign, Users, BarChart3, Clock, Activity } from "lucide-react"
 import Link from "next/link"
 import { notFound, useSearchParams } from "next/navigation"
 
@@ -405,21 +405,23 @@ export default function CommodityPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
+      {/* Header with purple theme */}
+      <header className="border-b border-purple-100 bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href={{ pathname: '/', query: { region } }}>
+              <Button variant="ghost" size="sm" asChild className="hover:bg-purple-50">
+                <Link href={{ pathname: '/market', query: { region } }}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Markets
                 </Link>
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">{commodity.name} Markets</h1>
-                <p className="text-sm text-muted-foreground">{commodity.description}</p>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  {commodity.name} Prediction Markets
+                </h1>
+                <p className="text-sm text-slate-600">{commodity.description}</p>
               </div>
             </div>
             <WalletConnect />
@@ -428,29 +430,29 @@ export default function CommodityPage({ params }: PageProps) {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Commodity Overview */}
+        {/* Commodity Overview - Purple themed */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="lg:col-span-2">
-            <CardHeader>
+          <Card className="lg:col-span-2 border-purple-200 shadow-lg shadow-purple-100/50">
+            <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-2xl">{commodity.name} Overview</CardTitle>
-                  <CardDescription>Current market performance and statistics</CardDescription>
+                  <CardTitle className="text-2xl text-purple-900">{commodity.name} Overview</CardTitle>
+                  <CardDescription className="text-purple-600">Current market performance and statistics</CardDescription>
                 </div>
-                <Badge className={commodity.color}>{commodity.grade}</Badge>
+                <Badge className="bg-purple-100 text-purple-800 border-purple-200">{commodity.grade}</Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">Current Price</p>
-                  <p className="text-2xl font-bold text-foreground">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="space-y-1">
+                  <p className="text-sm text-slate-500 font-medium">Current Price</p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
                     {livePrice && livePrice.price !== null
                       ? `$${livePrice.price.toFixed(2)}${livePrice.unit ? `/${livePrice.unit}` : ''}`
                       : commodity.currentPrice}
                   </p>
-                  <div className="flex items-center justify-center space-x-1 mt-1">
-                    <TrendIcon className={`w-4 h-4 ${commodity.trend === "up" ? "text-green-600" : "text-red-600"}`} />
+                  <div className="flex items-center space-x-1 mt-1">
+                    <TrendIcon className={`w-4 h-4 ${commodity.trend === "up" ? "text-green-500" : "text-red-500"}`} />
                     <span
                       className={`text-sm font-semibold ${
                         commodity.trend === "up" ? "text-green-600" : "text-red-600"
@@ -460,130 +462,154 @@ export default function CommodityPage({ params }: PageProps) {
                     </span>
                   </div>
                 </div>
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">24h Volume</p>
-                  <p className="text-xl font-bold text-foreground">{commodity.volume}</p>
+                <div className="space-y-1">
+                  <p className="text-sm text-slate-500 font-medium flex items-center gap-1">
+                    <Activity className="w-4 h-4" />
+                    24h Volume
+                  </p>
+                  <p className="text-2xl font-bold text-slate-900">{commodity.volume}</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">Total Volume</p>
-                  <p className="text-xl font-bold text-foreground">{commodity.totalVolume}</p>
+                <div className="space-y-1">
+                  <p className="text-sm text-slate-500 font-medium flex items-center gap-1">
+                    <BarChart3 className="w-4 h-4" />
+                    Total Volume
+                  </p>
+                  <p className="text-2xl font-bold text-slate-900">{commodity.totalVolume}</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">Participants</p>
-                  <p className="text-xl font-bold text-foreground">{commodity.participants}</p>
+                <div className="space-y-1">
+                  <p className="text-sm text-slate-500 font-medium flex items-center gap-1">
+                    <Users className="w-4 h-4" />
+                    Participants
+                  </p>
+                  <p className="text-2xl font-bold text-slate-900">{commodity.participants}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+          <Card className="border-purple-200 shadow-lg shadow-purple-100/50">
+            <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50">
+              <CardTitle className="flex items-center space-x-2 text-purple-900">
                 <Info className="w-5 h-5" />
                 <span>Quality Standards</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <div>
-                <p className="text-sm font-medium text-foreground mb-2">Grades</p>
-                <div className="space-y-1">
+                <p className="text-sm font-semibold text-slate-700 mb-2">Available Grades</p>
+                <div className="flex flex-wrap gap-2">
                   {commodity.qualityInfo.grades.map((grade, index) => (
-                    <Badge key={index} variant="outline" className="mr-1 mb-1">
+                    <Badge key={index} className="bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200">
                       {grade}
                     </Badge>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground mb-1">Standards</p>
-                <p className="text-sm text-muted-foreground">{commodity.qualityInfo.standards}</p>
+                <p className="text-sm font-semibold text-slate-700 mb-1">Standards</p>
+                <p className="text-sm text-slate-600">{commodity.qualityInfo.standards}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground mb-1">Data Sources</p>
-                <p className="text-sm text-muted-foreground">{commodity.qualityInfo.sources}</p>
+                <p className="text-sm font-semibold text-slate-700 mb-1">Data Sources</p>
+                <p className="text-sm text-slate-600">{commodity.qualityInfo.sources}</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Active Markets */}
-        <div className="space-y-6">
-          <h2 className="text-3xl font-bold text-foreground">Active Markets</h2>
+        {/* Active Markets - Kalshi Style */}
+        <div className="space-y-6 mt-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              Active Prediction Markets
+            </h2>
+            <Badge className="bg-purple-100 text-purple-700 border-purple-200">
+              {commodity.markets.length} Markets
+            </Badge>
+          </div>
           {commodity.markets.map((market) => (
-            <Card key={market.id} className="hover:shadow-lg transition-shadow duration-200">
-              <CardHeader>
-                <div className="flex items-start justify-between">
+            <Card key={market.id} className="hover:shadow-xl transition-all duration-300 border-purple-100 hover:border-purple-300 bg-white">
+              <CardHeader className="pb-4">
+                <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <CardTitle className="text-lg text-balance">{market.question}</CardTitle>
-                    <CardDescription className="mt-2">{market.description}</CardDescription>
+                    <CardTitle className="text-lg font-semibold text-slate-900 leading-tight">{market.question}</CardTitle>
+                    <CardDescription className="mt-2 text-slate-600">{market.description}</CardDescription>
                   </div>
-                  <div className="flex items-center space-x-2 ml-4">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">{market.deadline}</span>
+                  <div className="flex items-center space-x-2 shrink-0">
+                    <Clock className="w-4 h-4 text-purple-500" />
+                    <span className="text-sm font-medium text-purple-600">{market.deadline}</span>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* YES/NO Prices */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                      <div>
-                        <p className="font-semibold text-green-700 dark:text-green-400">YES</p>
-                        <p className="text-2xl font-bold text-green-800 dark:text-green-300">
-                          ${market.yesPrice.toFixed(2)}
-                        </p>
-                        <p className="text-sm text-green-600 dark:text-green-500">
-                          {(market.yesPrice * 100).toFixed(0)}% chance
-                        </p>
-                      </div>
-                      <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleTradeClick(market)}>
-                        Buy YES
-                      </Button>
+              <CardContent className="space-y-6">
+                {/* Probability Bars - Kalshi Style */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-slate-600">Market Probability</span>
+                    <span className="text-xs text-slate-500">{market.participants} traders</span>
+                  </div>
+                  <div className="relative h-12 flex rounded-lg overflow-hidden shadow-sm">
+                    <div 
+                      className="bg-gradient-to-r from-green-500 to-green-400 flex items-center justify-between px-4 transition-all duration-300"
+                      style={{ width: `${market.yesPrice * 100}%` }}
+                    >
+                      <span className="text-white font-bold text-sm">YES</span>
+                      <span className="text-white font-bold text-lg">{(market.yesPrice * 100).toFixed(0)}¢</span>
                     </div>
-                    <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-950/20 rounded-lg">
-                      <div>
-                        <p className="font-semibold text-red-700 dark:text-red-400">NO</p>
-                        <p className="text-2xl font-bold text-red-800 dark:text-red-300">
-                          ${market.noPrice.toFixed(2)}
-                        </p>
-                        <p className="text-sm text-red-600 dark:text-red-500">
-                          {(market.noPrice * 100).toFixed(0)}% chance
-                        </p>
-                      </div>
-                      <Button variant="destructive" onClick={() => handleTradeClick(market)}>
-                        Buy NO
-                      </Button>
+                    <div 
+                      className="bg-gradient-to-r from-red-400 to-red-500 flex items-center justify-between px-4 transition-all duration-300"
+                      style={{ width: `${market.noPrice * 100}%` }}
+                    >
+                      <span className="text-white font-bold text-lg">{(market.noPrice * 100).toFixed(0)}¢</span>
+                      <span className="text-white font-bold text-sm">NO</span>
                     </div>
                   </div>
+                </div>
 
-                  {/* Market Stats */}
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-                        <DollarSign className="w-5 h-5 text-primary" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Volume</p>
-                          <p className="font-semibold text-foreground">{market.volume}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-                        <Users className="w-5 h-5 text-primary" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Traders</p>
-                          <p className="font-semibold text-foreground">{market.participants}</p>
-                        </div>
-                      </div>
+                {/* Trading Buttons - Kalshi Style */}
+                <div className="grid grid-cols-2 gap-4">
+                  <Button 
+                    onClick={() => handleTradeClick(market)}
+                    className="h-14 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-lg shadow-lg shadow-green-500/30 transition-all duration-200 hover:scale-105"
+                  >
+                    <div className="flex flex-col items-center">
+                      <span>Buy YES</span>
+                      <span className="text-xs font-normal opacity-90">${market.yesPrice.toFixed(2)} per share</span>
                     </div>
-                    <div className="p-3 bg-muted/50 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">Market Confidence</span>
-                        <span className="text-sm font-medium text-foreground">
-                          {Math.max(market.yesPrice, market.noPrice) > 0.6 ? "High" : "Moderate"}
-                        </span>
-                      </div>
-                      <Progress value={Math.max(market.yesPrice, market.noPrice) * 100} className="h-2" />
+                  </Button>
+                  <Button 
+                    onClick={() => handleTradeClick(market)}
+                    className="h-14 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold text-lg shadow-lg shadow-red-500/30 transition-all duration-200 hover:scale-105"
+                  >
+                    <div className="flex flex-col items-center">
+                      <span>Buy NO</span>
+                      <span className="text-xs font-normal opacity-90">${market.noPrice.toFixed(2)} per share</span>
                     </div>
+                  </Button>
+                </div>
+
+                {/* Market Stats */}
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-purple-100">
+                  <div className="text-center space-y-1">
+                    <div className="flex items-center justify-center text-purple-500">
+                      <DollarSign className="w-4 h-4" />
+                    </div>
+                    <p className="text-xs text-slate-500 font-medium">Volume</p>
+                    <p className="font-bold text-slate-900">{market.volume}</p>
+                  </div>
+                  <div className="text-center space-y-1">
+                    <div className="flex items-center justify-center text-purple-500">
+                      <Users className="w-4 h-4" />
+                    </div>
+                    <p className="text-xs text-slate-500 font-medium">Traders</p>
+                    <p className="font-bold text-slate-900">{market.participants}</p>
+                  </div>
+                  <div className="text-center space-y-1">
+                    <div className="flex items-center justify-center text-purple-500">
+                      <Activity className="w-4 h-4" />
+                    </div>
+                    <p className="text-xs text-slate-500 font-medium">Liquidity</p>
+                    <p className="font-bold text-green-600">High</p>
                   </div>
                 </div>
               </CardContent>
@@ -591,21 +617,27 @@ export default function CommodityPage({ params }: PageProps) {
           ))}
         </div>
 
-        {/* Market Analysis Tabs */}
+        {/* Market Analysis Tabs - Purple Theme */}
         <div className="mt-12">
           <Tabs defaultValue="analysis" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="analysis">Market Analysis</TabsTrigger>
-              <TabsTrigger value="history">Price History</TabsTrigger>
-              <TabsTrigger value="news">Market News</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 bg-purple-100 p-1">
+              <TabsTrigger value="analysis" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                Market Analysis
+              </TabsTrigger>
+              <TabsTrigger value="history" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                Price History
+              </TabsTrigger>
+              <TabsTrigger value="news" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                Market News
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="analysis" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Market Analysis</CardTitle>
-                  <CardDescription>Expert insights and market trends for {commodity.name}</CardDescription>
+              <Card className="border-purple-200">
+                <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50">
+                  <CardTitle className="text-purple-900">Market Analysis</CardTitle>
+                  <CardDescription className="text-purple-600">Expert insights and market trends for {commodity.name}</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   <div className="space-y-4">
                     <div className="p-4 bg-muted/50 rounded-lg">
                       <h4 className="font-semibold text-foreground mb-2">Current Market Sentiment</h4>
@@ -629,43 +661,49 @@ export default function CommodityPage({ params }: PageProps) {
               </Card>
             </TabsContent>
             <TabsContent value="history" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Price History</CardTitle>
-                  <CardDescription>Historical price data and market performance</CardDescription>
+              <Card className="border-purple-200">
+                <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50">
+                  <CardTitle className="text-purple-900">Price History</CardTitle>
+                  <CardDescription className="text-purple-600">Historical price data and market performance</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="h-64 flex items-center justify-center bg-muted/20 rounded-lg">
+                <CardContent className="pt-6">
+                  <div className="h-64 flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg border-2 border-dashed border-purple-200">
                     <div className="text-center">
-                      <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-muted-foreground">Price chart integration coming soon</p>
-                      <p className="text-sm text-muted-foreground">Will display historical data from market oracles</p>
+                      <BarChart3 className="w-12 h-12 text-purple-400 mx-auto mb-2" />
+                      <p className="text-purple-600 font-medium">Price chart integration coming soon</p>
+                      <p className="text-sm text-purple-500">Will display historical data from market oracles</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
             <TabsContent value="news" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Market News</CardTitle>
-                  <CardDescription>Latest updates affecting {commodity.name} markets</CardDescription>
+              <Card className="border-purple-200">
+                <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50">
+                  <CardTitle className="text-purple-900">Market News</CardTitle>
+                  <CardDescription className="text-purple-600">Latest updates affecting {commodity.name} markets</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   <div className="space-y-4">
-                    <div className="p-4 border-l-4 border-primary bg-muted/20">
-                      <p className="font-medium text-foreground">Export Board Updates</p>
-                      <p className="text-sm text-muted-foreground mt-1">
+                    <div className="p-4 border-l-4 border-purple-500 bg-purple-50 rounded-r-lg">
+                      <p className="font-semibold text-slate-900">Export Board Updates</p>
+                      <p className="text-sm text-slate-600 mt-1">
                         Latest quality grade certifications and export volume reports from regional boards.
                       </p>
-                      <p className="text-xs text-muted-foreground mt-2">2 hours ago</p>
+                      <p className="text-xs text-purple-600 mt-2 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        2 hours ago
+                      </p>
                     </div>
-                    <div className="p-4 border-l-4 border-secondary bg-muted/20">
-                      <p className="font-medium text-foreground">Seasonal Forecast</p>
-                      <p className="text-sm text-muted-foreground mt-1">
+                    <div className="p-4 border-l-4 border-indigo-500 bg-indigo-50 rounded-r-lg">
+                      <p className="font-semibold text-slate-900">Seasonal Forecast</p>
+                      <p className="text-sm text-slate-600 mt-1">
                         Weather patterns and harvest predictions affecting {commodity.name.toLowerCase()} production.
                       </p>
-                      <p className="text-xs text-muted-foreground mt-2">6 hours ago</p>
+                      <p className="text-xs text-indigo-600 mt-2 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        6 hours ago
+                      </p>
                     </div>
                   </div>
                 </CardContent>
