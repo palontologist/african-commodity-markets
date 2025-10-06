@@ -1,0 +1,21 @@
+name: Daily Insights Generation
+
+# Backup scheduler using GitHub Actions
+# This runs if Vercel Cron is not available
+
+on:
+  schedule:
+    # Run every day at 6 AM UTC (adjust timezone as needed)
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  generate-insights:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Trigger insight generation
+        run: |
+          curl -X POST "${{ secrets.APP_URL }}/api/cron/generate-insights" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"

@@ -27,6 +27,9 @@ export function AppHeader() {
             <Link href="/grades" className="text-gray-600 hover:text-gray-900">
               Grades
             </Link>
+            <Link href="/insights" className="text-gray-600 hover:text-gray-900">
+              AI Insights
+            </Link>
             <Link href="/compare" className="text-gray-600 hover:text-gray-900">
               Compare
             </Link>
