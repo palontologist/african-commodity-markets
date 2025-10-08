@@ -15,10 +15,12 @@ A comprehensive platform for tracking African commodity market data with user au
 - **Comprehensive Schema**: Support for commodities, markets, pricing, grades, and user data
 
 ### 📊 Commodity Data
-- **Multi-Commodity Support**: Tea, Coffee, Cocoa, Gold, Avocado, Macadamia
+- **Multi-Commodity Support**: Tea, Coffee, Cocoa, Gold, Avocado, Macadamia, Cotton, Cashew, Rubber
+- **Real-Time Pricing**: Integration with Alpha Vantage and World Bank APIs for live market data
 - **Quality Grades**: Detailed quality standards and grading systems
 - **Market Information**: African market locations and trading data
-- **Price Tracking**: Historical and real-time commodity pricing
+- **Historical Data**: 5+ years of price history for trend analysis
+- **AI Predictions**: Groq-powered predictions for commodity price movements
 
 ### 🌍 African Markets Coverage
 - Ghana, Kenya, Nigeria, South Africa, Côte d'Ivoire, Ethiopia
@@ -61,7 +63,20 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
 # Turso Database
 DATABASE_URL=libsql://your-database-url.turso.io
 DATABASE_AUTH_TOKEN=your_database_auth_token_here
+
+# Groq AI (Required for predictions)
+GROQ_API_KEY=gsk_your_groq_api_key_here
+
+# Alpha Vantage (Optional but recommended for real-time prices)
+# Free tier: 25 requests/day
+# Get your key: https://www.alphavantage.co/support/#api-key
+ALPHA_VANTAGE_KEY=YOUR_ALPHA_VANTAGE_KEY_HERE
 ```
+
+**Important**: 
+- Without `ALPHA_VANTAGE_KEY`, the system will fallback to World Bank API (free, no key required)
+- World Bank provides monthly data; Alpha Vantage provides more frequent updates
+- For production use, sign up for Alpha Vantage Premium for higher rate limits
 
 ### Installation
 
@@ -92,6 +107,9 @@ DATABASE_AUTH_TOKEN=your_database_auth_token_here
    
    # Seed initial data
    pnpm db:seed
+   
+   # Optional: Ingest 5+ years of historical price data
+   pnpm tsx scripts/ingest-historical-prices.ts
    ```
 
 5. **Run development server**
@@ -106,6 +124,7 @@ DATABASE_AUTH_TOKEN=your_database_auth_token_here
 - `pnpm db:push` - Push schema changes to database
 - `pnpm db:studio` - Open Drizzle Studio for database management
 - `pnpm db:seed` - Seed database with initial data
+- `pnpm tsx scripts/ingest-historical-prices.ts` - Import 5+ years of historical price data from World Bank
 
 ## Clerk Setup
 

@@ -5,10 +5,10 @@ import { generatePrediction } from '@/lib/agents/agent'
 const COMMODITIES = [
   { symbol: 'COFFEE', region: 'AFRICA' },
   { symbol: 'COCOA', region: 'AFRICA' },
-  { symbol: 'COTTON', region: 'AFRICA' },
-  { symbol: 'CASHEW', region: 'AFRICA' },
-  { symbol: 'RUBBER', region: 'AFRICA' },
+  { symbol: 'TEA', region: 'AFRICA' },
   { symbol: 'GOLD', region: 'AFRICA' },
+  { symbol: 'AVOCADO', region: 'AFRICA' },
+  { symbol: 'MACADAMIA', region: 'AFRICA' },
 ] as const
 
 type CommoditySymbol = typeof COMMODITIES[number]['symbol']
