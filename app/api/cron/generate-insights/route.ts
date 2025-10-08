@@ -61,10 +61,9 @@ export async function GET(request: NextRequest) {
     try {
       console.log(`📊 Generating prediction for ${commodity.symbol} (${commodity.region})...`)
       
-      const prediction = await generatePrediction(
+      const priceData = await getLivePrice(
         commodity.symbol as CommoditySymbol,
-        commodity.region as Region,
-        'SHORT_TERM'
+        commodity.region as Region
       )
       
       const duration = Date.now() - commodityStart

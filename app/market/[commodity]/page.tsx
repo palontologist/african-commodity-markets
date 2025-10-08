@@ -1,48 +1,16 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { TradingModal } from "@/components/trading-modal"
 import { WalletConnect } from "@/components/wallet-connect"
-import { TrendingUp, TrendingDown, ArrowLeft, Info, Calendar, DollarSign, Users, BarChart3, Clock, Activity } from "lucide-react"
+import { TrendingUp, TrendingDown, ArrowLeft, Info, BarChart3, Clock, Activity, DollarSign, Users } from "lucide-react"
 import Link from "next/link"
-import { notFound, useSearchParams } from "next/navigation"
+import { notFound } from "next/navigation"
+import { MarketPredictionCard } from "@/components/blockchain/market-prediction-card"
+import { getPrediction, type OnChainPrediction } from "@/lib/blockchain/polygon-client"
+import { getLivePrice, type CommoditySymbol } from "@/lib/live-prices"
 
-type CommodityMarket = {
-  id: number
-  question: string
-  yesPrice: number
-  noPrice: number
-  volume: string
-  participants: number
-  deadline: string
-  description: string
-}
 
-type CommodityView = {
-  name: string
-  description: string
-  currentPrice: string
-  change: string
-  trend: "up" | "down"
-  volume: string
-  totalVolume: string
-  participants: number
-  grade: string
-  color: string
-  markets: CommodityMarket[]
-  qualityInfo: {
-    grades: string[]
-    standards: string
-    sources: string
-  }
-}
-
-type CommodityDataMap = Record<"tea" | "coffee" | "avocado" | "macadamia", CommodityView>
 
 function formatDate(d: Date) {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
@@ -358,70 +326,85 @@ interface PageProps {
   params: {
     commodity: string
   }
+  searchParams: {
+    region?: string
+  }
 }
 
-export default function CommodityPage({ params }: PageProps) {
-  const [selectedMarket, setSelectedMarket] = useState<any>(null)
-  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false)
-  const [livePrice, setLivePrice] = useState<{ price: number | null; unit?: string } | null>(null)
-  const searchParams = useSearchParams()
-  const region = (searchParams.get('region')?.toUpperCase() === 'LATAM' ? 'LATAM' : 'AFRICA')
+// Commodity symbol mapping
+const COMMODITY_MAP: Record<string, CommoditySymbol> = {
+  'coffee': 'COFFEE',
+  'cocoa': 'COCOA',
+  'cotton': 'COTTON',
+  'cashew': 'CASHEW',
+  'rubber': 'RUBBER',
+  'gold': 'GOLD',
+  'tea': 'COFFEE', // Fallback - add TEA to live-prices.ts if needed
+  'avocado': 'COFFEE', // Fallback
+  'macadamia': 'CASHEW', // Fallback
+}
 
-  const selectedCommodityData: CommodityDataMap = region === 'LATAM' ? commodityDataLatam : commodityDataAfrica
-  const commodity = selectedCommodityData[params.commodity as keyof CommodityDataMap]
-
-  if (!commodity) {
-    notFound()
-  }
-
-  const TrendIcon = commodity.trend === "up" ? TrendingUp : TrendingDown
-
-  useEffect(() => {
-    async function loadLive() {
-      const idToSymbol: Record<string, string> = {
-        tea: 'TEA',
-        coffee: 'COFFEE',
-        avocado: 'AVOCADO',
-        macadamia: 'MACADAMIA',
-      }
-      const symbol = idToSymbol[params.commodity]
-      if (!symbol) return
-      try {
-        const res = await fetch(`/api/live-prices?symbol=${symbol}&region=${region}`, { cache: 'no-store' })
-        if (!res.ok) return
-        const json = await res.json()
-        const data = json?.data
-        if (data) {
-          setLivePrice({ price: data.price ?? null, unit: data.unit })
-        }
-      } catch {}
+// Server Component - Fetch blockchain data
+export default async function CommodityPage({ params, searchParams }: PageProps) {
+  const commodityKey = params.commodity.toLowerCase()
+  const region = searchParams.region?.toUpperCase() === 'LATAM' ? 'LATAM' : 'AFRICA'
+  const commoditySymbol = COMMODITY_MAP[commodityKey] || 'COFFEE'
+  
+  // Fetch live price from real APIs
+  let livePrice: { price: number; unit?: string; source: string } | null = null
+  try {
+    const priceData = await getLivePrice(commoditySymbol, region as any)
+    livePrice = {
+      price: priceData.price,
+      unit: 'kg', // Default unit
+      source: priceData.source
     }
-    loadLive()
-  }, [params.commodity, region])
-
-  const handleTradeClick = (market: any) => {
-    setSelectedMarket(market)
-    setIsTradeModalOpen(true)
+  } catch (error) {
+    console.error('Failed to fetch live price:', error)
   }
+
+  // Fetch blockchain predictions for this commodity
+  const predictions: OnChainPrediction[] = []
+  let fetchError = false
+  
+  // Try to fetch predictions 0-20 (most recent)
+  for (let i = 0; i < 20; i++) {
+    try {
+      const prediction = await getPrediction(i)
+      // Filter by commodity
+      if (prediction.commodity.toLowerCase() === commodityKey.toLowerCase()) {
+        predictions.push(prediction)
+      }
+    } catch (error) {
+      // Prediction doesn't exist or error fetching
+      if (i === 0) {
+        fetchError = true
+      }
+      break
+    }
+  }
+
+  const TrendIcon = livePrice && livePrice.price > 0 ? TrendingUp : TrendingDown
+  const commodityName = commodityKey.charAt(0).toUpperCase() + commodityKey.slice(1)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
-      {/* Header with purple theme */}
-      <header className="border-b border-purple-100 bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header - Kalshi Style */}
+      <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" asChild className="hover:bg-purple-50">
+              <Button variant="ghost" size="sm" asChild>
                 <Link href={{ pathname: '/market', query: { region } }}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Markets
+                  Back
                 </Link>
               </Button>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  {commodity.name} Prediction Markets
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {commodityName}
                 </h1>
-                <p className="text-sm text-slate-600">{commodity.description}</p>
+                <p className="text-sm text-gray-600">Prediction Markets</p>
               </div>
             </div>
             <WalletConnect />
@@ -430,230 +413,161 @@ export default function CommodityPage({ params }: PageProps) {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Commodity Overview - Purple themed */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="lg:col-span-2 border-purple-200 shadow-lg shadow-purple-100/50">
-            <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50">
+        {/* Commodity Overview - Kalshi Style */}
+        <div className="mb-8">
+          <Card className="border-gray-200">
+            <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-2xl text-purple-900">{commodity.name} Overview</CardTitle>
-                  <CardDescription className="text-purple-600">Current market performance and statistics</CardDescription>
+                  <CardTitle className="text-2xl text-gray-900">{commodityName} Overview</CardTitle>
+                  <CardDescription>Current market performance and live data</CardDescription>
                 </div>
-                <Badge className="bg-purple-100 text-purple-800 border-purple-200">{commodity.grade}</Badge>
+                {livePrice && (
+                  <Badge variant="outline" className="text-xs">
+                    Source: {livePrice.source}
+                  </Badge>
+                )}
               </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div className="space-y-1">
-                  <p className="text-sm text-slate-500 font-medium">Current Price</p>
-                  <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                    {livePrice && livePrice.price !== null
-                      ? `$${livePrice.price.toFixed(2)}${livePrice.unit ? `/${livePrice.unit}` : ''}`
-                      : commodity.currentPrice}
+                  <p className="text-sm text-gray-600 font-medium">Live Price</p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {livePrice ? `$${livePrice.price.toFixed(2)}` : 'Loading...'}
                   </p>
-                  <div className="flex items-center space-x-1 mt-1">
-                    <TrendIcon className={`w-4 h-4 ${commodity.trend === "up" ? "text-green-500" : "text-red-500"}`} />
-                    <span
-                      className={`text-sm font-semibold ${
-                        commodity.trend === "up" ? "text-green-600" : "text-red-600"
-                      }`}
-                    >
-                      {commodity.change}
-                    </span>
-                  </div>
+                  {livePrice && (
+                    <div className="flex items-center space-x-1 mt-1">
+                      <TrendIcon className="w-4 h-4 text-green-500" />
+                      <span className="text-sm font-semibold text-green-600">
+                        per {livePrice.unit}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-slate-500 font-medium flex items-center gap-1">
+                  <p className="text-sm text-gray-600 font-medium flex items-center gap-1">
                     <Activity className="w-4 h-4" />
-                    24h Volume
+                    Active Markets
                   </p>
-                  <p className="text-2xl font-bold text-slate-900">{commodity.volume}</p>
+                  <p className="text-2xl font-bold text-gray-900">{predictions.length}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-slate-500 font-medium flex items-center gap-1">
+                  <p className="text-sm text-gray-600 font-medium flex items-center gap-1">
                     <BarChart3 className="w-4 h-4" />
                     Total Volume
                   </p>
-                  <p className="text-2xl font-bold text-slate-900">{commodity.totalVolume}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    ${(predictions.reduce((sum, p) => sum + Number(p.yesStakes + p.noStakes), 0) / 1_000_000).toFixed(2)}K
+                  </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-slate-500 font-medium flex items-center gap-1">
+                  <p className="text-sm text-gray-600 font-medium flex items-center gap-1">
                     <Users className="w-4 h-4" />
-                    Participants
+                    Total Traders
                   </p>
-                  <p className="text-2xl font-bold text-slate-900">{commodity.participants}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {predictions.length}
+                  </p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-purple-200 shadow-lg shadow-purple-100/50">
-            <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50">
-              <CardTitle className="flex items-center space-x-2 text-purple-900">
-                <Info className="w-5 h-5" />
-                <span>Quality Standards</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-6">
-              <div>
-                <p className="text-sm font-semibold text-slate-700 mb-2">Available Grades</p>
-                <div className="flex flex-wrap gap-2">
-                  {commodity.qualityInfo.grades.map((grade, index) => (
-                    <Badge key={index} className="bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200">
-                      {grade}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-700 mb-1">Standards</p>
-                <p className="text-sm text-slate-600">{commodity.qualityInfo.standards}</p>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-700 mb-1">Data Sources</p>
-                <p className="text-sm text-slate-600">{commodity.qualityInfo.sources}</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Active Markets - Kalshi Style */}
+        {/* Active Markets - Blockchain Data */}
         <div className="space-y-6 mt-8">
           <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              Active Prediction Markets
+            <h2 className="text-3xl font-bold text-gray-900">
+              Live Prediction Markets
             </h2>
-            <Badge className="bg-purple-100 text-purple-700 border-purple-200">
-              {commodity.markets.length} Markets
+            <Badge variant="outline">
+              {predictions.length} On-Chain Markets
             </Badge>
           </div>
-          {commodity.markets.map((market) => (
-            <Card key={market.id} className="hover:shadow-xl transition-all duration-300 border-purple-100 hover:border-purple-300 bg-white">
-              <CardHeader className="pb-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold text-slate-900 leading-tight">{market.question}</CardTitle>
-                    <CardDescription className="mt-2 text-slate-600">{market.description}</CardDescription>
-                  </div>
-                  <div className="flex items-center space-x-2 shrink-0">
-                    <Clock className="w-4 h-4 text-purple-500" />
-                    <span className="text-sm font-medium text-purple-600">{market.deadline}</span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Probability Bars - Kalshi Style */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-slate-600">Market Probability</span>
-                    <span className="text-xs text-slate-500">{market.participants} traders</span>
-                  </div>
-                  <div className="relative h-12 flex rounded-lg overflow-hidden shadow-sm">
-                    <div 
-                      className="bg-gradient-to-r from-green-500 to-green-400 flex items-center justify-between px-4 transition-all duration-300"
-                      style={{ width: `${market.yesPrice * 100}%` }}
-                    >
-                      <span className="text-white font-bold text-sm">YES</span>
-                      <span className="text-white font-bold text-lg">{(market.yesPrice * 100).toFixed(0)}¢</span>
-                    </div>
-                    <div 
-                      className="bg-gradient-to-r from-red-400 to-red-500 flex items-center justify-between px-4 transition-all duration-300"
-                      style={{ width: `${market.noPrice * 100}%` }}
-                    >
-                      <span className="text-white font-bold text-lg">{(market.noPrice * 100).toFixed(0)}¢</span>
-                      <span className="text-white font-bold text-sm">NO</span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Trading Buttons - Kalshi Style */}
-                <div className="grid grid-cols-2 gap-4">
-                  <Button 
-                    onClick={() => handleTradeClick(market)}
-                    className="h-14 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-lg shadow-lg shadow-green-500/30 transition-all duration-200 hover:scale-105"
-                  >
-                    <div className="flex flex-col items-center">
-                      <span>Buy YES</span>
-                      <span className="text-xs font-normal opacity-90">${market.yesPrice.toFixed(2)} per share</span>
-                    </div>
-                  </Button>
-                  <Button 
-                    onClick={() => handleTradeClick(market)}
-                    className="h-14 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold text-lg shadow-lg shadow-red-500/30 transition-all duration-200 hover:scale-105"
-                  >
-                    <div className="flex flex-col items-center">
-                      <span>Buy NO</span>
-                      <span className="text-xs font-normal opacity-90">${market.noPrice.toFixed(2)} per share</span>
-                    </div>
-                  </Button>
-                </div>
-
-                {/* Market Stats */}
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-purple-100">
-                  <div className="text-center space-y-1">
-                    <div className="flex items-center justify-center text-purple-500">
-                      <DollarSign className="w-4 h-4" />
-                    </div>
-                    <p className="text-xs text-slate-500 font-medium">Volume</p>
-                    <p className="font-bold text-slate-900">{market.volume}</p>
-                  </div>
-                  <div className="text-center space-y-1">
-                    <div className="flex items-center justify-center text-purple-500">
-                      <Users className="w-4 h-4" />
-                    </div>
-                    <p className="text-xs text-slate-500 font-medium">Traders</p>
-                    <p className="font-bold text-slate-900">{market.participants}</p>
-                  </div>
-                  <div className="text-center space-y-1">
-                    <div className="flex items-center justify-center text-purple-500">
-                      <Activity className="w-4 h-4" />
-                    </div>
-                    <p className="text-xs text-slate-500 font-medium">Liquidity</p>
-                    <p className="font-bold text-green-600">High</p>
-                  </div>
+          {fetchError && (
+            <Card className="border-yellow-200 bg-yellow-50">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <p className="text-yellow-800 font-medium">Unable to fetch blockchain data</p>
+                  <p className="text-sm text-yellow-600 mt-1">
+                    Make sure your wallet is connected and you're on the correct network
+                  </p>
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {predictions.length === 0 && !fetchError && (
+            <Card className="border-gray-200">
+              <CardContent className="pt-6">
+                <div className="text-center py-12">
+                  <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 font-medium">No active markets for {commodityName}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Check back soon or explore other commodities
+                  </p>
+                  <Button asChild className="mt-4">
+                    <Link href={{ pathname: '/market', query: { region } }}>
+                      Browse All Markets
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {predictions.map((prediction) => (
+            <MarketPredictionCard
+              key={prediction.predictionId}
+              prediction={prediction}
+              onStaked={() => {
+                // Refresh page to show updated data
+                // In production, use React Query or similar for automatic updates
+              }}
+            />
           ))}
         </div>
 
-        {/* Market Analysis Tabs - Purple Theme */}
+        {/* Market Analysis Tabs */}
         <div className="mt-12">
           <Tabs defaultValue="analysis" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-purple-100 p-1">
-              <TabsTrigger value="analysis" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1">
+              <TabsTrigger value="analysis">
                 Market Analysis
               </TabsTrigger>
-              <TabsTrigger value="history" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              <TabsTrigger value="history">
                 Price History
               </TabsTrigger>
-              <TabsTrigger value="news" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              <TabsTrigger value="news">
                 Market News
               </TabsTrigger>
             </TabsList>
             <TabsContent value="analysis" className="mt-6">
-              <Card className="border-purple-200">
-                <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50">
-                  <CardTitle className="text-purple-900">Market Analysis</CardTitle>
-                  <CardDescription className="text-purple-600">Expert insights and market trends for {commodity.name}</CardDescription>
+              <Card className="border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-gray-900">Market Analysis</CardTitle>
+                  <CardDescription>Expert insights and market trends for {commodityName}</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
                   <div className="space-y-4">
-                    <div className="p-4 bg-muted/50 rounded-lg">
-                      <h4 className="font-semibold text-foreground mb-2">Current Market Sentiment</h4>
-                      <p className="text-muted-foreground text-pretty">
-                        {commodity.trend === "up"
-                          ? `${commodity.name} markets are showing strong bullish sentiment with increased trading volume and positive price momentum. Quality grades remain stable with strong export demand.`
-                          : `${commodity.name} markets are experiencing some volatility with mixed signals from export data. Traders are closely watching quality grade reports and seasonal factors.`}
+                    <div className="p-4 bg-gray-50 rounded-lg">
+                      <h4 className="font-semibold text-gray-900 mb-2">Current Market Sentiment</h4>
+                      <p className="text-gray-600">
+                        {commodityName} markets are powered by AI predictions and real-time blockchain data. 
+                        Our prediction oracle uses multiple data sources including Alpha Vantage and World Bank 
+                        commodity prices to ensure accuracy.
                       </p>
                     </div>
-                    <div className="p-4 bg-muted/50 rounded-lg">
-                      <h4 className="font-semibold text-foreground mb-2">Key Factors to Watch</h4>
-                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        <li>Seasonal harvest patterns and weather conditions</li>
-                        <li>Export board quality grade certifications</li>
-                        <li>International demand and shipping logistics</li>
-                        <li>Currency fluctuations affecting export pricing</li>
+                    <div className="p-4 bg-gray-50 rounded-lg">
+                      <h4 className="font-semibold text-gray-900 mb-2">How It Works</h4>
+                      <ul className="list-disc list-inside text-gray-600 space-y-1">
+                        <li>AI generates price predictions using advanced models</li>
+                        <li>Predictions are submitted on-chain to Polygon network</li>
+                        <li>Traders stake USDC on YES or NO outcomes</li>
+                        <li>Oracle automatically resolves using real market data</li>
+                        <li>Winners claim payouts directly to their wallets</li>
                       </ul>
                     </div>
                   </div>
@@ -661,48 +575,48 @@ export default function CommodityPage({ params }: PageProps) {
               </Card>
             </TabsContent>
             <TabsContent value="history" className="mt-6">
-              <Card className="border-purple-200">
-                <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50">
-                  <CardTitle className="text-purple-900">Price History</CardTitle>
-                  <CardDescription className="text-purple-600">Historical price data and market performance</CardDescription>
+              <Card className="border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-gray-900">Price History</CardTitle>
+                  <CardDescription>Historical price data from real market sources</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
-                  <div className="h-64 flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg border-2 border-dashed border-purple-200">
+                  <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
                     <div className="text-center">
-                      <BarChart3 className="w-12 h-12 text-purple-400 mx-auto mb-2" />
-                      <p className="text-purple-600 font-medium">Price chart integration coming soon</p>
-                      <p className="text-sm text-purple-500">Will display historical data from market oracles</p>
+                      <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-600 font-medium">Price chart coming soon</p>
+                      <p className="text-sm text-gray-500">Will display Alpha Vantage historical data</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
             <TabsContent value="news" className="mt-6">
-              <Card className="border-purple-200">
-                <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50">
-                  <CardTitle className="text-purple-900">Market News</CardTitle>
-                  <CardDescription className="text-purple-600">Latest updates affecting {commodity.name} markets</CardDescription>
+              <Card className="border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-gray-900">Market News</CardTitle>
+                  <CardDescription>Latest updates affecting {commodityName} markets</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
                   <div className="space-y-4">
-                    <div className="p-4 border-l-4 border-purple-500 bg-purple-50 rounded-r-lg">
-                      <p className="font-semibold text-slate-900">Export Board Updates</p>
-                      <p className="text-sm text-slate-600 mt-1">
-                        Latest quality grade certifications and export volume reports from regional boards.
+                    <div className="p-4 border-l-4 border-green-500 bg-green-50 rounded-r-lg">
+                      <p className="font-semibold text-gray-900">Real-Time Data Integration</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Platform now uses Alpha Vantage and World Bank APIs for accurate price data.
                       </p>
-                      <p className="text-xs text-purple-600 mt-2 flex items-center gap-1">
+                      <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        2 hours ago
+                        Live
                       </p>
                     </div>
-                    <div className="p-4 border-l-4 border-indigo-500 bg-indigo-50 rounded-r-lg">
-                      <p className="font-semibold text-slate-900">Seasonal Forecast</p>
-                      <p className="text-sm text-slate-600 mt-1">
-                        Weather patterns and harvest predictions affecting {commodity.name.toLowerCase()} production.
+                    <div className="p-4 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg">
+                      <p className="font-semibold text-gray-900">Oracle Resolution Service</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Automated oracle service now resolves predictions using actual market prices.
                       </p>
-                      <p className="text-xs text-indigo-600 mt-2 flex items-center gap-1">
+                      <p className="text-xs text-blue-600 mt-2 flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        6 hours ago
+                        Active
                       </p>
                     </div>
                   </div>
@@ -712,15 +626,6 @@ export default function CommodityPage({ params }: PageProps) {
           </Tabs>
         </div>
       </main>
-
-      {selectedMarket && (
-        <TradingModal
-          isOpen={isTradeModalOpen}
-          onClose={() => setIsTradeModalOpen(false)}
-          market={selectedMarket}
-          commodity={commodity.name}
-        />
-      )}
     </div>
   )
 }

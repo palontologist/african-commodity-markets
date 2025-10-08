@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAccount, useSigner } from 'wagmi'
+import { useAccount } from 'wagmi'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -175,7 +175,7 @@ export function PredictionStakingModal({ open, onOpenChange, prediction }: Predi
               <div>
                 <p className="text-sm text-muted-foreground mb-2">AI Confidence</p>
                 <Progress value={Number(prediction.confidence)} className="h-2" />
-                <p className="text-xs text-muted-foreground mt-1">{prediction.confidence}% confident</p>
+                <p className="text-xs text-muted-foreground mt-1">{Number(prediction.confidence)}% confident</p>
               </div>
             </div>
           </CardContent>
