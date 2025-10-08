@@ -10,7 +10,13 @@ const nextConfig = {
     unoptimized: true,
   },
   experimental: {
-    serverComponentsExternalPackages: ["@libsql/client"]
+    serverComponentsExternalPackages: ["@libsql/client"],
+    serverActions: {
+      allowedOrigins: [
+        'localhost:3000',
+        '*.app.github.dev'
+      ]
+    }
   }
 }
 

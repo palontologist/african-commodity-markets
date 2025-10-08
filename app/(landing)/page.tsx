@@ -3,9 +3,6 @@
 import Link from 'next/link'
 import { ArrowRight, TrendingUp, Users, Shield, BarChart3, Globe, Sparkles } from 'lucide-react'
 
-// Force dynamic rendering for client component
-export const dynamic = 'force-dynamic'
-
 export default function LandingPage() {
   return (
     <div className="relative min-h-screen w-full bg-slate-50">
@@ -69,10 +66,7 @@ export default function LandingPage() {
           {/* Hero Content */}
           <div className="relative z-10 text-center px-4">
             <div className="max-w-4xl mx-auto">
-              <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium">
-                <Sparkles className="h-4 w-4 text-green-400" />
-                <span>AI-Powered Price Predictions</span>
-              </div>
+              
               
               <h1 className="text-5xl font-bold leading-tight tracking-tight text-white sm:text-6xl lg:text-7xl mb-6">
                 Predicting the Future of
