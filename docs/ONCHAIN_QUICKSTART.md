@@ -1,7 +1,7 @@
 # 🚀 On-Chain AI Prediction Marketplace - Quick Start
 
 **Status**: Smart contract ready for deployment  
-**Network**: Polygon Mumbai Testnet  
+**Network**: Polygon Amoy Testnet (Mumbai deprecated)  
 **Focus**: AI price predictions with on-chain staking
 
 ---
@@ -28,12 +28,13 @@ A production-ready Solidity contract that:
 ## 🛠️ Setup Instructions
 
 ### Step 1: Get Test MATIC
-You need MATIC tokens to deploy and interact with the contract on Mumbai testnet.
+You need MATIC tokens to deploy and interact with the contract on Amoy testnet.
 
 ```bash
-# Visit Mumbai Faucet
+# Visit Polygon Faucet
 https://faucet.polygon.technology/
 
+# Select "Amoy Testnet"
 # Enter your wallet address
 # Receive 0.5 MATIC (enough for ~100 transactions)
 ```
@@ -42,12 +43,12 @@ https://faucet.polygon.technology/
 Users need USDC to stake on predictions.
 
 ```bash
-# Mumbai USDC Address (already in contract)
-0x0FA8781a83E46826621b3BC094Ea2A0212e71B23
+# Amoy USDC Address (Circle's official test USDC)
+0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582
 
 # Get test USDC from:
 https://faucet.circle.com/ (if available)
-# OR use Uniswap Mumbai to swap MATIC → USDC
+# OR use a testnet DEX to swap MATIC → USDC
 ```
 
 ### Step 3: Set Up Environment Variables
@@ -57,10 +58,10 @@ https://faucet.circle.com/ (if available)
 cp .env.example .env.local
 
 # Edit .env.local and add:
-POLYGON_MUMBAI_RPC="https://rpc-mumbai.maticvigil.com"
+POLYGON_AMOY_RPC="https://rpc-amoy.polygon.technology"
 PRIVATE_KEY="your-metamask-private-key-here"  # ⚠️ Use a test wallet!
 POLYGONSCAN_API_KEY="your-polygonscan-api-key"
-USDC_ADDRESS="0x0FA8781a83E46826621b3BC094Ea2A0212e71B23"
+USDC_ADDRESS="0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582"
 ```
 
 **⚠️ Important**: 
@@ -79,15 +80,15 @@ Expected output:
 Compiled 1 Solidity file successfully
 ```
 
-### Step 5: Deploy to Mumbai
+### Step 5: Deploy to Amoy
 
 ```bash
-npx hardhat run scripts/deploy-prediction-market.ts --network mumbai
+npx hardhat run scripts/deploy-prediction-market.ts --network amoy
 ```
 
 Expected output:
 ```
-🚀 Deploying AIPredictionMarket to Polygon Mumbai...
+🚀 Deploying AIPredictionMarket to Polygon Amoy...
 
 Deploying with account: 0x...
 Account balance: 0.5 MATIC
@@ -95,30 +96,30 @@ Account balance: 0.5 MATIC
 ✅ AIPredictionMarket deployed to: 0xYourContractAddress
 
 📋 Contract Details:
-- USDC Token: 0x0FA8781a83E46826621b3BC094Ea2A0212e71B23
+- USDC Token: 0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582
 - Oracle Address: 0x... (your address)
 - Platform Fee: 2%
 - Min Stake: 1 USDC
 
 🔗 View on PolygonScan:
-https://mumbai.polygonscan.com/address/0xYourContractAddress
+https://amoy.polygonscan.com/address/0xYourContractAddress
 ```
 
-### Step 6: Verify Contract
+### Step 6: Verify Contract on PolygonScan (Optional)
 
 ```bash
-npx hardhat verify --network mumbai <CONTRACT_ADDRESS> \
-  "0x0FA8781a83E46826621b3BC094Ea2A0212e71B23" \
+npx hardhat verify --network amoy <CONTRACT_ADDRESS> \
+  "0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582" \
   "<YOUR_WALLET_ADDRESS>"
 ```
 
-###  Step 7: Update Next.js Environment
+### Step 7: Update Next.js Environment
 
 ```bash
 # Add to .env.local
 NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS="0xYourContractAddress"
-NEXT_PUBLIC_USDC_ADDRESS="0x0FA8781a83E46826621b3BC094Ea2A0212e71B23"
-NEXT_PUBLIC_CHAIN_ID="80001"
+NEXT_PUBLIC_USDC_ADDRESS="0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582"
+NEXT_PUBLIC_CHAIN_ID="80002"
 ```
 
 ---
@@ -267,8 +268,8 @@ function getPosition(uint256 predictionId, address user) returns (UserPosition)
 - [ ] Claim winnings
 - [ ] Check fee collection
 
-### Mumbai Testnet Testing
-- [ ] Deploy to Mumbai
+### Amoy Testnet Testing
+- [ ] Deploy to Amoy
 - [ ] Verify on PolygonScan
 - [ ] Create real prediction from Groq
 - [ ] Stake with test USDC
@@ -342,8 +343,8 @@ function getPosition(uint256 predictionId, address user) returns (UserPosition)
 
 - [Hardhat Docs](https://hardhat.org/docs)
 - [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/)
-- [Polygon Mumbai Faucet](https://faucet.polygon.technology/)
-- [PolygonScan Mumbai](https://mumbai.polygonscan.com/)
+- [Polygon Amoy Faucet](https://faucet.polygon.technology/)
+- [PolygonScan Amoy](https://amoy.polygonscan.com/)
 - [ethers.js Docs](https://docs.ethers.org/)
 
 ---
@@ -351,9 +352,9 @@ function getPosition(uint256 predictionId, address user) returns (UserPosition)
 ## 🎯 Contract Addresses (Save After Deployment)
 
 ```bash
-# Mumbai Testnet
+# Amoy Testnet
 PREDICTION_MARKET=0x...
-USDC=0x0FA8781a83E46826621b3BC094Ea2A0212e71B23
+USDC=0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582
 
 # Polygon Mainnet (future)
 PREDICTION_MARKET=0x...

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generatePrediction } from '@/lib/agents'
+import { submitPredictionToBlockchain } from '@/lib/blockchain/server'
 import type { CommoditySymbol } from '@/lib/live-prices'
 import { z } from 'zod'
 
@@ -59,10 +60,43 @@ export async function POST(request: NextRequest) {
       horizon: params.horizon
     })
     
+    // Submit to blockchain
+    let blockchainData = null
+    if (process.env.PRIVATE_KEY && process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS) {
+      console.log('📦 Submitting prediction to blockchain...')
+      
+      // Calculate target date based on horizon
+      const now = new Date()
+      let targetDate = new Date(now)
+      switch (params.horizon) {
+        case 'SHORT_TERM':
+          targetDate.setDate(now.getDate() + 7) // 7 days
+          break
+        case 'MEDIUM_TERM':
+          targetDate.setDate(now.getDate() + 30) // 30 days
+          break
+        case 'LONG_TERM':
+          targetDate.setDate(now.getDate() + 90) // 90 days
+          break
+      }
+      
+      blockchainData = await submitPredictionToBlockchain({
+        commodity: params.symbol,
+        currentPrice: Math.round((prediction.currentPrice || 0) * 100), // Convert to cents
+        predictedPrice: Math.round(prediction.predictedPrice * 100), // Convert to cents
+        targetDate,
+        confidence: prediction.confidence,
+        model: 'qwen/qwen3-32b'
+      })
+    }
+    
     // Return successful response
     return NextResponse.json({
       success: true,
-      data: prediction,
+      data: {
+        ...prediction,
+        blockchain: blockchainData
+      },
       metadata: {
         timestamp: new Date().toISOString(),
         symbol: params.symbol,
