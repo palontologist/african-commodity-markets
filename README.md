@@ -188,6 +188,32 @@ The application is configured for deployment on platforms like Vercel, Netlify, 
 2. Add environment variables in Vercel dashboard
 3. Deploy with automatic builds on push
 
+## Roadmap
+
+### Current Phase: Web2.5 Hybrid Platform (January 2026)
+We're building towards a multi-chain architecture combining Solana (speed & mobile) with Polygon (AI & enterprise). See our detailed roadmap:
+
+📍 **[Multi-Chain Implementation Roadmap](docs/MULTICHAIN_ROADMAP.md)** - 5-week plan to dual hackathon submission
+
+**Key Milestones**:
+- ✅ **Week 0** (Completed): Real data integration (Alpha Vantage + World Bank APIs)
+- ✅ **Week 0** (Completed): AI predictions with Groq (qwen/qwen3-32b)
+- 🔄 **Week 1**: Solana oracle + AMM programs (Rust/Anchor)
+- 🔄 **Week 2**: Polygon prediction markets + NFTs (Solidity)
+- ⏳ **Week 3**: Wormhole cross-chain bridge + mobile app
+- ⏳ **Week 4**: Full Web2.5 integration (Next.js ↔ Blockchain)
+- ⏳ **Week 5**: Testing, documentation, demo videos
+
+**Target**: Submissions to Solana Cypherpunk + Polygon Buildathon (February 2026)
+
+### Strategic Alignment
+Our development follows the [Whitepaper Alignment Plan](docs/WHITEPAPER_ALIGNMENT.md):
+- **Phase 1** (✅ Complete): Real data & AI predictions
+- **Phase 2** (Current): Settlement system & blockchain integration
+- **Phase 3** (Q1 2026): Tokenization ($AFF token + RWA NFTs)
+- **Phase 4** (Q2 2026): Cross-chain expansion (Wormhole)
+- **Phase 5** (Q3 2026): Multi-language & 20+ commodities
+
 ## Contributing
 
 1. Fork the repository
@@ -195,6 +221,11 @@ The application is configured for deployment on platforms like Vercel, Netlify, 
 3. Make your changes
 4. Add tests if applicable
 5. Submit a pull request
+
+For blockchain development, see:
+- [Solana Guide](docs/SOLANA_GUIDE.md) (coming soon)
+- [Polygon Guide](docs/POLYGON_GUIDE.md) (coming soon)
+- [Multi-Chain Roadmap](docs/MULTICHAIN_ROADMAP.md)
 
 ## License
 
