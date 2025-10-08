@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { listRecentPredictions } from '@/lib/db/predictions'
 import { z } from 'zod'
 
+// Mark this route as dynamic (not static)
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 /**
  * Query parameters validation schema
  */

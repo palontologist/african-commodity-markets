@@ -3,6 +3,9 @@
 import Link from 'next/link'
 import { ArrowRight, TrendingUp, Users, Shield, BarChart3, Globe, Sparkles } from 'lucide-react'
 
+// Force dynamic rendering for client component
+export const dynamic = 'force-dynamic'
+
 export default function LandingPage() {
   return (
     <div className="relative min-h-screen w-full bg-slate-50">
