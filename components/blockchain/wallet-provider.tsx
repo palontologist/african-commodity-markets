@@ -5,7 +5,7 @@ import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { WagmiProvider } from 'wagmi'
 import { polygonAmoy, polygon } from 'wagmi/chains'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
-import { ReactNode } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 
 const config = getDefaultConfig({
   appName: 'Afrifutures - African Commodity Markets',
@@ -17,6 +17,17 @@ const config = getDefaultConfig({
 const queryClient = new QueryClient()
 
 export function BlockchainProvider({ children }: { children: ReactNode }) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Prevent SSR hydration issues by only rendering blockchain components on client
+  if (!mounted) {
+    return <>{children}</>
+  }
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
