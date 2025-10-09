@@ -1,3 +1,5 @@
+'use client'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -9,8 +11,44 @@ import { notFound } from "next/navigation"
 import { MarketPredictionCard } from "@/components/blockchain/market-prediction-card"
 import { getPrediction, type OnChainPrediction } from "@/lib/blockchain/polygon-client"
 import { getLivePrice, type CommoditySymbol } from "@/lib/live-prices"
+import { useState, useEffect } from "react"
 
+export const dynamic = 'force-dynamic'
 
+// Type definitions
+interface Market {
+  id: number
+  question: string
+  yesPrice: number
+  noPrice: number
+  volume: string
+  participants: number
+  deadline: string
+  description: string
+}
+
+interface QualityInfo {
+  grades: string[]
+  standards: string
+  sources: string
+}
+
+interface CommodityData {
+  name: string
+  description: string
+  currentPrice: string
+  change: string
+  trend: 'up' | 'down'
+  volume: string
+  totalVolume: string
+  participants: number
+  grade: string
+  color: string
+  markets: Market[]
+  qualityInfo: QualityInfo
+}
+
+type CommodityDataMap = Record<string, CommodityData>
 
 function formatDate(d: Date) {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
@@ -344,45 +382,53 @@ const COMMODITY_MAP: Record<string, CommoditySymbol> = {
   'macadamia': 'CASHEW', // Fallback
 }
 
-// Server Component - Fetch blockchain data
-export default async function CommodityPage({ params, searchParams }: PageProps) {
+// Client Component - Fetch blockchain data on mount
+export default function CommodityPage({ params, searchParams }: PageProps) {
   const commodityKey = params.commodity.toLowerCase()
   const region = searchParams.region?.toUpperCase() === 'LATAM' ? 'LATAM' : 'AFRICA'
   const commoditySymbol = COMMODITY_MAP[commodityKey] || 'COFFEE'
   
-  // Fetch live price from real APIs
-  let livePrice: { price: number; unit?: string; source: string } | null = null
-  try {
-    const priceData = await getLivePrice(commoditySymbol, region as any)
-    livePrice = {
-      price: priceData.price,
-      unit: 'kg', // Default unit
-      source: priceData.source
-    }
-  } catch (error) {
-    console.error('Failed to fetch live price:', error)
-  }
+  const [livePrice, setLivePrice] = useState<{ price: number; unit?: string; source: string } | null>(null)
+  const [predictions, setPredictions] = useState<OnChainPrediction[]>([])
+  const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(false)
 
-  // Fetch blockchain predictions for this commodity
-  const predictions: OnChainPrediction[] = []
-  let fetchError = false
-  
-  // Try to fetch predictions 0-20 (most recent)
-  for (let i = 0; i < 20; i++) {
-    try {
-      const prediction = await getPrediction(i)
-      // Filter by commodity
-      if (prediction.commodity.toLowerCase() === commodityKey.toLowerCase()) {
-        predictions.push(prediction)
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // Fetch live price
+        const priceData = await getLivePrice(commoditySymbol, region as any)
+        setLivePrice({
+          price: priceData.price,
+          unit: 'kg',
+          source: priceData.source
+        })
+
+        // Fetch blockchain predictions
+        const fetchedPredictions: OnChainPrediction[] = []
+        for (let i = 0; i < 20; i++) {
+          try {
+            const prediction = await getPrediction(i)
+            if (prediction.commodity.toLowerCase() === commodityKey.toLowerCase()) {
+              fetchedPredictions.push(prediction)
+            }
+          } catch (error) {
+            if (i === 0) {
+              console.error('Failed to fetch predictions:', error)
+              setFetchError(true)
+            }
+            break
+          }
+        }
+        setPredictions(fetchedPredictions)
+      } catch (error) {
+        console.error('Failed to fetch data:', error)
+      } finally {
+        setLoading(false)
       }
-    } catch (error) {
-      // Prediction doesn't exist or error fetching
-      if (i === 0) {
-        fetchError = true
-      }
-      break
     }
-  }
+    fetchData()
+  }, [commodityKey, commoditySymbol, region])
 
   const TrendIcon = livePrice && livePrice.price > 0 ? TrendingUp : TrendingDown
   const commodityName = commodityKey.charAt(0).toUpperCase() + commodityKey.slice(1)

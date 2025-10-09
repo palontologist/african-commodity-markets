@@ -1,3 +1,5 @@
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -7,37 +9,51 @@ import { TrendingUp, TrendingDown, Activity, Users, Clock, DollarSign, ArrowRigh
 import { getPrediction, type OnChainPrediction } from "@/lib/blockchain/polygon-client"
 import { MarketPredictionCard } from "@/components/blockchain/market-prediction-card"
 import { getLivePrice, type CommoditySymbol } from "@/lib/live-prices"
+import { useState, useEffect } from "react"
 
-// Disable static generation for pages using blockchain wallet
 export const dynamic = 'force-dynamic'
 
-export default async function HomePage() {
-  // Fetch recent on-chain predictions
-  const predictions: OnChainPrediction[] = []
-  
-  // Try to fetch predictions 0-10 (most recent)
-  for (let i = 0; i < 10; i++) {
-    try {
-      const prediction = await getPrediction(i)
-      predictions.push(prediction)
-    } catch (error) {
-      // Prediction doesn't exist or error fetching
-      break
-    }
-  }
+export default function HomePage() {
+  const [predictions, setPredictions] = useState<OnChainPrediction[]>([])
+  const [livePrices, setLivePrices] = useState<Array<any>>([])
+  const [loading, setLoading] = useState(true)
 
-  // Fetch live prices for key commodities
-  const commoditySymbols: CommoditySymbol[] = ['COFFEE', 'COCOA', 'COTTON', 'GOLD', 'CASHEW', 'RUBBER']
-  const livePrices = await Promise.all(
-    commoditySymbols.map(async (symbol) => {
+  useEffect(() => {
+    async function fetchData() {
       try {
-        const price = await getLivePrice(symbol, 'AFRICA')
-        return { symbol, ...price }
-      } catch {
-        return null
+        // Fetch recent on-chain predictions
+        const fetchedPredictions: OnChainPrediction[] = []
+        for (let i = 0; i < 10; i++) {
+          try {
+            const prediction = await getPrediction(i)
+            fetchedPredictions.push(prediction)
+          } catch (error) {
+            break
+          }
+        }
+        setPredictions(fetchedPredictions)
+
+        // Fetch live prices for key commodities
+        const commoditySymbols: CommoditySymbol[] = ['COFFEE', 'COCOA', 'COTTON', 'GOLD', 'CASHEW', 'RUBBER']
+        const prices = await Promise.all(
+          commoditySymbols.map(async (symbol) => {
+            try {
+              const price = await getLivePrice(symbol, 'AFRICA')
+              return { symbol, ...price }
+            } catch {
+              return null
+            }
+          })
+        )
+        setLivePrices(prices)
+      } catch (error) {
+        console.error('Failed to fetch data:', error)
+      } finally {
+        setLoading(false)
       }
-    })
-  )
+    }
+    fetchData()
+  }, [])
 
   // Group predictions by commodity
   const commodityGroups = predictions.reduce((acc, pred) => {
@@ -195,7 +211,17 @@ export default async function HomePage() {
         </div>
 
         {/* Market Cards */}
-        {predictions.length === 0 ? (
+        {loading ? (
+          <Card className="border-gray-200">
+            <CardContent className="pt-12 pb-12">
+              <div className="text-center">
+                <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4 animate-spin" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading markets...</h3>
+                <p className="text-gray-600">Fetching live data from the blockchain</p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : predictions.length === 0 ? (
           <Card className="border-gray-200">
             <CardContent className="pt-12 pb-12">
               <div className="text-center">
@@ -216,9 +242,6 @@ export default async function HomePage() {
               <MarketPredictionCard
                 key={prediction.predictionId}
                 prediction={prediction}
-                onStaked={() => {
-                  // In production, use React Query to refetch
-                }}
               />
             ))}
           </div>
