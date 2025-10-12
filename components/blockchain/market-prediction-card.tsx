@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { TrendingUp, TrendingDown, Calendar, Users, DollarSign, ArrowUpRight, ArrowDownRight, Trophy } from 'lucide-react'
 import { type OnChainPrediction, getOdds, formatUSDC } from '@/lib/blockchain/polygon-client'
-import { PredictionStakingModal } from './prediction-staking-modal'
+import { StakeModal } from '@/components/markets/stake-modal'
 import { ClaimWinningsButton } from './claim-winnings-button'
 
 interface MarketPredictionCardProps {
@@ -57,6 +57,19 @@ export function MarketPredictionCard({ prediction, onStaked }: MarketPredictionC
 
   // Format question
   const question = `Will ${prediction.commodity} reach $${predictedPrice.toFixed(2)} by ${targetDate.toLocaleDateString()}?`
+  
+  // Convert OnChainPrediction to Market format for StakeModal
+  const marketData = {
+    id: prediction.predictionId,
+    commodity: prediction.commodity,
+    question,
+    thresholdPrice: Number(prediction.predictedPrice),
+    expiryTime: Number(prediction.targetDate) * 1000,
+    yesPool: Number(prediction.yesStakes) / 1e6, // Convert from USDC base units
+    noPool: Number(prediction.noStakes) / 1e6,
+    chain: 'polygon' as const, // Default to polygon, could be dynamic
+    resolved: prediction.resolved,
+  }
 
   return (
     <>
@@ -217,10 +230,15 @@ export function MarketPredictionCard({ prediction, onStaked }: MarketPredictionC
       </Card>
 
       {/* Staking Modal */}
-      <PredictionStakingModal
+      <StakeModal
+        market={marketData}
         open={showStakingModal}
         onOpenChange={setShowStakingModal}
-        prediction={prediction}
+        onSuccess={() => {
+          setShowStakingModal(false)
+          loadOdds()
+          onStaked?.()
+        }}
       />
     </>
   )
