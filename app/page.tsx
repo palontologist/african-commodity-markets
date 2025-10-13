@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { AppHeader } from "@/components/app-header"
-import { NavButton } from "@/components/ui/nav-button"
+import { StakeModal } from "@/components/markets/stake-modal"
 import Link from "next/link"
 import { TrendingUp, TrendingDown, Activity, DollarSign, Coffee, Leaf, Apple, Nut, Flower2, Palmtree } from "lucide-react"
 import { getPrediction, type OnChainPrediction } from "@/lib/blockchain/polygon-client"
@@ -83,6 +83,8 @@ export default function HomePage() {
   const [predictions, setPredictions] = useState<OnChainPrediction[]>([])
   const [livePrices, setLivePrices] = useState<Record<string, any>>({})
   const [loading, setLoading] = useState(true)
+  const [stakeModalOpen, setStakeModalOpen] = useState(false)
+  const [selectedMarket, setSelectedMarket] = useState<any>(null)
 
   useEffect(() => {
     async function fetchData() {
@@ -139,6 +141,28 @@ export default function HomePage() {
   const totalActiveMarkets = filteredCommodities.length * 3 // Average 3 markets per commodity
   const totalVolume = predictions.reduce((sum, p) => sum + Number(p.yesStakes + p.noStakes), 0)
   const avgReturn = selectedRegion === 'AFRICA' ? '+14.7%' : '+11.3%'
+
+  // Handle opening stake modal with market data
+  const handleStakeClick = (commodity: typeof COMMODITY_DATA[0]) => {
+    const priceData = livePrices[commodity.id]
+    const currentPrice = priceData?.price || 0
+    
+    // Create a market object for the stake modal
+    const market = {
+      id: `market-${commodity.id}-${Date.now()}`,
+      commodity: commodity.symbol,
+      question: `Will ${commodity.name} reach $${(currentPrice * 1.15).toFixed(2)} by December 31, 2025?`,
+      thresholdPrice: Math.round(currentPrice * 1.15 * 100), // 15% increase as threshold
+      expiryTime: new Date('2025-12-31').getTime(),
+      yesPool: Math.random() * 100 + 50, // Mock pool data
+      noPool: Math.random() * 75 + 25,
+      chain: 'polygon' as const, // Default to Polygon, can be changed
+      resolved: false,
+    }
+    
+    setSelectedMarket(market)
+    setStakeModalOpen(true)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -343,11 +367,12 @@ export default function HomePage() {
 
                     {/* Action Buttons */}
                     <div className="pt-2 border-t">
-                                            <div className="flex space-x-2">
-                        <Button asChild className="flex-1">
-                          <Link 
-                          href={`/marketplace/${commodity.id}?region=${selectedRegion}`} 
-                          >Trade Now</Link>
+                      <div className="flex space-x-2">
+                        <Button 
+                          onClick={() => handleStakeClick(commodity)}
+                          className="flex-1"
+                        >
+                          Stake Now
                         </Button>
                         <Button asChild variant="outline">
                           <Link 
@@ -386,6 +411,20 @@ export default function HomePage() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Stake Modal */}
+      {selectedMarket && (
+        <StakeModal
+          market={selectedMarket}
+          open={stakeModalOpen}
+          onOpenChange={setStakeModalOpen}
+          onSuccess={() => {
+            console.log('Stake successful!')
+            // Refresh data after successful stake
+            // You can add logic here to refetch predictions and prices
+          }}
+        />
+      )}
     </div>
   )
 }
