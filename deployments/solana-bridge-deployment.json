@@ -1,0 +1,38 @@
+{
+  "deployment": {
+    "timestamp": "2025-10-13T09:22:05Z",
+    "network": "devnet",
+    "status": "success"
+  },
+  "solana": {
+    "programId": "4kXhKyaVrRq2M1XmfwnhskKn32puw5xiE9jQPQ9RXvmK",
+    "bridgeState": "HD7dAfQybQVjAG34mZmUt3L62j8TU5oJdQkJSEi9qXK8",
+    "authority": "6NFLxHeUT7LVya1Zx2NYCG6V3Fzh37W81dGqVsn924nQ",
+    "initializationTx": "3Fy6fncrrEG7LfK92q2QMNMbfDp3PDTjQeTwTYJG7L9WRwV1zUjVbtDa9sBrLjahyzBTmhoUX2d5VDBbaTUuhnQd",
+    "network": "devnet",
+    "slot": 414256458,
+    "feePaid": "0.000005 SOL",
+    "links": {
+      "program": "https://explorer.solana.com/address/4kXhKyaVrRq2M1XmfwnhskKn32puw5xiE9jQPQ9RXvmK?cluster=devnet",
+      "bridgeState": "https://explorer.solana.com/address/HD7dAfQybQVjAG34mZmUt3L62j8TU5oJdQkJSEi9qXK8?cluster=devnet",
+      "initTx": "https://explorer.solana.com/tx/3Fy6fncrrEG7LfK92q2QMNMbfDp3PDTjQeTwTYJG7L9WRwV1zUjVbtDa9sBrLjahyzBTmhoUX2d5VDBbaTUuhnQd?cluster=devnet"
+    }
+  },
+  "polygon": {
+    "bridgeContract": "0x3FC085a0e6a6A8898e6430A1b0a0cfFEFa663ba9",
+    "affToken": "0x09Cd30910955C21F9bfC5819c6C8521ed1DD70Df",
+    "usdcToken": "0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582",
+    "wormholeCore": "0x0CBE91CF822c73C2315FB05100C2F714765d5c20",
+    "deployer": "0x95432C47b65A381B2bC43779Fd97e5017f39aB82",
+    "network": "polygon-amoy",
+    "links": {
+      "bridge": "https://amoy.polygonscan.com/address/0x3FC085a0e6a6A8898e6430A1b0a0cfFEFa663ba9",
+      "affToken": "https://amoy.polygonscan.com/address/0x09Cd30910955C21F9bfC5819c6C8521ed1DD70Df"
+    }
+  },
+  "configuration": {
+    "polygonEmitter": "0000000000000000000000003FC085a0e6a6A8898e6430A1b0a0cfFEFa663ba9",
+    "bridgeFee": "0.01 MATIC",
+    "relayerFee": "0.005 MATIC"
+  }
+}

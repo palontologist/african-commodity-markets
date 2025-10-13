@@ -3,7 +3,8 @@
 import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { WalletConnect } from './wallet-connect'
+import { WalletConnect } from './unified-wallet-connect'
+import { ChainSelector } from './blockchain/chain-selector'
 
 export function AppHeader() {
   const [hasAuth, setHasAuth] = useState(true) // Default to true for build
@@ -52,6 +53,7 @@ export function AppHeader() {
         </div>
         
         <div className="flex items-center space-x-4">
+          <ChainSelector />
           <WalletConnect />
           {hasAuth ? (
             <>

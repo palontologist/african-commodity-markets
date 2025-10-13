@@ -4,6 +4,8 @@ import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import { AuthProvider } from '@/components/auth-provider'
 import { BlockchainProvider } from '@/components/blockchain/wallet-provider'
+import { SolanaWalletProvider } from '@/components/blockchain/solana-wallet-provider'
+import { ChainProvider } from '@/components/blockchain/chain-provider'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -21,9 +23,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <AuthProvider>
-          <BlockchainProvider>
-            {children}
-          </BlockchainProvider>
+          <ChainProvider>
+            <BlockchainProvider>
+              <SolanaWalletProvider>
+                {children}
+              </SolanaWalletProvider>
+            </BlockchainProvider>
+          </ChainProvider>
         </AuthProvider>
         <Analytics />
       </body>

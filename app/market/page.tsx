@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TrendingUp, TrendingDown, Coffee, Leaf, Apple, Nut } from "lucide-react"
 import { AppHeader } from "@/components/app-header"
+import { NavButton } from '@/components/ui/nav-button'
 import Link from "next/link"
 import { getLivePrice, type Region, type CommoditySymbol } from "@/lib/live-prices"
 
@@ -261,12 +262,13 @@ export default async function MarketsPage({
                         <span className="text-sm font-medium text-foreground">{commodity.nextSettlement}</span>
                       </div>
                       <div className="flex space-x-2">
-                        <Button asChild className="flex-1">
-                          <Link href={{ pathname: `/market/${commodity.id}`, query: { region } }}>Trade Now</Link>
-                        </Button>
-                        <Button variant="outline" asChild>
-                          <Link href={{ pathname: `/market/${commodity.id}`, query: { region } }}>View Details</Link>
-                        </Button>
+                        {/* Use client-side NavButton to force navigation when third-party UI may capture clicks */}
+                        <NavButton href={`/market/${commodity.id}?region=${region}`} className="flex-1">
+                          Trade Now
+                        </NavButton>
+                        <NavButton href={`/market/${commodity.id}?region=${region}`} variant="outline">
+                          View Details
+                        </NavButton>
                       </div>
                     </div>
                   </CardContent>

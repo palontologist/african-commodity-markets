@@ -11,7 +11,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx lib/db/seed-script.ts"
+    "db:seed": "tsx lib/db/seed-script.ts",
+    "seed:markets": "tsx scripts/seed-markets.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.32.0",
@@ -47,6 +48,13 @@
     "@radix-ui/react-toggle-group": "1.1.1",
     "@radix-ui/react-tooltip": "1.1.6",
     "@rainbow-me/rainbowkit": "^2.2.8",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-react": "^0.15.35",
+    "@solana/wallet-adapter-react-ui": "^0.9.35",
+    "@solana/wallet-adapter-wallets": "^0.19.32",
+    "@solana/web3.js": "^1.95.8",
+    "@solana/spl-token": "^0.4.9",
+    "@coral-xyz/anchor": "^0.30.1",
     "@tanstack/react-query": "^5.90.2",
     "@types/jsonwebtoken": "^9.0.10",
     "@vercel/analytics": "latest",
@@ -97,6 +105,6 @@
     "tailwindcss": "^4.1.9",
     "tsx": "^4.20.5",
     "tw-animate-css": "1.3.3",
-    "typescript": "^5"
+    "typescript": "^5.4.5"
   }
 }

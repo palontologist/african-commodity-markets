@@ -26,7 +26,15 @@ export default function HomePage() {
         for (let i = 0; i < 10; i++) {
           try {
             const prediction = await getPrediction(i)
-            fetchedPredictions.push(prediction)
+            // Filter out invalid/empty predictions
+            if (
+              prediction.commodity && 
+              prediction.commodity !== '' &&
+              Number(prediction.predictedPrice) > 0 &&
+              Number(prediction.targetDate) > 0
+            ) {
+              fetchedPredictions.push(prediction)
+            }
           } catch (error) {
             break
           }
@@ -242,6 +250,19 @@ export default function HomePage() {
               <MarketPredictionCard
                 key={prediction.predictionId}
                 prediction={prediction}
+                onStaked={async () => {
+                  // Refresh predictions after staking
+                  try {
+                    const updatedPrediction = await getPrediction(prediction.predictionId)
+                    setPredictions(prev => 
+                      prev.map(p => 
+                        p.predictionId === prediction.predictionId ? updatedPrediction : p
+                      )
+                    )
+                  } catch (error) {
+                    console.error('Failed to refresh prediction:', error)
+                  }
+                }}
               />
             ))}
           </div>

@@ -166,7 +166,7 @@ async function main() {
 main()
 ```
 
-### 2. Deploy Solana Bridge Program
+m### 2. Deploy Solana Bridge Program
 
 ```bash
 cd afrifutures/programs/wormhole-bridge

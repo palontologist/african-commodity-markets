@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount, Transfer};
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("4kXhKyaVrRq2M1XmfwnhskKn32puw5xiE9jQPQ9RXvmK");
 
 /// Solana side of Afrifutures Wormhole Bridge (Simplified for Playground)
 /// This version works without wormhole-anchor-sdk for easier deployment

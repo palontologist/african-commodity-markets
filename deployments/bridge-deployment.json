@@ -1,0 +1,11 @@
+{
+  "network": "polygon-amoy",
+  "affToken": "0x09Cd30910955C21F9bfC5819c6C8521ed1DD70Df",
+  "bridgeAddress": "0x3FC085a0e6a6A8898e6430A1b0a0cfFEFa663ba9",
+  "wormholeCore": "0x0CBE91CF822c73C2315FB05100C2F714765d5c20",
+  "usdc": "0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582",
+  "deployer": "0x95432C47b65A381B2bC43779Fd97e5017f39aB82",
+  "timestamp": "2025-10-13T05:45:56.313Z",
+  "bridgeFee": "0.01",
+  "relayerFee": "0.005"
+}
