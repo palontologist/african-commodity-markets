@@ -22,8 +22,8 @@ export function AppHeader() {
             African Commodity Markets
           </Link>
           <nav className="hidden md:flex space-x-4">
-            <Link href="/market" className="text-gray-600 hover:text-gray-900">
-              Markets
+            <Link href="/marketplace" className="text-gray-600 hover:text-gray-900">
+              Marketplace
             </Link>
             <Link href="/grades" className="text-gray-600 hover:text-gray-900">
               Grades

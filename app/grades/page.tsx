@@ -274,7 +274,7 @@ export default function QualityGradesPage() {
                         </div>
 
                         <Button asChild className="w-full">
-                          <Link href={`/market/${key}`}>View {commodity.name.split(" ")[0]} Markets</Link>
+                          <Link href={`/marketplace/${key}`}>View {commodity.name.split(" ")[0]} Markets</Link>
                         </Button>
                       </CardContent>
                     </Card>
@@ -341,7 +341,7 @@ export default function QualityGradesPage() {
                   <Link href="/">Explore Markets</Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <Link href="/market/tea">Start with Tea</Link>
+                  <Link href="/marketplace/tea">Start with Tea</Link>
                 </Button>
               </div>
             </CardContent>
