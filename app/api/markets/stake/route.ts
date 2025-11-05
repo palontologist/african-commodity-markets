@@ -9,6 +9,41 @@ const stakeSchema = z.object({
   walletAddress: z.string(),
 })
 
+// Helper function to log stake processing details (only in development)
+function logStakeDetails(chain: string, data: z.infer<typeof stakeSchema>) {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Processing ${chain} stake:`, {
+      marketId: data.marketId,
+      amount: data.amount,
+      side: data.side,
+      walletAddress: data.walletAddress,
+    })
+  }
+}
+
+// Helper function to create error response
+function createErrorResponse(error: unknown, fallbackMessage: string, status: number = 500) {
+  const message = error instanceof Error ? error.message : fallbackMessage
+  return NextResponse.json({ message }, { status })
+}
+
+// Helper function to format environment variable name for user-friendly error messages
+function formatEnvVarName(name: string): string {
+  return name
+    .replace('NEXT_PUBLIC_', '')
+    .replace(/_/g, ' ')
+    .toLowerCase()
+}
+
+// Helper function to check and throw error for missing environment variable
+function requireEnvVar(name: string, value: string | undefined): string {
+  if (!value) {
+    console.error(`Missing ${name} environment variable`)
+    throw new Error(`${formatEnvVarName(name)} not configured`)
+  }
+  return value
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -25,15 +60,13 @@ export async function POST(req: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
+        { message: 'Invalid request data', details: error.errors },
         { status: 400 }
       )
     }
 
-    return NextResponse.json(
-      { error: 'Failed to process stake' },
-      { status: 500 }
-    )
+    // Extract error message from Error objects, or use generic fallback
+    return createErrorResponse(error, 'Failed to process stake')
   }
 }
 
@@ -43,17 +76,11 @@ async function handlePolygonStake(data: z.infer<typeof stakeSchema>) {
     const { ethers } = await import('ethers')
     const contractABI = (await import('@/lib/blockchain/AIPredictionMarket.abi.json')).default
 
-    // Get contract address from env
-    const contractAddress = process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS
-    if (!contractAddress) {
-      throw new Error('Contract address not configured')
-    }
+    // Get and validate required environment variables
+    const contractAddress = requireEnvVar('NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS', process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS)
+    const usdcAddress = requireEnvVar('NEXT_PUBLIC_USDC_ADDRESS', process.env.NEXT_PUBLIC_USDC_ADDRESS)
 
-    // Get USDC address
-    const usdcAddress = process.env.NEXT_PUBLIC_USDC_ADDRESS
-    if (!usdcAddress) {
-      throw new Error('USDC address not configured')
-    }
+    logStakeDetails('Polygon', data)
 
     // Create provider (this will be called from client, so user signs)
     // In production, you'd use wagmi/viem for client-side signing
@@ -73,12 +100,9 @@ async function handlePolygonStake(data: z.infer<typeof stakeSchema>) {
         },
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Polygon stake error:', error)
-    return NextResponse.json(
-      { error: error.message || 'Failed to stake on Polygon' },
-      { status: 500 }
-    )
+    return createErrorResponse(error, 'Failed to stake on Polygon')
   }
 }
 
@@ -88,20 +112,14 @@ async function handleSolanaStake(data: z.infer<typeof stakeSchema>) {
     const { Connection, PublicKey, Transaction } = await import('@solana/web3.js')
     const { Program, AnchorProvider, BN } = await import('@coral-xyz/anchor')
 
-    // Get program ID from env
-    const programId = process.env.NEXT_PUBLIC_SOLANA_PREDICTION_PROGRAM_ID
-    if (!programId) {
-      throw new Error('Solana program ID not configured')
-    }
-
-    // Get RPC URL
-    const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com'
+    // Get and validate required environment variables
+    const programId = requireEnvVar('NEXT_PUBLIC_SOLANA_PREDICTION_PROGRAM_ID', process.env.NEXT_PUBLIC_SOLANA_PREDICTION_PROGRAM_ID)
+    const usdcMint = requireEnvVar('NEXT_PUBLIC_SOLANA_USDC_MINT', process.env.NEXT_PUBLIC_SOLANA_USDC_MINT)
     
-    // Get USDC mint
-    const usdcMint = process.env.NEXT_PUBLIC_SOLANA_USDC_MINT
-    if (!usdcMint) {
-      throw new Error('Solana USDC mint not configured')
-    }
+    // Get RPC URL (with default fallback)
+    const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com'
+
+    logStakeDetails('Solana', data)
 
     // Create connection
     const connection = new Connection(rpcUrl, 'confirmed')
@@ -130,11 +148,8 @@ async function handleSolanaStake(data: z.infer<typeof stakeSchema>) {
         },
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Solana stake error:', error)
-    return NextResponse.json(
-      { error: error.message || 'Failed to stake on Solana' },
-      { status: 500 }
-    )
+    return createErrorResponse(error, 'Failed to stake on Solana')
   }
 }
