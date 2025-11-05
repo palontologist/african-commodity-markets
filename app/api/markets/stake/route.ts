@@ -22,9 +22,18 @@ function logStakeDetails(chain: string, data: z.infer<typeof stakeSchema>) {
 }
 
 // Helper function to create error response
-function createErrorResponse(error: any, fallbackMessage: string) {
+function createErrorResponse(error: any, fallbackMessage: string, status: number = 500) {
   const message = error?.message || fallbackMessage
-  return NextResponse.json({ message }, { status: 500 })
+  return NextResponse.json({ message }, { status })
+}
+
+// Helper function to check and throw error for missing environment variable
+function requireEnvVar(name: string, value: string | undefined): string {
+  if (!value) {
+    console.error(`Missing ${name} environment variable`)
+    throw new Error(`${name.replace('NEXT_PUBLIC_', '').replace(/_/g, ' ').toLowerCase()} not configured`)
+  }
+  return value
 }
 
 export async function POST(req: NextRequest) {
@@ -59,19 +68,9 @@ async function handlePolygonStake(data: z.infer<typeof stakeSchema>) {
     const { ethers } = await import('ethers')
     const contractABI = (await import('@/lib/blockchain/AIPredictionMarket.abi.json')).default
 
-    // Get contract address from env
-    const contractAddress = process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS
-    if (!contractAddress) {
-      console.error('Missing NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS environment variable')
-      throw new Error('Contract address not configured')
-    }
-
-    // Get USDC address
-    const usdcAddress = process.env.NEXT_PUBLIC_USDC_ADDRESS
-    if (!usdcAddress) {
-      console.error('Missing NEXT_PUBLIC_USDC_ADDRESS environment variable')
-      throw new Error('USDC address not configured')
-    }
+    // Get and validate required environment variables
+    const contractAddress = requireEnvVar('NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS', process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS)
+    const usdcAddress = requireEnvVar('NEXT_PUBLIC_USDC_ADDRESS', process.env.NEXT_PUBLIC_USDC_ADDRESS)
 
     logStakeDetails('Polygon', data)
 
@@ -105,22 +104,12 @@ async function handleSolanaStake(data: z.infer<typeof stakeSchema>) {
     const { Connection, PublicKey, Transaction } = await import('@solana/web3.js')
     const { Program, AnchorProvider, BN } = await import('@coral-xyz/anchor')
 
-    // Get program ID from env
-    const programId = process.env.NEXT_PUBLIC_SOLANA_PREDICTION_PROGRAM_ID
-    if (!programId) {
-      console.error('Missing NEXT_PUBLIC_SOLANA_PREDICTION_PROGRAM_ID environment variable')
-      throw new Error('Solana program ID not configured')
-    }
-
-    // Get RPC URL
-    const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com'
+    // Get and validate required environment variables
+    const programId = requireEnvVar('NEXT_PUBLIC_SOLANA_PREDICTION_PROGRAM_ID', process.env.NEXT_PUBLIC_SOLANA_PREDICTION_PROGRAM_ID)
+    const usdcMint = requireEnvVar('NEXT_PUBLIC_SOLANA_USDC_MINT', process.env.NEXT_PUBLIC_SOLANA_USDC_MINT)
     
-    // Get USDC mint
-    const usdcMint = process.env.NEXT_PUBLIC_SOLANA_USDC_MINT
-    if (!usdcMint) {
-      console.error('Missing NEXT_PUBLIC_SOLANA_USDC_MINT environment variable')
-      throw new Error('Solana USDC mint not configured')
-    }
+    // Get RPC URL (with default fallback)
+    const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com'
 
     logStakeDetails('Solana', data)
 
