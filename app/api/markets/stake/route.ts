@@ -100,7 +100,7 @@ async function handlePolygonStake(data: z.infer<typeof stakeSchema>) {
         },
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Polygon stake error:', error)
     return createErrorResponse(error, 'Failed to stake on Polygon')
   }
@@ -148,7 +148,7 @@ async function handleSolanaStake(data: z.infer<typeof stakeSchema>) {
         },
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Solana stake error:', error)
     return createErrorResponse(error, 'Failed to stake on Solana')
   }
