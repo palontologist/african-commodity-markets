@@ -59,12 +59,15 @@ async function handlePolygonStake(data: z.infer<typeof stakeSchema>) {
       throw new Error('USDC address not configured')
     }
 
-    console.log('Processing Polygon stake:', {
-      marketId: data.marketId,
-      amount: data.amount,
-      side: data.side,
-      walletAddress: data.walletAddress,
-    })
+    // Only log in development to avoid exposing sensitive data in production
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Processing Polygon stake:', {
+        marketId: data.marketId,
+        amount: data.amount,
+        side: data.side,
+        walletAddress: data.walletAddress,
+      })
+    }
 
     // Create provider (this will be called from client, so user signs)
     // In production, you'd use wagmi/viem for client-side signing
@@ -116,12 +119,15 @@ async function handleSolanaStake(data: z.infer<typeof stakeSchema>) {
       throw new Error('Solana USDC mint not configured')
     }
 
-    console.log('Processing Solana stake:', {
-      marketId: data.marketId,
-      amount: data.amount,
-      side: data.side,
-      walletAddress: data.walletAddress,
-    })
+    // Only log in development to avoid exposing sensitive data in production
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Processing Solana stake:', {
+        marketId: data.marketId,
+        amount: data.amount,
+        side: data.side,
+        walletAddress: data.walletAddress,
+      })
+    }
 
     // Create connection
     const connection = new Connection(rpcUrl, 'confirmed')
