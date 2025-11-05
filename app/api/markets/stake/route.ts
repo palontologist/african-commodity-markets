@@ -30,8 +30,10 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Return more detailed error for other errors
+    const errorMessage = error instanceof Error ? error.message : 'Failed to process stake'
     return NextResponse.json(
-      { message: 'Failed to process stake' },
+      { message: errorMessage },
       { status: 500 }
     )
   }
@@ -46,14 +48,23 @@ async function handlePolygonStake(data: z.infer<typeof stakeSchema>) {
     // Get contract address from env
     const contractAddress = process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS
     if (!contractAddress) {
+      console.error('Missing NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS environment variable')
       throw new Error('Contract address not configured')
     }
 
     // Get USDC address
     const usdcAddress = process.env.NEXT_PUBLIC_USDC_ADDRESS
     if (!usdcAddress) {
+      console.error('Missing NEXT_PUBLIC_USDC_ADDRESS environment variable')
       throw new Error('USDC address not configured')
     }
+
+    console.log('Processing Polygon stake:', {
+      marketId: data.marketId,
+      amount: data.amount,
+      side: data.side,
+      walletAddress: data.walletAddress,
+    })
 
     // Create provider (this will be called from client, so user signs)
     // In production, you'd use wagmi/viem for client-side signing
@@ -91,6 +102,7 @@ async function handleSolanaStake(data: z.infer<typeof stakeSchema>) {
     // Get program ID from env
     const programId = process.env.NEXT_PUBLIC_SOLANA_PREDICTION_PROGRAM_ID
     if (!programId) {
+      console.error('Missing NEXT_PUBLIC_SOLANA_PREDICTION_PROGRAM_ID environment variable')
       throw new Error('Solana program ID not configured')
     }
 
@@ -100,8 +112,16 @@ async function handleSolanaStake(data: z.infer<typeof stakeSchema>) {
     // Get USDC mint
     const usdcMint = process.env.NEXT_PUBLIC_SOLANA_USDC_MINT
     if (!usdcMint) {
+      console.error('Missing NEXT_PUBLIC_SOLANA_USDC_MINT environment variable')
       throw new Error('Solana USDC mint not configured')
     }
+
+    console.log('Processing Solana stake:', {
+      marketId: data.marketId,
+      amount: data.amount,
+      side: data.side,
+      walletAddress: data.walletAddress,
+    })
 
     // Create connection
     const connection = new Connection(rpcUrl, 'confirmed')
