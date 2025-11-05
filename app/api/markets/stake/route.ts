@@ -9,6 +9,18 @@ const stakeSchema = z.object({
   walletAddress: z.string(),
 })
 
+// Helper function to log stake processing details (only in development)
+function logStakeDetails(chain: string, data: z.infer<typeof stakeSchema>) {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Processing ${chain} stake:`, {
+      marketId: data.marketId,
+      amount: data.amount,
+      side: data.side,
+      walletAddress: data.walletAddress,
+    })
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -30,7 +42,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Return more detailed error for other errors
+    // Extract error message from Error objects, or use generic fallback
     const errorMessage = error instanceof Error ? error.message : 'Failed to process stake'
     return NextResponse.json(
       { message: errorMessage },
@@ -59,15 +71,7 @@ async function handlePolygonStake(data: z.infer<typeof stakeSchema>) {
       throw new Error('USDC address not configured')
     }
 
-    // Only log in development to avoid exposing sensitive data in production
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Processing Polygon stake:', {
-        marketId: data.marketId,
-        amount: data.amount,
-        side: data.side,
-        walletAddress: data.walletAddress,
-      })
-    }
+    logStakeDetails('Polygon', data)
 
     // Create provider (this will be called from client, so user signs)
     // In production, you'd use wagmi/viem for client-side signing
@@ -119,15 +123,7 @@ async function handleSolanaStake(data: z.infer<typeof stakeSchema>) {
       throw new Error('Solana USDC mint not configured')
     }
 
-    // Only log in development to avoid exposing sensitive data in production
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Processing Solana stake:', {
-        marketId: data.marketId,
-        amount: data.amount,
-        side: data.side,
-        walletAddress: data.walletAddress,
-      })
-    }
+    logStakeDetails('Solana', data)
 
     // Create connection
     const connection = new Connection(rpcUrl, 'confirmed')
