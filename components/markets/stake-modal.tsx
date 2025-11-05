@@ -83,7 +83,6 @@ export function StakeModal({ market, open, onOpenChange, onSuccess }: StakeModal
     if (isApproveSuccess) {
       toast.success('USDC spending approved!')
       setNeedsApproval(false)
-      checkApprovalNeeded() // Re-check to update state
     }
   }, [isApproveSuccess])
 
