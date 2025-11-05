@@ -22,16 +22,24 @@ function logStakeDetails(chain: string, data: z.infer<typeof stakeSchema>) {
 }
 
 // Helper function to create error response
-function createErrorResponse(error: any, fallbackMessage: string, status: number = 500) {
-  const message = error?.message || fallbackMessage
+function createErrorResponse(error: unknown, fallbackMessage: string, status: number = 500) {
+  const message = error instanceof Error ? error.message : fallbackMessage
   return NextResponse.json({ message }, { status })
+}
+
+// Helper function to format environment variable name for user-friendly error messages
+function formatEnvVarName(name: string): string {
+  return name
+    .replace('NEXT_PUBLIC_', '')
+    .replace(/_/g, ' ')
+    .toLowerCase()
 }
 
 // Helper function to check and throw error for missing environment variable
 function requireEnvVar(name: string, value: string | undefined): string {
   if (!value) {
     console.error(`Missing ${name} environment variable`)
-    throw new Error(`${name.replace('NEXT_PUBLIC_', '').replace(/_/g, ' ').toLowerCase()} not configured`)
+    throw new Error(`${formatEnvVarName(name)} not configured`)
   }
   return value
 }
