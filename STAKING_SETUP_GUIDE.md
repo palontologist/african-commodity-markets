@@ -58,15 +58,18 @@ Note: This is the bridge contract address from your deployment docs. You may nee
 
 #### 1. USDC SPL Token Mint
 ```bash
-NEXT_PUBLIC_SOLANA_USDC_MINT="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-```
-This is the official USDC SPL token mint address on Solana devnet.
-
-Alternative for testing (if above doesn't work):
-```bash
-# Devnet USDC from Circle
+# Devnet USDC - Use this for testing on Solana devnet
 NEXT_PUBLIC_SOLANA_USDC_MINT="4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
 ```
+⚠️ **Important**: `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` is the mainnet USDC address. For devnet testing, use `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`.
+
+**How to get devnet USDC:**
+1. Visit https://faucet.circle.com/
+2. Connect your Phantom wallet
+3. Select "Solana Devnet"
+4. Request USDC tokens (you'll get test USDC)
+
+Alternative: You can also use any devnet SPL token for testing purposes.
 
 #### 2. Prediction Market Program ID
 ```bash
@@ -127,7 +130,7 @@ NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS="your-polygon-contract-or-wallet-address"
 NEXT_PUBLIC_CHAIN_ID="80002"
 
 # Solana Staking (Devnet)
-NEXT_PUBLIC_SOLANA_USDC_MINT="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+NEXT_PUBLIC_SOLANA_USDC_MINT="4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
 NEXT_PUBLIC_SOLANA_PREDICTION_PROGRAM_ID="your-solana-program-id-or-wallet-address"
 NEXT_PUBLIC_SOLANA_RPC_URL="https://api.devnet.solana.com"
 NEXT_PUBLIC_SOLANA_CLUSTER="devnet"
@@ -209,7 +212,7 @@ NEXT_PUBLIC_CHAIN_ID="80002"
 # Blockchain - Solana
 NEXT_PUBLIC_SOLANA_RPC_URL="https://api.devnet.solana.com"
 NEXT_PUBLIC_SOLANA_CLUSTER="devnet"
-NEXT_PUBLIC_SOLANA_USDC_MINT="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+NEXT_PUBLIC_SOLANA_USDC_MINT="4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
 NEXT_PUBLIC_SOLANA_PREDICTION_PROGRAM_ID="4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
 
 # AI APIs
@@ -248,6 +251,39 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ---
 
 ## 🆘 Troubleshooting
+
+### "Solana USDC balance not showing" or "Balance is 0"
+This is the most common issue when connecting Phantom wallet:
+
+**Cause**: Wrong USDC mint address or no token account exists yet.
+
+**Solution:**
+1. **Use correct devnet USDC mint**: `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` (NOT the mainnet address)
+2. **Get devnet USDC tokens**:
+   - Visit https://faucet.circle.com/
+   - Connect Phantom wallet
+   - Select "Solana Devnet"
+   - Request test USDC (free)
+3. **Ensure you have SOL for rent**:
+   - Visit https://faucet.solana.com/
+   - Request devnet SOL (0.1-1 SOL)
+   - SOL is needed to create the token account
+
+**Check your setup:**
+```bash
+# In .env.local, make sure you have:
+NEXT_PUBLIC_SOLANA_USDC_MINT="4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
+NEXT_PUBLIC_SOLANA_RPC_URL="https://api.devnet.solana.com"
+NEXT_PUBLIC_SOLANA_CLUSTER="devnet"
+```
+
+**Verify on Solana Explorer:**
+- Go to https://explorer.solana.com/?cluster=devnet
+- Paste your Phantom wallet address
+- Check for SPL tokens - you should see USDC if you have any
+
+### "Token account not found"
+This means you haven't received any USDC yet. The token account is created automatically when you first receive USDC. Use the Circle faucet above to get test tokens.
 
 ### "Environment variable not configured"
 ✅ **Good!** This means the improved error handling is working. Now you know exactly which variable to add.

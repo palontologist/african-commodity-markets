@@ -81,11 +81,21 @@ async function getSolanaUSDCBalance(address: string) {
     
     const usdcMint = process.env.NEXT_PUBLIC_SOLANA_USDC_MINT
     if (!usdcMint) {
+      console.error('Missing NEXT_PUBLIC_SOLANA_USDC_MINT environment variable')
       throw new Error('Solana USDC mint not configured')
     }
 
     const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com'
     const connection = new Connection(rpcUrl, 'confirmed')
+
+    // Log configuration for debugging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Fetching Solana USDC balance:', {
+        address,
+        usdcMint,
+        rpcUrl,
+      })
+    }
 
     const ownerPublicKey = new PublicKey(address)
     const mintPublicKey = new PublicKey(usdcMint)
@@ -102,6 +112,10 @@ async function getSolanaUSDCBalance(address: string) {
       // USDC has 6 decimals on Solana
       const balance = Number(accountInfo.amount) / 1_000_000
 
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Solana USDC balance found:', balance, 'USDC')
+      }
+
       return NextResponse.json({
         balance: balance,
         raw: accountInfo.amount.toString(),
@@ -111,18 +125,27 @@ async function getSolanaUSDCBalance(address: string) {
       })
     } catch (accountError) {
       // Account doesn't exist yet (no USDC tokens)
+      console.log('Solana token account not found for address:', address)
+      console.log('Token account would be:', tokenAccount.toBase58())
+      console.log('User needs to receive USDC first to create the account')
+      
       return NextResponse.json({
         balance: 0,
         raw: '0',
         decimals: 6,
         chain: 'solana',
+        tokenAccount: tokenAccount.toBase58(),
         message: 'Token account not found. User needs to receive USDC first.',
       })
     }
   } catch (error: any) {
     console.error('Solana balance error:', error)
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+    })
     return NextResponse.json(
-      { error: 'Failed to fetch Solana USDC balance', balance: 0 },
+      { error: 'Failed to fetch Solana USDC balance', balance: 0, details: error.message },
       { status: 200 } // Return 200 with 0 balance on error
     )
   }
