@@ -9,9 +9,10 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2, TrendingUp, TrendingDown, Wallet, AlertCircle, CheckCircle2 } from 'lucide-react'
-import { useAccount } from 'wagmi'
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { toast } from 'sonner'
+import { parseUnits, maxUint256 } from 'viem'
 
 interface Market {
   id: string
@@ -36,7 +37,6 @@ export function StakeModal({ market, open, onOpenChange, onSuccess }: StakeModal
   const [amount, setAmount] = useState('')
   const [side, setSide] = useState<'yes' | 'no'>('yes')
   const [isLoading, setIsLoading] = useState(false)
-  const [isApproving, setIsApproving] = useState(false)
   const [needsApproval, setNeedsApproval] = useState(false)
   const [usdcBalance, setUsdcBalance] = useState<number>(0)
   const [step, setStep] = useState<'input' | 'confirming' | 'success'>('input')
@@ -49,6 +49,17 @@ export function StakeModal({ market, open, onOpenChange, onSuccess }: StakeModal
   
   const isConnected = market.chain === 'polygon' ? isPolygonConnected : isSolanaConnected
   const walletAddress = market.chain === 'polygon' ? polygonAddress : solanaPublicKey?.toBase58()
+
+  // Wagmi hooks for contract interaction
+  const { 
+    data: approveHash, 
+    isPending: isApproving,
+    writeContract: writeApprove,
+    error: approveError 
+  } = useWriteContract()
+
+  const { isLoading: isApproveConfirming, isSuccess: isApproveSuccess } = 
+    useWaitForTransactionReceipt({ hash: approveHash })
 
   // Calculate odds and potential payout
   const totalPool = market.yesPool + market.noPool
@@ -66,6 +77,23 @@ export function StakeModal({ market, open, onOpenChange, onSuccess }: StakeModal
       checkApprovalNeeded()
     }
   }, [open, isConnected, walletAddress])
+
+  // Handle approval transaction success
+  useEffect(() => {
+    if (isApproveSuccess) {
+      toast.success('USDC spending approved!')
+      setNeedsApproval(false)
+      checkApprovalNeeded() // Re-check to update state
+    }
+  }, [isApproveSuccess])
+
+  // Handle approval errors
+  useEffect(() => {
+    if (approveError) {
+      console.error('Approval error:', approveError)
+      toast.error('Failed to approve USDC spending')
+    }
+  }, [approveError])
 
   async function fetchUSDCBalance() {
     try {
@@ -119,28 +147,44 @@ export function StakeModal({ market, open, onOpenChange, onSuccess }: StakeModal
   }
 
   async function handleApprove() {
-    if (market.chain !== 'polygon') return
+    if (market.chain !== 'polygon' || !polygonAddress) return
 
-    setIsApproving(true)
     try {
-      const response = await fetch('/api/contracts/approve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          address: polygonAddress,
-          amount: amount,
-        }),
+      // Get USDC and contract addresses from environment
+      const usdcAddress = process.env.NEXT_PUBLIC_USDC_ADDRESS
+      const contractAddress = process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS
+
+      if (!usdcAddress || !contractAddress) {
+        toast.error('Contract addresses not configured')
+        return
+      }
+
+      // ERC-20 approve ABI
+      const erc20ApproveAbi = [
+        {
+          name: 'approve',
+          type: 'function',
+          stateMutability: 'nonpayable',
+          inputs: [
+            { name: 'spender', type: 'address' },
+            { name: 'amount', type: 'uint256' },
+          ],
+          outputs: [{ name: '', type: 'bool' }],
+        },
+      ] as const
+
+      // Write the approval transaction
+      writeApprove({
+        address: usdcAddress as `0x${string}`,
+        abi: erc20ApproveAbi,
+        functionName: 'approve',
+        args: [contractAddress as `0x${string}`, maxUint256],
       })
 
-      if (!response.ok) throw new Error('Approval failed')
-
-      toast.success('USDC spending approved!')
-      setNeedsApproval(false)
+      toast.info('Please confirm the transaction in your wallet...')
     } catch (error) {
       console.error('Approval error:', error)
       toast.error('Failed to approve USDC spending')
-    } finally {
-      setIsApproving(false)
     }
   }
 
@@ -354,12 +398,12 @@ export function StakeModal({ market, open, onOpenChange, onSuccess }: StakeModal
                 {market.chain === 'polygon' && needsApproval && (
                   <Button
                     onClick={handleApprove}
-                    disabled={isApproving || !amount || parseFloat(amount) <= 0}
+                    disabled={(isApproving || isApproveConfirming) || !amount || parseFloat(amount) <= 0}
                     className="w-full"
                     variant="outline"
                   >
-                    {isApproving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Approve USDC Spending
+                    {(isApproving || isApproveConfirming) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    {isApproveConfirming ? 'Confirming...' : 'Approve USDC Spending'}
                   </Button>
                 )}
 
