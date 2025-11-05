@@ -21,6 +21,12 @@ function logStakeDetails(chain: string, data: z.infer<typeof stakeSchema>) {
   }
 }
 
+// Helper function to create error response
+function createErrorResponse(error: any, fallbackMessage: string) {
+  const message = error?.message || fallbackMessage
+  return NextResponse.json({ message }, { status: 500 })
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -43,11 +49,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Extract error message from Error objects, or use generic fallback
-    const errorMessage = error instanceof Error ? error.message : 'Failed to process stake'
-    return NextResponse.json(
-      { message: errorMessage },
-      { status: 500 }
-    )
+    return createErrorResponse(error, 'Failed to process stake')
   }
 }
 
@@ -93,10 +95,7 @@ async function handlePolygonStake(data: z.infer<typeof stakeSchema>) {
     })
   } catch (error: any) {
     console.error('Polygon stake error:', error)
-    return NextResponse.json(
-      { message: error.message || 'Failed to stake on Polygon' },
-      { status: 500 }
-    )
+    return createErrorResponse(error, 'Failed to stake on Polygon')
   }
 }
 
@@ -154,9 +153,6 @@ async function handleSolanaStake(data: z.infer<typeof stakeSchema>) {
     })
   } catch (error: any) {
     console.error('Solana stake error:', error)
-    return NextResponse.json(
-      { message: error.message || 'Failed to stake on Solana' },
-      { status: 500 }
-    )
+    return createErrorResponse(error, 'Failed to stake on Solana')
   }
 }
