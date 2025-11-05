@@ -25,13 +25,13 @@ export async function POST(req: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
+        { message: 'Invalid request data', details: error.errors },
         { status: 400 }
       )
     }
 
     return NextResponse.json(
-      { error: 'Failed to process stake' },
+      { message: 'Failed to process stake' },
       { status: 500 }
     )
   }
@@ -76,7 +76,7 @@ async function handlePolygonStake(data: z.infer<typeof stakeSchema>) {
   } catch (error: any) {
     console.error('Polygon stake error:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to stake on Polygon' },
+      { message: error.message || 'Failed to stake on Polygon' },
       { status: 500 }
     )
   }
@@ -133,7 +133,7 @@ async function handleSolanaStake(data: z.infer<typeof stakeSchema>) {
   } catch (error: any) {
     console.error('Solana stake error:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to stake on Solana' },
+      { message: error.message || 'Failed to stake on Solana' },
       { status: 500 }
     )
   }
