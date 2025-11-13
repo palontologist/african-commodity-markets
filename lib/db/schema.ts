@@ -239,3 +239,118 @@ export type NewCommodityListing = typeof commodityListings.$inferInsert;
 
 export type CommodityBid = typeof commodityBids.$inferSelect;
 export type NewCommodityBid = typeof commodityBids.$inferInsert;
+
+// Scraped Exchange Data - for data from African commodity exchanges
+export const scrapedExchangeData = sqliteTable('scraped_exchange_data', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  exchangeName: text('exchange_name').notNull(), // e.g., 'africaexchange.com', 'eatta.co.ke'
+  exchangeUrl: text('exchange_url').notNull(),
+  commodityId: integer('commodity_id').references(() => commodities.id),
+  commodityName: text('commodity_name').notNull(),
+  price: real('price'),
+  currency: text('currency'),
+  volume: real('volume'),
+  unit: text('unit'),
+  quality: text('quality'),
+  scrapedAt: integer('scraped_at', { mode: 'timestamp' }).notNull(),
+  rawData: text('raw_data'), // JSON string with all scraped fields
+  status: text('status').default('ACTIVE'), // ACTIVE, ERROR, STALE
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+});
+
+// API Access Logs - for tracking micropayments and enterprise usage
+export const apiAccessLogs = sqliteTable('api_access_logs', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').references(() => users.id),
+  apiKey: text('api_key'),
+  endpoint: text('endpoint').notNull(), // e.g., '/api/predictions', '/api/live-prices'
+  method: text('method').notNull(),
+  requestData: text('request_data'), // JSON string
+  responseStatus: integer('response_status'),
+  paymentStatus: text('payment_status').default('PENDING'), // PENDING, PAID, FAILED, FREE
+  paymentAmount: real('payment_amount').default(0),
+  paymentCurrency: text('payment_currency').default('USDC'),
+  x402TransactionId: text('x402_transaction_id'), // X402 protocol transaction ID
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  accessedAt: integer('accessed_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Enterprise API Keys - for managing enterprise access
+export const enterpriseApiKeys = sqliteTable('enterprise_api_keys', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => users.id),
+  apiKey: text('api_key').notNull().unique(),
+  name: text('name').notNull(), // e.g., "Production API Key"
+  description: text('description'),
+  tier: text('tier').default('FREE'), // FREE, BASIC, PREMIUM, ENTERPRISE
+  rateLimit: integer('rate_limit').default(100), // requests per hour
+  monthlyQuota: integer('monthly_quota').default(10000), // monthly request quota
+  currentUsage: integer('current_usage').default(0),
+  allowedEndpoints: text('allowed_endpoints'), // JSON array of allowed endpoints
+  isActive: integer('is_active', { mode: 'boolean' }).default(1),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }),
+  lastUsedAt: integer('last_used_at', { mode: 'timestamp' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+});
+
+// User Deals - for users listing their own deals (real estate, commodities, etc.)
+export const userDeals = sqliteTable('user_deals', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => users.id),
+  title: text('title').notNull(),
+  dealType: text('deal_type').notNull(), // COMMODITY, REAL_ESTATE, EQUIPMENT, OTHER
+  description: text('description').notNull(),
+  commodityId: integer('commodity_id').references(() => commodities.id),
+  category: text('category'), // e.g., "Agricultural Land", "Commercial Property"
+  quantity: real('quantity'),
+  unit: text('unit'),
+  askingPrice: real('asking_price').notNull(),
+  currency: text('currency').notNull().default('USD'),
+  location: text('location'),
+  countryId: integer('country_id').references(() => countries.id),
+  images: text('images'), // JSON array of image URLs
+  documents: text('documents'), // JSON array of document URLs
+  settlementTerms: text('settlement_terms'),
+  paymentMethod: text('payment_method'), // USDC, M-PESA, BANK_TRANSFER, CASH
+  status: text('status').default('ACTIVE'), // ACTIVE, PENDING, SOLD, EXPIRED, CANCELLED
+  visibility: text('visibility').default('PUBLIC'), // PUBLIC, PRIVATE, UNLISTED
+  expiresAt: integer('expires_at', { mode: 'timestamp' }),
+  viewCount: integer('view_count').default(0),
+  contactEmail: text('contact_email'),
+  contactPhone: text('contact_phone'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Deal Inquiries - for managing interest in user deals
+export const dealInquiries = sqliteTable('deal_inquiries', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  dealId: integer('deal_id').notNull().references(() => userDeals.id),
+  inquirerUserId: text('inquirer_user_id').references(() => users.id),
+  inquirerName: text('inquirer_name'),
+  inquirerEmail: text('inquirer_email').notNull(),
+  inquirerPhone: text('inquirer_phone'),
+  message: text('message').notNull(),
+  offerAmount: real('offer_amount'),
+  status: text('status').default('NEW'), // NEW, READ, REPLIED, ACCEPTED, REJECTED
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+});
+
+export type ScrapedExchangeData = typeof scrapedExchangeData.$inferSelect;
+export type NewScrapedExchangeData = typeof scrapedExchangeData.$inferInsert;
+
+export type ApiAccessLog = typeof apiAccessLogs.$inferSelect;
+export type NewApiAccessLog = typeof apiAccessLogs.$inferInsert;
+
+export type EnterpriseApiKey = typeof enterpriseApiKeys.$inferSelect;
+export type NewEnterpriseApiKey = typeof enterpriseApiKeys.$inferInsert;
+
+export type UserDeal = typeof userDeals.$inferSelect;
+export type NewUserDeal = typeof userDeals.$inferInsert;
+
+export type DealInquiry = typeof dealInquiries.$inferSelect;
+export type NewDealInquiry = typeof dealInquiries.$inferInsert;
