@@ -15,12 +15,13 @@ A comprehensive platform for tracking African commodity market data with user au
 - **Comprehensive Schema**: Support for commodities, markets, pricing, grades, and user data
 
 ### 📊 Commodity Data
-- **Multi-Commodity Support**: Tea, Coffee, Cocoa, Gold, Avocado, Macadamia, Cotton, Cashew, Rubber
-- **Real-Time Pricing**: Integration with Alpha Vantage and World Bank APIs for live market data
+- **Multi-Commodity Support**: Tea, Coffee, Cocoa, Gold, Avocado, Macadamia, Cotton, Cashew, Rubber, **Wheat, Maize**
+- **Real-Time Pricing**: Integration with Alpha Vantage, **Tridge.com**, and World Bank APIs for live market data
 - **Quality Grades**: Detailed quality standards and grading systems
 - **Market Information**: African market locations and trading data
 - **Historical Data**: 5+ years of price history for trend analysis
 - **AI Predictions**: Groq-powered predictions for commodity price movements
+- **Wheat & Maize Oracle**: Dedicated API for wheat and maize flour prices with Kenya market focus
 
 ### 🌍 African Markets Coverage
 - Ghana, Kenya, Nigeria, South Africa, Côte d'Ivoire, Ethiopia
@@ -125,6 +126,44 @@ ALPHA_VANTAGE_KEY=YOUR_ALPHA_VANTAGE_KEY_HERE
 - `pnpm db:studio` - Open Drizzle Studio for database management
 - `pnpm db:seed` - Seed database with initial data
 - `pnpm tsx scripts/ingest-historical-prices.ts` - Import 5+ years of historical price data from World Bank
+
+## API Endpoints
+
+### Wheat and Maize Oracle API
+
+Dedicated API for wheat and maize flour prices with real-time data from multiple sources including Tridge.com.
+
+**Quick Start:**
+```bash
+# Get wheat and maize prices
+curl "http://localhost:3000/api/oracle/wheat-maize"
+
+# Get only wheat price
+curl "http://localhost:3000/api/oracle/wheat-maize?commodity=WHEAT"
+
+# Get Tridge-specific data
+curl "http://localhost:3000/api/oracle/wheat-maize?source=tridge"
+
+# Get historical data from database
+curl "http://localhost:3000/api/oracle/wheat-maize?historical=true"
+```
+
+**📖 Full Documentation:** See [WHEAT_MAIZE_API_DOCS.md](./WHEAT_MAIZE_API_DOCS.md) for comprehensive API documentation including:
+- All endpoints and parameters
+- Request/response examples
+- Integration examples (JavaScript, Python, cURL)
+- Error handling
+- Blockchain integration
+
+### Live Prices API
+
+```bash
+# Get any commodity price
+curl "http://localhost:3000/api/live-prices?symbol=WHEAT"
+curl "http://localhost:3000/api/live-prices?symbols=WHEAT,MAIZE,COFFEE"
+```
+
+Supports: COFFEE, COCOA, COTTON, CASHEW, RUBBER, GOLD, TEA, AVOCADO, MACADAMIA, WHEAT, MAIZE
 
 ## Clerk Setup
 
