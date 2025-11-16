@@ -3,7 +3,9 @@
  * Provides real-time commodity price data from various sources
  */
 
-export type CommoditySymbol = 'COFFEE' | 'COCOA' | 'COTTON' | 'CASHEW' | 'RUBBER' | 'GOLD' | 'TEA' | 'AVOCADO' | 'MACADAMIA'
+import { getTridgePrice as fetchTridgePrice } from './scrapers/tridge-scraper'
+
+export type CommoditySymbol = 'COFFEE' | 'COCOA' | 'COTTON' | 'CASHEW' | 'RUBBER' | 'GOLD' | 'TEA' | 'AVOCADO' | 'MACADAMIA' | 'WHEAT' | 'MAIZE'
 export type Region = 'AFRICA' | 'LATAM'
 
 interface PriceData {
@@ -32,7 +34,9 @@ const WORLD_BANK_MAP: Partial<Record<CommoditySymbol, string>> = {
   'RUBBER': 'PRUBB',      // Rubber
   'GOLD': 'PGOLD',        // Gold
   'AVOCADO': 'PFRUVT',    // Fruits
-  'MACADAMIA': 'PNUTS'    // Nuts
+  'MACADAMIA': 'PNUTS',   // Nuts
+  'WHEAT': 'PWHEAMT',     // Wheat
+  'MAIZE': 'PMAIZMT'      // Maize (Corn)
 }
 
 // Cache for price data (5 minute TTL)
@@ -41,7 +45,7 @@ const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
 /**
  * Get live price for a commodity
- * Tries Alpha Vantage first, falls back to World Bank, then cache
+ * Tries Alpha Vantage first, then Tridge (for wheat/maize), falls back to World Bank, then cache
  */
 export async function getLivePrice(
   symbol: CommoditySymbol,
@@ -66,6 +70,19 @@ export async function getLivePrice(
     }
   } catch (error) {
     console.warn(`Alpha Vantage failed for ${symbol}:`, error)
+  }
+  
+  try {
+    // Try Tridge for wheat and maize (Kenya-specific data)
+    if (symbol === 'WHEAT' || symbol === 'MAIZE') {
+      const price = await getTridgePrice(symbol)
+      if (price) {
+        priceCache.set(cacheKey, { data: price, expires: Date.now() + CACHE_TTL })
+        return price
+      }
+    }
+  } catch (error) {
+    console.warn(`Tridge failed for ${symbol}:`, error)
   }
   
   try {
@@ -174,6 +191,27 @@ async function getWorldBankPrice(symbol: CommoditySymbol): Promise<PriceData | n
 }
 
 /**
+ * Get price from Tridge for wheat and maize
+ */
+async function getTridgePrice(symbol: 'WHEAT' | 'MAIZE'): Promise<PriceData | null> {
+  try {
+    const tridgeData = await fetchTridgePrice(symbol)
+    if (tridgeData) {
+      return {
+        price: Math.round(tridgeData.price * 100) / 100,
+        currency: tridgeData.currency,
+        timestamp: tridgeData.timestamp,
+        source: tridgeData.source
+      }
+    }
+  } catch (error) {
+    console.error(`Tridge API error for ${symbol}:`, error)
+  }
+  
+  return null
+}
+
+/**
  * Fallback prices when APIs are unavailable
  */
 function getFallbackPrice(symbol: CommoditySymbol): PriceData {
@@ -186,7 +224,9 @@ function getFallbackPrice(symbol: CommoditySymbol): PriceData {
     'GOLD': 1950,       // USD per oz
     'TEA': 3.5,         // USD per kg
     'AVOCADO': 2.5,     // USD per kg
-    'MACADAMIA': 12     // USD per kg
+    'MACADAMIA': 12,    // USD per kg
+    'WHEAT': 280,       // USD per metric ton
+    'MAIZE': 220        // USD per metric ton
   }
   
   console.warn(`Using fallback price for ${symbol}`)

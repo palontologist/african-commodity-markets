@@ -120,6 +120,20 @@ export async function seedDatabase() {
         unit: 'kg',
         description: 'Premium macadamia nuts',
       },
+      {
+        name: 'Wheat',
+        code: 'WHEAT',
+        category: 'Agricultural',
+        unit: 'MT',
+        description: 'Wheat grain and flour for milling and consumption',
+      },
+      {
+        name: 'Maize',
+        code: 'MAIZE',
+        category: 'Agricultural',
+        unit: 'MT',
+        description: 'Maize grain and flour for milling and consumption',
+      },
     ]).returning();
 
     console.log('Commodities seeded:', commodityData.length);
