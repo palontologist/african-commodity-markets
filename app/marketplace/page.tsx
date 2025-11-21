@@ -4,8 +4,30 @@ import { Button } from "@/components/ui/button"
 import { TrendingUp, Shield, DollarSign, PiggyBank, Award, Lock, Zap, BarChart3 } from "lucide-react"
 import { AppHeader } from "@/components/app-header"
 import Link from "next/link"
+import { getLivePrice, type CommoditySymbol } from "@/lib/live-prices"
 
-export default function MarketplacePage() {
+export default async function MarketplacePage() {
+  // Fetch prices
+  const commodities: { id: string; symbol: CommoditySymbol; name: string; unit: string }[] = [
+    { id: 'coffee', symbol: 'COFFEE', name: 'Coffee', unit: '/lb' },
+    { id: 'cocoa', symbol: 'COCOA', name: 'Cocoa', unit: '/MT' },
+    { id: 'tea', symbol: 'TEA', name: 'Tea', unit: '/kg' },
+    { id: 'cotton', symbol: 'COTTON', name: 'Cotton', unit: '/lb' },
+    { id: 'avocado', symbol: 'AVOCADO', name: 'Avocado', unit: '/kg' },
+    { id: 'macadamia', symbol: 'MACADAMIA', name: 'Macadamia', unit: '/kg' },
+  ]
+
+  const prices = await Promise.all(
+    commodities.map(async (c) => {
+      try {
+        const data = await getLivePrice(c.symbol, 'AFRICA')
+        return { ...c, price: data.price, currency: data.currency, source: data.source }
+      } catch (e) {
+        return { ...c, price: 0, currency: 'USD', source: 'Unavailable' }
+      }
+    })
+  )
+
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
@@ -20,6 +42,23 @@ export default function MarketplacePage() {
             Stake USDC directly in commodity-backed pools. Earn yields based on real commodity price movements.
             No NFTs, no complex tokens - just simple USDC staking with transparent returns.
           </p>
+        </div>
+
+        {/* Live Market Prices */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
+          {prices.map((item) => (
+            <Card key={item.id} className="text-center py-4 hover:shadow-md transition-shadow">
+              <CardContent className="p-2">
+                <p className="text-sm font-medium text-muted-foreground">{item.name}</p>
+                <p className="text-xl font-bold text-foreground mt-1">
+                  ${item.price.toFixed(2)}<span className="text-xs font-normal text-muted-foreground">{item.unit}</span>
+                </p>
+                <Badge variant="outline" className="text-[10px] mt-2 h-5">
+                  {item.source}
+                </Badge>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Staking Pool Features */}

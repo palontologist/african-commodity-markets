@@ -8,7 +8,7 @@ import { StakeModal } from "@/components/markets/stake-modal"
 import Link from "next/link"
 import { TrendingUp, TrendingDown, Activity, DollarSign, Coffee, Leaf, Apple, Nut, Flower2, Palmtree } from "lucide-react"
 import { getPrediction, type OnChainPrediction } from "@/lib/blockchain/polygon-client"
-import { getLivePrice, type CommoditySymbol, type Region } from "@/lib/live-prices"
+import { type CommoditySymbol, type Region } from "@/lib/live-prices"
 import { useState, useEffect } from "react"
 
 export const dynamic = 'force-dynamic'
@@ -110,18 +110,24 @@ export default function HomePage() {
         setPredictions(fetchedPredictions)
 
         // Fetch live prices for all commodities
-        const pricesData: Record<string, any> = {}
-        await Promise.all(
-          COMMODITY_DATA.map(async (commodity) => {
-            try {
-              const price = await getLivePrice(commodity.symbol, selectedRegion)
-              pricesData[commodity.id] = price
-            } catch (error) {
-              console.error(`Failed to fetch price for ${commodity.symbol}:`, error)
-            }
-          })
-        )
-        setLivePrices(pricesData)
+        const symbols = COMMODITY_DATA.map(c => c.symbol).join(',')
+        try {
+          const response = await fetch(`/api/live-prices?symbols=${symbols}&region=${selectedRegion}`)
+          const data = await response.json()
+          
+          const pricesData: Record<string, any> = {}
+          if (data.data && Array.isArray(data.data)) {
+            data.data.forEach((price: any, index: number) => {
+              if (price) {
+                const commodityId = COMMODITY_DATA[index].id
+                pricesData[commodityId] = price
+              }
+            })
+          }
+          setLivePrices(pricesData)
+        } catch (error) {
+          console.error('Failed to fetch live prices:', error)
+        }
       } catch (error) {
         console.error('Failed to fetch data:', error)
       } finally {

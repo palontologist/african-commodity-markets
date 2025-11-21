@@ -10,7 +10,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { MarketPredictionCard } from "@/components/blockchain/market-prediction-card"
 import { getPrediction, type OnChainPrediction } from "@/lib/blockchain/polygon-client"
-import { getLivePrice, type CommoditySymbol } from "@/lib/live-prices"
+import { type CommoditySymbol } from "@/lib/live-prices"
 import { useState, useEffect } from "react"
 
 export const dynamic = 'force-dynamic'
@@ -397,12 +397,17 @@ export default function CommodityPage({ params, searchParams }: PageProps) {
     async function fetchData() {
       try {
         // Fetch live price
-        const priceData = await getLivePrice(commoditySymbol, region as any)
-        setLivePrice({
-          price: priceData.price,
-          unit: 'kg',
-          source: priceData.source
-        })
+        const response = await fetch(`/api/live-prices?symbol=${commoditySymbol}&region=${region}`)
+        const data = await response.json()
+        const priceData = data.data
+        
+        if (priceData) {
+          setLivePrice({
+            price: priceData.price,
+            unit: 'kg',
+            source: priceData.source
+          })
+        }
 
         // Fetch blockchain predictions
         const fetchedPredictions: OnChainPrediction[] = []
