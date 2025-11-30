@@ -24,7 +24,7 @@ export function BlockchainProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const fullConfig = getDefaultConfig({
-      appName: 'Afrifutures - African Commodity Markets',
+      appName: 'Afrifutures',
       projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'afrifutures-commodity-markets',
       chains: [polygonAmoy, polygon],
       ssr: false,

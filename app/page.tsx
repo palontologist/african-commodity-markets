@@ -3,13 +3,17 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { AppHeader } from "@/components/app-header"
 import { StakeModal } from "@/components/markets/stake-modal"
 import Link from "next/link"
-import { TrendingUp, TrendingDown, Activity, DollarSign, Coffee, Leaf, Apple, Nut, Flower2, Palmtree } from "lucide-react"
+import { TrendingUp, TrendingDown, Activity, DollarSign, Coffee, Leaf, Apple, Nut, Flower2, Palmtree, Sprout, LineChart, Users } from "lucide-react"
 import { getPrediction, type OnChainPrediction } from "@/lib/blockchain/polygon-client"
 import { type CommoditySymbol, type Region } from "@/lib/live-prices"
 import { useState, useEffect } from "react"
+import { useUserType } from "@/components/user-type-provider"
+import { useRouter } from "next/navigation"
 
 export const dynamic = 'force-dynamic'
 
@@ -78,13 +82,24 @@ const COMMODITY_DATA = [
 ]
 
 export default function HomePage() {
+  const { setUserType, userType } = useUserType()
+  const router = useRouter()
   const [selectedRegion, setSelectedRegion] = useState<Region>('AFRICA')
   const [selectedCommodity, setSelectedCommodity] = useState<string>('all')
+  const [selectedCountry, setSelectedCountry] = useState<string>('all')
+  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('all')
+  const [isLive, setIsLive] = useState(true)
   const [predictions, setPredictions] = useState<OnChainPrediction[]>([])
   const [livePrices, setLivePrices] = useState<Record<string, any>>({})
   const [loading, setLoading] = useState(true)
   const [stakeModalOpen, setStakeModalOpen] = useState(false)
   const [selectedMarket, setSelectedMarket] = useState<any>(null)
+
+  const handleUserTypeSelect = (type: 'farmer' | 'trader' | 'coop') => {
+    setUserType(type)
+    // Navigate to personalized dashboard or show relevant features
+    router.push(`/dashboard?type=${type}`)
+  }
 
   useEffect(() => {
     async function fetchData() {
@@ -171,41 +186,118 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <AppHeader />
 
       <main className="container mx-auto px-4 py-8">
-        {/* Hero Section - Kalshi Style */}
-        <div className="mb-8">
-          <div className="max-w-3xl mb-6">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Trade on African Commodity Outcomes
-            </h1>
-            <p className="text-lg text-gray-600">
-              Bet on the future prices of coffee, cocoa, cotton, and more. 
-              AI-powered predictions meet real market data on the blockchain.
-            </p>
+        {/* Hero Section */}
+        <div className="mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-12">
+            <div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
+                Trade the future of African crops.
+              </h1>
+              <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">
+                Back price outcomes, earn yield, and unlock instant USDC for farmers.
+              </p>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+                <Button asChild size="lg" className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
+                  <Link href="/marketplace">Browse Markets</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/10 w-full sm:w-auto">
+                  <Link href="/how-it-works">How it Works</Link>
+                </Button>
+              </div>
+            </div>
+            <div className="relative">
+              {/* Abstract illustrations */}
+              <div className="relative h-64 lg:h-80">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl blur-3xl"></div>
+                <div className="relative bg-white rounded-xl p-8 shadow-lg border border-primary/10">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-sm text-gray-600">USDC</p>
+                      <p className="text-2xl font-bold text-gray-900">$1,234.56</p>
+                    </div>
+                    <TrendingUp className="w-8 h-8 text-primary" />
+                  </div>
+                  <div className="h-24 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg flex items-center justify-center">
+                    <LineChart className="w-12 h-12 text-primary" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Country/Region Selector - Kalshi Style */}
-          <div className="flex items-center gap-3 mb-6">
-            <span className="text-sm font-medium text-gray-700">Region:</span>
-            <div className="flex gap-2">
-              <Button
-                variant={selectedRegion === 'AFRICA' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedRegion('AFRICA')}
-              >
-                🌍 Africa
-              </Button>
-              <Button
-                variant={selectedRegion === 'LATAM' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedRegion('LATAM')}
-              >
-                🌎 Latin America
-              </Button>
-            </div>
+          {/* Feature Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+            <Card 
+              className={`border-gray-200 hover:shadow-lg transition-all cursor-pointer ${userType === 'farmer' ? 'border-primary border-2 bg-primary/5' : ''}`}
+              onClick={() => handleUserTypeSelect('farmer')}
+            >
+              <CardHeader>
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Sprout className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="text-xl">For Farmers</CardTitle>
+                <CardDescription className="text-base">
+                  Turn future harvests into instant working capital.
+                </CardDescription>
+                {userType === 'farmer' && (
+                  <div className="mt-4 pt-4 border-t space-y-2">
+                    <Link href="/grades" className="block text-sm text-primary hover:underline">📊 Crop Grades</Link>
+                    <Link href="/marketplace" className="block text-sm text-primary hover:underline">💰 Live Prices</Link>
+                    <Link href="/deals/new" className="block text-sm text-primary hover:underline">📝 List on Marketplace</Link>
+                    <Link href="/insights" className="block text-sm text-primary hover:underline">🤖 AI Insights</Link>
+                  </div>
+                )}
+              </CardHeader>
+            </Card>
+
+            <Card 
+              className={`border-gray-200 hover:shadow-lg transition-all cursor-pointer ${userType === 'trader' ? 'border-primary border-2 bg-primary/5' : ''}`}
+              onClick={() => handleUserTypeSelect('trader')}
+            >
+              <CardHeader>
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <LineChart className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="text-xl">For Traders</CardTitle>
+                <CardDescription className="text-base">
+                  Trade commodity outcomes with AI-powered odds.
+                </CardDescription>
+                {userType === 'trader' && (
+                  <div className="mt-4 pt-4 border-t space-y-2">
+                    <Link href="/marketplace" className="block text-sm text-primary hover:underline">📈 Prediction Markets</Link>
+                    <Link href="/insights" className="block text-sm text-primary hover:underline">🤖 AI Insights</Link>
+                    <Link href="/dashboard" className="block text-sm text-primary hover:underline">💼 Trading Dashboard</Link>
+                  </div>
+                )}
+              </CardHeader>
+            </Card>
+
+            <Card 
+              className={`border-gray-200 hover:shadow-lg transition-all cursor-pointer ${userType === 'coop' ? 'border-primary border-2 bg-primary/5' : ''}`}
+              onClick={() => handleUserTypeSelect('coop')}
+            >
+              <CardHeader>
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Users className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="text-xl">For Co-ops</CardTitle>
+                <CardDescription className="text-base">
+                  Use analytics to negotiate better prices and credit.
+                </CardDescription>
+                {userType === 'coop' && (
+                  <div className="mt-4 pt-4 border-t space-y-2">
+                    <Link href="/marketplace" className="block text-sm text-primary hover:underline">📈 Marketplace</Link>
+                    <Link href="/wheat-maize-markets" className="block text-sm text-primary hover:underline">🌾 Wheat & Maize Markets</Link>
+                    <Link href="/api-docs" className="block text-sm text-primary hover:underline">📚 API Documentation</Link>
+                    <Link href="/dashboard" className="block text-sm text-primary hover:underline">📊 Analytics Dashboard</Link>
+                  </div>
+                )}
+              </CardHeader>
+            </Card>
           </div>
 
           {/* Stats */}
@@ -217,7 +309,7 @@ export default function HomePage() {
                     <p className="text-sm text-gray-600 font-medium">Active Markets</p>
                     <p className="text-2xl font-bold text-gray-900 mt-1">{totalActiveMarkets}</p>
                   </div>
-                  <Activity className="w-8 h-8 text-green-600" />
+                  <Activity className="w-8 h-8 text-primary" />
                 </div>
               </CardContent>
             </Card>
@@ -229,7 +321,7 @@ export default function HomePage() {
                     <p className="text-sm text-gray-600 font-medium">Commodities</p>
                     <p className="text-2xl font-bold text-gray-900 mt-1">{filteredCommodities.length}</p>
                   </div>
-                  <TrendingUp className="w-8 h-8 text-blue-600" />
+                  <TrendingUp className="w-8 h-8 text-primary" />
                 </div>
               </CardContent>
             </Card>
@@ -243,7 +335,7 @@ export default function HomePage() {
                       ${(totalVolume / 1_000_000).toFixed(1)}M
                     </p>
                   </div>
-                  <DollarSign className="w-8 h-8 text-purple-600" />
+                  <DollarSign className="w-8 h-8 text-primary" />
                 </div>
               </CardContent>
             </Card>
@@ -253,37 +345,96 @@ export default function HomePage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 font-medium">Avg. Return</p>
-                    <p className="text-2xl font-bold text-green-600 mt-1">{avgReturn}</p>
+                    <p className="text-2xl font-bold text-primary mt-1">{avgReturn}</p>
                   </div>
-                  <TrendingUp className="w-8 h-8 text-green-600" />
+                  <TrendingUp className="w-8 h-8 text-primary" />
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Commodity Filter Tabs - Kalshi Style */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2">
-            <Button
-              variant={selectedCommodity === 'all' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setSelectedCommodity('all')}
-              className="whitespace-nowrap"
-            >
-              All Markets
-            </Button>
-            {COMMODITY_DATA.map((commodity) => (
-              <Button
-                key={commodity.id}
-                variant={selectedCommodity === commodity.id ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setSelectedCommodity(commodity.id)}
-                className="whitespace-nowrap"
-              >
-                {commodity.name}
-              </Button>
-            ))}
+        {/* Filters and Toggle */}
+        <div className="mb-6 space-y-4">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:gap-4">
+            {/* Commodity Filter */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-1 sm:flex-initial">
+              <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Commodity:</label>
+              <Select value={selectedCommodity} onValueChange={setSelectedCommodity}>
+                <SelectTrigger className="w-full sm:w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  {COMMODITY_DATA.map((commodity) => (
+                    <SelectItem key={commodity.id} value={commodity.id}>
+                      {commodity.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Country Filter */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-1 sm:flex-initial">
+              <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Country:</label>
+              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                <SelectTrigger className="w-full sm:w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  {selectedRegion === 'AFRICA' ? (
+                    <>
+                      <SelectItem value="kenya">Kenya</SelectItem>
+                      <SelectItem value="ghana">Ghana</SelectItem>
+                      <SelectItem value="ethiopia">Ethiopia</SelectItem>
+                      <SelectItem value="nigeria">Nigeria</SelectItem>
+                      <SelectItem value="south-africa">South Africa</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="brazil">Brazil</SelectItem>
+                      <SelectItem value="colombia">Colombia</SelectItem>
+                      <SelectItem value="ecuador">Ecuador</SelectItem>
+                      <SelectItem value="peru">Peru</SelectItem>
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Timeframe Filter */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-1 sm:flex-initial">
+              <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Timeframe:</label>
+              <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe}>
+                <SelectTrigger className="w-full sm:w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Settled/Live Toggle */}
+            <div className="flex items-center gap-3 sm:ml-auto justify-center sm:justify-start">
+              <span className={`text-sm font-medium ${!isLive ? 'text-gray-900' : 'text-gray-500'}`}>
+                Settled
+              </span>
+              <Switch
+                checked={isLive}
+                onCheckedChange={setIsLive}
+                className="data-[state=checked]:bg-primary"
+              />
+              <span className={`text-sm font-medium ${isLive ? 'text-primary' : 'text-gray-500'}`}>
+                Live
+              </span>
+            </div>
           </div>
         </div>
 
@@ -395,7 +546,7 @@ export default function HomePage() {
         )}
 
         {/* Footer CTA */}
-        <Card className="mt-12 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+        <Card className="mt-12 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
           <CardContent className="pt-8 pb-8">
             <div className="text-center max-w-2xl mx-auto">
               <h3 className="text-2xl font-bold text-gray-900 mb-3">
@@ -406,10 +557,10 @@ export default function HomePage() {
                 Low fees, instant settlement, and AI-powered insights.
               </p>
               <div className="flex items-center justify-center gap-4">
-                <Button asChild size="lg">
+                <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
                   <Link href="/dashboard">Connect Wallet</Link>
                 </Button>
-                <Button asChild variant="outline" size="lg">
+                <Button asChild variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/10">
                   <Link href="/marketplace">Browse Marketplace</Link>
                 </Button>
               </div>

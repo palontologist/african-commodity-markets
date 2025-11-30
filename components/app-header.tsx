@@ -5,81 +5,209 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { WalletConnect } from './unified-wallet-connect'
 import { ChainSelector } from './blockchain/chain-selector'
+import { Button } from './ui/button'
+import { Dialog, DialogContent, DialogTrigger } from './ui/dialog'
+import { Menu, X } from 'lucide-react'
+import { useUserType } from './user-type-provider'
 
 export function AppHeader() {
   const [hasAuth, setHasAuth] = useState(true) // Default to true for build
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { userType } = useUserType()
 
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
     setHasAuth(!!key && key !== 'pk_test_Y2xlcmsuYWZyaWNhbm1hcmtldHMuZGV2JA') // Exclude default build key
   }, [])
 
-  return (
-    <header className="border-b bg-white">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-6">
-          <Link href="/" className="text-xl font-bold text-green-600">
-            African Commodity Markets
+  const navLinks = (
+    <>
+      <Link 
+        href="/marketplace" 
+        className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        Markets
+      </Link>
+      <Link 
+        href="/how-it-works" 
+        className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        How it Works
+      </Link>
+      {userType === 'farmer' && (
+        <Link 
+          href="/grades" 
+          className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          Crop Grades
+        </Link>
+      )}
+      {userType === 'coop' && (
+        <>
+          <Link 
+            href="/marketplace" 
+            className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Marketplace
           </Link>
-          <nav className="hidden md:flex space-x-4">
-            <Link href="/marketplace" className="text-gray-600 hover:text-gray-900">
-              Marketplace
-            </Link>
-            <Link href="/grades" className="text-gray-600 hover:text-gray-900">
-              Grades
-            </Link>
-            <Link href="/insights" className="text-gray-600 hover:text-gray-900">
-              AI Insights
-            </Link>
-            <Link href="/compare" className="text-gray-600 hover:text-gray-900">
-              Compare
-            </Link>
-            <Link href="/whitepaper" className="text-gray-600 hover:text-gray-900">
-              Whitepaper
-            </Link>
-            {hasAuth && (
+          <Link 
+            href="/wheat-maize-markets" 
+            className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Wheat & Maize
+          </Link>
+          <Link 
+            href="/api-docs" 
+            className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            API Docs
+          </Link>
+        </>
+      )}
+      {hasAuth && (
+        <SignedIn>
+          <Link 
+            href="/dashboard" 
+            className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Dashboard
+          </Link>
+        </SignedIn>
+      )}
+      <Link 
+        href="/insights" 
+        className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        AI Insights
+      </Link>
+      {userType !== 'coop' && (
+        <Link 
+          href="/whitepaper" 
+          className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          Docs
+        </Link>
+      )}
+    </>
+  )
+
+  return (
+    <header className="border-b bg-white sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-3 sm:py-4">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="text-lg sm:text-xl font-bold text-primary flex-shrink-0">
+            Afrifutures
+          </Link>
+          
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-1">
+            {navLinks}
+          </nav>
+          
+          {/* Right side: Actions */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Chain Selector - Hidden on very small screens */}
+            <div className="hidden sm:block">
+              <ChainSelector />
+            </div>
+            
+            {/* Wallet Connect - Responsive sizing */}
+            <div className="hidden sm:block">
+              <WalletConnect />
+            </div>
+            
+            {/* Auth buttons - Responsive */}
+            {hasAuth ? (
               <>
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <button className="bg-primary text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-primary/90 transition-colors text-sm sm:text-base">
+                      <span className="hidden sm:inline">Sign In</span>
+                      <span className="sm:hidden">Sign In</span>
+                    </button>
+                  </SignInButton>
+                </SignedOut>
                 <SignedIn>
-                  <Link href="/dashboard" className="text-gray-600 hover:text-gray-900">
-                    Dashboard
-                  </Link>
-                  <Link href="/watchlist" className="text-gray-600 hover:text-gray-900">
-                    Watchlist
-                  </Link>
+                  <UserButton 
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-8 h-8"
+                      }
+                    }}
+                  />
                 </SignedIn>
               </>
+            ) : (
+              <div className="text-xs sm:text-sm text-gray-500 hidden sm:block">
+                Setup Clerk auth to sign in
+              </div>
             )}
-          </nav>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          <ChainSelector />
-          <WalletConnect />
-          {hasAuth ? (
-            <>
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                    Sign In
-                  </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton 
-                  afterSignOutUrl="/"
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-8 h-8"
-                    }
-                  }}
-                />
-              </SignedIn>
-            </>
-          ) : (
-            <div className="text-sm text-gray-500">
-              Setup Clerk auth to sign in
-            </div>
-          )}
+            
+            {/* Mobile Menu Button */}
+            <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden"
+                  aria-label="Toggle menu"
+                >
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md w-[calc(100%-2rem)] p-0 top-4 right-4 left-auto translate-x-0 translate-y-0 max-h-[calc(100vh-2rem)] overflow-y-auto">
+                <div className="flex flex-col">
+                  {/* Mobile Menu Header */}
+                  <div className="flex items-center justify-between p-4 border-b">
+                    <span className="text-lg font-bold text-primary">Menu</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="h-8 w-8"
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </div>
+                  
+                  {/* Mobile Navigation Links */}
+                  <nav className="flex flex-col p-4 space-y-1">
+                    {navLinks}
+                  </nav>
+                  
+                  {/* Mobile Actions */}
+                  <div className="border-t p-4 space-y-3">
+                    <div className="block sm:hidden">
+                      <ChainSelector />
+                    </div>
+                    <div className="block sm:hidden">
+                      <WalletConnect />
+                    </div>
+                    {hasAuth && (
+                      <SignedOut>
+                        <SignInButton mode="modal">
+                          <Button className="w-full bg-primary hover:bg-primary/90" onClick={() => setMobileMenuOpen(false)}>
+                            Sign In
+                          </Button>
+                        </SignInButton>
+                      </SignedOut>
+                    )}
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
     </header>

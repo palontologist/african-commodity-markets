@@ -12,8 +12,8 @@ export function WalletConnect() {
       {isPolygon && <ConnectButton />}
       {isSolana && (
         <WalletMultiButton 
+          className="!bg-primary hover:!bg-primary/90"
           style={{
-            background: '#10b981',
             borderRadius: '0.375rem',
             height: '36px',
             fontSize: '14px',
