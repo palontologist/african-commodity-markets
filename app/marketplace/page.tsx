@@ -46,26 +46,6 @@ export default function MarketplacePage() {
     }
     fetchPrices()
   }, [])
-  // Fetch prices
-  const commodities: { id: string; symbol: CommoditySymbol; name: string; unit: string }[] = [
-    { id: 'coffee', symbol: 'COFFEE', name: 'Coffee', unit: '/lb' },
-    { id: 'cocoa', symbol: 'COCOA', name: 'Cocoa', unit: '/MT' },
-    { id: 'tea', symbol: 'TEA', name: 'Tea', unit: '/kg' },
-    { id: 'cotton', symbol: 'COTTON', name: 'Cotton', unit: '/lb' },
-    { id: 'avocado', symbol: 'AVOCADO', name: 'Avocado', unit: '/kg' },
-    { id: 'macadamia', symbol: 'MACADAMIA', name: 'Macadamia', unit: '/kg' },
-  ]
-
-  const prices = await Promise.all(
-    commodities.map(async (c) => {
-      try {
-        const data = await getLivePrice(c.symbol, 'AFRICA')
-        return { ...c, price: data.price, currency: data.currency, source: data.source }
-      } catch (e) {
-        return { ...c, price: 0, currency: 'USD', source: 'Unavailable' }
-      }
-    })
-  )
 
   return (
     <div className="min-h-screen bg-white">

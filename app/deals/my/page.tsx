@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { AppHeader } from "@/components/app-header"
 import { Package, Plus, Eye, MapPin, Edit } from "lucide-react"
 import Link from "next/link"
-import { useAuth } from "@clerk/nextjs"
 
 interface Deal {
   id: number
@@ -23,7 +22,8 @@ interface Deal {
 }
 
 export default function MyDealsPage() {
-  const { isSignedIn } = useAuth()
+  // Auth temporarily disabled; treat user as signed in for now
+  const isSignedIn = true
   const [deals, setDeals] = useState<Deal[]>([])
   const [loading, setLoading] = useState(true)
 

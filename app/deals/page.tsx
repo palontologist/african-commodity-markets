@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { AppHeader } from "@/components/app-header"
 import { Package, TrendingUp, Building2, Plus, Search } from "lucide-react"
 import Link from "next/link"
-import { useAuth } from "@clerk/nextjs"
 
 interface Deal {
   id: number
@@ -23,7 +22,8 @@ interface Deal {
 }
 
 export default function DealsPage() {
-  const { isSignedIn } = useAuth()
+  // Auth temporarily disabled; treat all users as not signed in
+  const isSignedIn = false
   const [deals, setDeals] = useState<Deal[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<string>('ALL')

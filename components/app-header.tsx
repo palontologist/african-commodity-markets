@@ -1,6 +1,5 @@
 'use client'
 
-import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { WalletConnect } from './unified-wallet-connect'
@@ -11,14 +10,11 @@ import { Menu, X } from 'lucide-react'
 import { useUserType } from './user-type-provider'
 
 export function AppHeader() {
-  const [hasAuth, setHasAuth] = useState(true) // Default to true for build
+  const [hasAuth] = useState(false) // Clerk disabled for now
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { userType } = useUserType()
 
-  useEffect(() => {
-    const key = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-    setHasAuth(!!key && key !== 'pk_test_Y2xlcmsuYWZyaWNhbm1hcmtldHMuZGV2JA') // Exclude default build key
-  }, [])
+  // When Clerk is re-enabled, restore real auth setup here.
 
   const navLinks = (
     <>
@@ -70,17 +66,14 @@ export function AppHeader() {
           </Link>
         </>
       )}
-      {hasAuth && (
-        <SignedIn>
-          <Link 
-            href="/dashboard" 
-            className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Dashboard
-          </Link>
-        </SignedIn>
-      )}
+      {/* Dashboard link left visible; auth disabled so it behaves like a normal link */}
+      <Link 
+        href="/dashboard" 
+        className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        Dashboard
+      </Link>
       <Link 
         href="/insights" 
         className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
@@ -126,33 +119,7 @@ export function AppHeader() {
               <WalletConnect />
             </div>
             
-            {/* Auth buttons - Responsive */}
-            {hasAuth ? (
-              <>
-                <SignedOut>
-                  <SignInButton mode="modal">
-                    <button className="bg-primary text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-primary/90 transition-colors text-sm sm:text-base">
-                      <span className="hidden sm:inline">Sign In</span>
-                      <span className="sm:hidden">Sign In</span>
-                    </button>
-                  </SignInButton>
-                </SignedOut>
-                <SignedIn>
-                  <UserButton 
-                    afterSignOutUrl="/"
-                    appearance={{
-                      elements: {
-                        avatarBox: "w-8 h-8"
-                      }
-                    }}
-                  />
-                </SignedIn>
-              </>
-            ) : (
-              <div className="text-xs sm:text-sm text-gray-500 hidden sm:block">
-                Setup Clerk auth to sign in
-              </div>
-            )}
+            {/* Auth temporarily disabled */}
             
             {/* Mobile Menu Button */}
             <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>

@@ -11,11 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AppHeader } from "@/components/app-header"
 import { ArrowLeft, Upload, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { useAuth } from "@clerk/nextjs"
 
 export default function NewDealPage() {
   const router = useRouter()
-  const { isSignedIn } = useAuth()
+  // Auth temporarily disabled; allow listing without sign-in
+  const isSignedIn = true
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
