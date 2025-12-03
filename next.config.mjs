@@ -7,7 +7,6 @@ const nextConfig = {
     unoptimized: true,
   },
   serverExternalPackages: ["@libsql/client"],
-  turbopack: {},
 }
 
 export default nextConfig
