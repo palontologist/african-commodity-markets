@@ -1,49 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
   images: {
     unoptimized: true,
   },
-  experimental: {
-    serverComponentsExternalPackages: ["@libsql/client"],
-    serverActions: {
-      allowedOrigins: [
-        'localhost:3000',
-        '*.app.github.dev'
-      ]
-    }
-  },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      }
-      // Avoid webpack devtool values that inject `eval()` (which can be blocked by CSP).
-      // Use a non-eval source map in development to prevent "unsafe-eval" CSP violations
-      // when testing in environments with strict CSP headers.
-      if (process.env.NODE_ENV !== 'production') {
-        // 'cheap-module-source-map' provides good rebuild performance without using eval.
-        config.devtool = 'cheap-module-source-map'
-      }
-    }
-    
-    // Suppress warnings for optional dependencies
-    config.ignoreWarnings = [
-      /Critical dependency: the request of a dependency is an expression/,
-      /@react-native-async-storage\/async-storage/,
-      /pino-pretty/,
-    ]
-    
-    return config
-  },
+  serverExternalPackages: ["@libsql/client"],
+  turbopack: {},
 }
 
 export default nextConfig
