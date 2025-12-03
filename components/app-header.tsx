@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import { WalletConnect } from './unified-wallet-connect'
 import { ChainSelector } from './blockchain/chain-selector'
 import { Button } from './ui/button'
@@ -10,11 +11,8 @@ import { Menu, X } from 'lucide-react'
 import { useUserType } from './user-type-provider'
 
 export function AppHeader() {
-  const [hasAuth] = useState(false) // Clerk disabled for now
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { userType } = useUserType()
-
-  // When Clerk is re-enabled, restore real auth setup here.
 
   const navLinks = (
     <>
@@ -119,7 +117,17 @@ export function AppHeader() {
               <WalletConnect />
             </div>
             
-            {/* Auth temporarily disabled */}
+            {/* Auth */}
+            <SignedOut>
+              <SignInButton mode="modal">
+                <Button variant="outline" size="sm" className="hidden sm:flex">
+                  Sign In
+                </Button>
+              </SignInButton>
+            </SignedOut>
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
             
             {/* Mobile Menu Button */}
             <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -161,15 +169,18 @@ export function AppHeader() {
                     <div className="block sm:hidden">
                       <WalletConnect />
                     </div>
-                    {hasAuth && (
-                      <SignedOut>
-                        <SignInButton mode="modal">
-                          <Button className="w-full bg-primary hover:bg-primary/90" onClick={() => setMobileMenuOpen(false)}>
-                            Sign In
-                          </Button>
-                        </SignInButton>
-                      </SignedOut>
-                    )}
+                    <SignedOut>
+                      <SignInButton mode="modal">
+                        <Button className="w-full bg-primary hover:bg-primary/90" onClick={() => setMobileMenuOpen(false)}>
+                          Sign In
+                        </Button>
+                      </SignInButton>
+                    </SignedOut>
+                    <SignedIn>
+                      <div className="flex items-center justify-center">
+                        <UserButton afterSignOutUrl="/" />
+                      </div>
+                    </SignedIn>
                   </div>
                 </div>
               </DialogContent>

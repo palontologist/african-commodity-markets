@@ -1,12 +1,12 @@
 'use client'
 
-import { useUser } from '@clerk/nextjs'
-import { redirect, useSearchParams } from 'next/navigation'
+import { useUser, RedirectToSignIn } from '@clerk/nextjs'
 import { AppHeader } from '@/components/app-header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Activity, TrendingUp, Bell, DollarSign, Sprout, LineChart, Users, Award, FileText, Database, BarChart3 } from 'lucide-react'
 import { useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useUserType } from '@/components/user-type-provider'
 import Link from 'next/link'
 
@@ -17,12 +17,6 @@ function DashboardContent() {
   const { user, isLoaded, isSignedIn } = useUser()
   const { userType, setUserType } = useUserType()
   const searchParams = useSearchParams()
-  
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      redirect('/sign-in')
-    }
-  }, [isLoaded, isSignedIn])
 
   useEffect(() => {
     // Set user type from URL if provided
@@ -33,35 +27,41 @@ function DashboardContent() {
   }, [searchParams, setUserType])
 
   if (!isLoaded) {
-    return <div>Loading...</div>
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    )
   }
 
   if (!isSignedIn) {
-    return <div>Redirecting to sign in...</div>
+    return <RedirectToSignIn />
   }
+
+  const userName = user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || 'User'
 
   const getWelcomeMessage = () => {
     if (userType === 'farmer') {
       return {
-        title: `Welcome, ${user.firstName || 'Farmer'}!`,
+        title: `Welcome, ${userName || 'Farmer'}!`,
         subtitle: 'Access crop grades, live prices, and list your harvests on the marketplace.',
         icon: Sprout
       }
     } else if (userType === 'trader') {
       return {
-        title: `Welcome, ${user.firstName || 'Trader'}!`,
+        title: `Welcome, ${userName || 'Trader'}!`,
         subtitle: 'Trade prediction markets and leverage AI insights for better outcomes.',
         icon: LineChart
       }
     } else if (userType === 'coop') {
       return {
-        title: `Welcome, ${user.firstName || 'Co-op'}!`,
+        title: `Welcome, ${userName || 'Co-op'}!`,
         subtitle: 'Access price oracles, API documentation, and analytics for better negotiations.',
         icon: Users
       }
     }
     return {
-      title: `Welcome back, ${user.firstName || user.emailAddresses[0].emailAddress}!`,
+      title: `Welcome back, ${userName}!`,
       subtitle: 'Manage your Afrifutures portfolio and track your commodity market positions.',
       icon: Activity
     }
