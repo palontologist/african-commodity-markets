@@ -6,11 +6,14 @@ import { AppHeader } from '@/components/app-header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Activity, TrendingUp, Bell, DollarSign, Sprout, LineChart, Users, Award, FileText, Database, BarChart3 } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useUserType } from '@/components/user-type-provider'
 import Link from 'next/link'
 
-export default function DashboardPage() {
+// Force dynamic rendering to avoid static generation issues with useSearchParams
+export const dynamic = 'force-dynamic'
+
+function DashboardContent() {
   const { user, isLoaded, isSignedIn } = useUser()
   const { userType, setUserType } = useUserType()
   const searchParams = useSearchParams()
@@ -288,5 +291,26 @@ export default function DashboardPage() {
         </Card>
       </main>
     </div>
+  )
+}
+
+function DashboardLoading() {
+  return (
+    <div className="min-h-screen bg-white">
+      <AppHeader />
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-600">Loading dashboard...</div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent />
+    </Suspense>
   )
 }
