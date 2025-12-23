@@ -101,14 +101,14 @@ export async function POST(request: NextRequest) {
     console.error('Failed to create profile:', error)
     return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 })
   }
-}if (!db) {
-    return NextResponse.json({ error: 'Database not available' }, { status: 503 })
-  }
-
-  
+}
 
 // PATCH - Update profile (switch role, add role, update metadata)
 export async function PATCH(request: NextRequest) {
+  if (!db) {
+    return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+  }
+
   try {
     const body = await request.json()
     const { userId, activeRole, addRole, removeRole, metadata, kycVerified } = body
