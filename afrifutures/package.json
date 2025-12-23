@@ -10,7 +10,7 @@
   "dependencies": {
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.4",
+    "next": "15.5.9",
     "ethers": "^6.13.0",
     "@solana/web3.js": "^1.95.0",
     "@solana/wallet-adapter-base": "^0.9.23",
