@@ -286,7 +286,31 @@ export function StakeModal({ market, open, onOpenChange, onSuccess }: StakeModal
                   Wallet not connected
                 </p>
                 <p className="text-sm text-amber-700 mt-1">
-                  Please connect your {market.chain === 'polygon' ? 'MetaMask' : 'Phantom'} wallet to stake.
+                  Please connect your {market.chain === 'polygon' ? 'Polygon wallet (MetaMask)' : 'Solana wallet (Phantom or Solflare)'} to stake.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Chain Mismatch Warning */}
+        {isConnected && (
+          (market.chain === 'polygon' && !isPolygonConnected) || 
+          (market.chain === 'solana' && !isSolanaConnected)
+        ) && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-red-900">
+                  Wrong wallet connected
+                </p>
+                <p className="text-sm text-red-700 mt-1">
+                  This market is on {market.chain === 'polygon' ? 'Polygon' : 'Solana'}. 
+                  Please connect your {market.chain === 'polygon' ? 'MetaMask wallet' : 'Solana wallet (Phantom or Solflare)'}.
+                </p>
+                <p className="text-xs text-red-600 mt-2">
+                  Currently connected: {market.chain === 'polygon' ? 'Solana wallet' : 'Polygon wallet'}
                 </p>
               </div>
             </div>

@@ -9,6 +9,7 @@ import { TrendingUp, TrendingDown, Calendar, Users, DollarSign, ArrowUpRight, Ar
 import { type OnChainPrediction, getOdds, formatUSDC } from '@/lib/blockchain/polygon-client'
 import { StakeModal } from '@/components/markets/stake-modal'
 import { ClaimWinningsButton } from './claim-winnings-button'
+import { useChain } from './chain-provider'
 
 interface MarketPredictionCardProps {
   prediction: OnChainPrediction
@@ -16,6 +17,7 @@ interface MarketPredictionCardProps {
 }
 
 export function MarketPredictionCard({ prediction, onStaked }: MarketPredictionCardProps) {
+  const { activeChain } = useChain()
   const [showStakingModal, setShowStakingModal] = useState(false)
   const [odds, setOdds] = useState<{ yes: number; no: number } | null>(null)
   const [loading, setLoading] = useState(false)
@@ -81,7 +83,7 @@ export function MarketPredictionCard({ prediction, onStaked }: MarketPredictionC
     expiryTime: Number(prediction.targetDate) * 1000,
     yesPool: Number(prediction.yesStakes) / 1e6, // Convert from USDC base units
     noPool: Number(prediction.noStakes) / 1e6,
-    chain: 'polygon' as const, // Default to polygon, could be dynamic
+    chain: activeChain, // Use active chain from context
     resolved: prediction.resolved,
   }
 
