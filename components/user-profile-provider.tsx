@@ -5,7 +5,7 @@ import { useUser } from '@clerk/nextjs'
 import { useAccount } from 'wagmi'
 import { useWallet } from '@solana/wallet-adapter-react'
 
-export type UserRole = 'PUBLIC' | 'FARMER' | 'TRADER' | 'COOPERATIVE'
+export type UserRole = 'PUBLIC' | 'FARMER' | 'TRADER' | 'COOPERATIVE' | 'ADMIN'
 
 interface UserProfile {
   id: string
@@ -93,6 +93,24 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
       if (response.ok) {
         const updated = await response.json()
         setProfile(updated)
+        
+        // Sync the new role to Clerk for middleware route protection
+        try {
+          await fetch('/api/sync-clerk-role', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              userId: profile.userId,
+              walletAddress: profile.walletAddress 
+            }),
+          })
+          
+          // Reload the page to update middleware with new role
+          window.location.reload()
+        } catch (syncError) {
+          console.error('Failed to sync role to Clerk:', syncError)
+          // Continue anyway - role is updated in Turso
+        }
       }
     } catch (error) {
       console.error('Failed to switch role:', error)
