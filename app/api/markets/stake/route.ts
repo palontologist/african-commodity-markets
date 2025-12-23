@@ -86,6 +86,9 @@ async function handlePolygonStake(data: z.infer<typeof stakeSchema>) {
     // In production, you'd use wagmi/viem for client-side signing
     // This endpoint just validates and returns the transaction data
     
+    // Convert amount to string to avoid BigInt serialization error
+    const amountInBaseUnits = ethers.parseUnits(data.amount.toString(), 6) // USDC has 6 decimals
+    
     // For now, return the transaction data that the client needs to sign
     return NextResponse.json({
       success: true,
@@ -95,7 +98,7 @@ async function handlePolygonStake(data: z.infer<typeof stakeSchema>) {
         method: 'stakePrediction',
         params: {
           predictionId: data.marketId,
-          amount: ethers.parseUnits(data.amount.toString(), 6), // USDC has 6 decimals
+          amount: amountInBaseUnits.toString(), // Convert BigInt to string for JSON
           isYes: data.side === 'yes',
         },
       },

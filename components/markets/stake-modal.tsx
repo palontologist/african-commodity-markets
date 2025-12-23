@@ -331,6 +331,54 @@ export function StakeModal({ market, open, onOpenChange, onSuccess }: StakeModal
                   <span className="text-sm font-semibold">{usdcBalance.toFixed(2)} USDC</span>
                 </div>
 
+                {/* Zero Balance Warning */}
+                {usdcBalance === 0 && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-blue-900">
+                          No USDC tokens in wallet
+                        </p>
+                        <p className="text-xs text-blue-700 mt-1">
+                          {market.chain === 'polygon' 
+                            ? 'Get test USDC from Polygon faucet or swap POL → USDC on QuickSwap'
+                            : 'Get test USDC from Solana devnet faucet or create token account first'
+                          }
+                        </p>
+                        {market.chain === 'polygon' && (
+                          <div className="mt-2 space-y-1">
+                            <a 
+                              href="https://faucet.polygon.technology/" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-600 hover:text-blue-800 underline block"
+                            >
+                              → Get POL from Polygon Faucet
+                            </a>
+                            <a 
+                              href="https://quickswap.exchange/#/swap?currency0=0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270&currency1=0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-600 hover:text-blue-800 underline block"
+                            >
+                              → Swap POL to USDC on QuickSwap
+                            </a>
+                          </div>
+                        )}
+                        {market.chain === 'solana' && (
+                          <div className="mt-2">
+                            <code className="text-xs bg-blue-100 px-2 py-1 rounded block">
+                              solana airdrop 2<br/>
+                              spl-token create-account 4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU
+                            </code>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Chain Badge */}
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="capitalize">
@@ -381,7 +429,12 @@ export function StakeModal({ market, open, onOpenChange, onSuccess }: StakeModal
                     </Button>
                   </div>
                   {parseFloat(amount) > usdcBalance && (
-                    <p className="text-xs text-red-500">Insufficient balance</p>
+                    <p className="text-xs text-red-500">
+                      {usdcBalance === 0 
+                        ? 'You need to get USDC tokens first (balance is 0)'
+                        : `Insufficient balance (you have ${usdcBalance.toFixed(2)} USDC)`
+                      }
+                    </p>
                   )}
                 </div>
 

@@ -55,12 +55,32 @@ Chain: [Polygon] [Solana]
 ### Step 3: Get Test USDC
 
 #### Polygon USDC (Amoy Testnet):
-```bash
-# Option 1: Use Polygon faucet
-Visit: https://faucet.polygon.technology/
 
-# Option 2: Mint test USDC from contract
-# Contact admin for test USDC
+**Important**: Approving USDC spending ≠ Having USDC tokens! You need to actually get USDC first.
+
+**Option 1: Get POL, then swap to USDC (Recommended)**
+```bash
+# Step 1: Get test POL from faucet
+Visit: https://faucet.polygon.technology/
+Enter your wallet address and request POL tokens
+
+# Step 2: Swap POL → USDC on QuickSwap
+Visit: https://quickswap.exchange/
+Connect wallet → Select POL → Select USDC → Swap
+USDC Address: 0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582
+```
+
+**Option 2: Use a testnet USDC faucet**
+```bash
+# Some testnet faucets that may work:
+- https://faucet.circle.com/ (if available for Amoy)
+- Contact project admin for test USDC airdrop
+```
+
+**Option 3: Mint USDC directly (if you have minter role)**
+```bash
+# This requires the USDC contract to have a mint function
+# Usually only available for admin/deployer
 ```
 
 #### Solana USDC (Devnet):
@@ -101,9 +121,16 @@ spl-token create-account 4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU
 3. Your Solana USDC token account doesn't exist yet
 
 **Solutions**:
-- For Polygon: Get test USDC from faucet
-- For Solana: Create token account and request test USDC
+- For Polygon: 
+  1. Get POL from https://faucet.polygon.technology/
+  2. Swap POL to USDC on QuickSwap
+  3. Or contact admin for test USDC airdrop
+- For Solana: 
+  1. Create token account: `spl-token create-account 4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`
+  2. Request test USDC from devnet faucet
 - Verify you're on the correct network (testnet/devnet)
+
+**Note**: Just because you approved USDC spending doesn't mean you have USDC! Approval only gives the contract permission to spend tokens you own.
 
 ### Error: Seeing Ethereum transaction instead of Solana
 **Cause**: This was the bug that's now fixed. If you still see this:
@@ -209,9 +236,29 @@ Response:
 1. **Clear your browser cache** and refresh the page
 2. **Select the correct chain** using the chain selector in the header
 3. **Connect the matching wallet** (MetaMask for Polygon, Phantom/Solflare for Solana)
-4. **Verify your USDC balance** shows correctly in the stake modal
-5. **Get test USDC** if balance is 0
-6. **Try staking** on a market
+4. **Get test tokens if you don't have them**:
+   - **Polygon**: Get POL from faucet → Swap to USDC on QuickSwap
+   - **Solana**: Create token account → Request test USDC
+5. **Verify your USDC balance** shows correctly in the stake modal (should be > 0)
+6. **Approve USDC spending** (Polygon only, first time)
+7. **Try staking** on a market
+
+## 🔑 Understanding Approval vs Having Tokens
+
+**Common Confusion**: "I approved USDC spending, why can't I stake?"
+
+- ✅ **Approval** = Giving the contract *permission* to spend your USDC
+- ❌ **Approval** ≠ Having USDC tokens in your wallet
+
+**Analogy**: It's like giving someone permission to use your credit card. Permission doesn't mean you have money on the card!
+
+**What you need**:
+1. USDC tokens in your wallet (balance > 0)
+2. Approval for the contract to spend them (Polygon only)
+
+**Check your actual USDC balance**:
+- Polygon: Add token `0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582` to MetaMask
+- Solana: Check SPL tokens in Solflare for mint `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`
 
 ## ❓ Still Having Issues?
 
