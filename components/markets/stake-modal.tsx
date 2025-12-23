@@ -255,7 +255,7 @@ export function StakeModal({ market, open, onOpenChange, onSuccess }: StakeModal
     setSide('yes')
     setStep('input')
     setIsLoading(false)
-    setIsApproving(false)
+    // Note: isApproving comes from wagmi hook and resets automatically
   }
 
   function handleOpenChange(newOpen: boolean) {

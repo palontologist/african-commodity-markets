@@ -21,14 +21,43 @@ import { AnchorProvider, Program, BN, web3 } from '@coral-xyz/anchor'
 // Program IDs (replace with your deployed program IDs)
 // Use default placeholder addresses that are valid PublicKeys
 const DEFAULT_PROGRAM_ID = '11111111111111111111111111111111'
-export const ORACLE_PROGRAM_ID = new PublicKey(
-  process.env.NEXT_PUBLIC_SOLANA_ORACLE_PROGRAM_ID || DEFAULT_PROGRAM_ID
+
+/**
+ * Safely parse a PublicKey from environment variable
+ * Returns default if env var is missing, empty, or contains placeholder text
+ */
+function safePublicKey(envValue: string | undefined, defaultValue: string): PublicKey {
+  // Check if the value is missing, empty, or contains common placeholder patterns
+  if (
+    !envValue ||
+    envValue.trim() === '' ||
+    envValue.includes('your-') ||
+    envValue.includes('YOUR_') ||
+    envValue.includes('placeholder') ||
+    envValue.includes('xxx')
+  ) {
+    return new PublicKey(defaultValue)
+  }
+  
+  try {
+    return new PublicKey(envValue)
+  } catch (error) {
+    console.warn(`Invalid PublicKey in env: "${envValue}", using default`)
+    return new PublicKey(defaultValue)
+  }
+}
+
+export const ORACLE_PROGRAM_ID = safePublicKey(
+  process.env.NEXT_PUBLIC_SOLANA_ORACLE_PROGRAM_ID,
+  DEFAULT_PROGRAM_ID
 )
-export const MARKET_PROGRAM_ID = new PublicKey(
-  process.env.NEXT_PUBLIC_SOLANA_MARKET_PROGRAM_ID || process.env.NEXT_PUBLIC_SOLANA_PREDICTION_PROGRAM_ID || DEFAULT_PROGRAM_ID
+export const MARKET_PROGRAM_ID = safePublicKey(
+  process.env.NEXT_PUBLIC_SOLANA_MARKET_PROGRAM_ID || process.env.NEXT_PUBLIC_SOLANA_PREDICTION_PROGRAM_ID,
+  DEFAULT_PROGRAM_ID
 )
-export const USDC_MINT = new PublicKey(
-  process.env.NEXT_PUBLIC_SOLANA_USDC_MINT || '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU' // Devnet USDC
+export const USDC_MINT = safePublicKey(
+  process.env.NEXT_PUBLIC_SOLANA_USDC_MINT,
+  '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU' // Devnet USDC
 )
 
 export interface SolanaPrediction {
