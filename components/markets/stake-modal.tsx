@@ -76,7 +76,7 @@ export function StakeModal({ market, open, onOpenChange, onSuccess }: StakeModal
       fetchUSDCBalance()
       checkApprovalNeeded()
     }
-  }, [open, isConnected, walletAddress])
+  }, [open, isConnected, walletAddress, market.chain, polygonAddress, solanaPublicKey])
 
   // Handle approval transaction success
   useEffect(() => {
@@ -96,16 +96,26 @@ export function StakeModal({ market, open, onOpenChange, onSuccess }: StakeModal
 
   async function fetchUSDCBalance() {
     try {
+      console.log('Fetching USDC balance for chain:', market.chain)
+      
       if (market.chain === 'polygon' && polygonAddress) {
         // Fetch ERC-20 USDC balance
+        console.log('Fetching Polygon USDC for address:', polygonAddress)
         const response = await fetch(`/api/balance/usdc?address=${polygonAddress}&chain=polygon`)
         const data = await response.json()
+        console.log('Polygon USDC balance:', data.balance)
         setUsdcBalance(data.balance || 0)
       } else if (market.chain === 'solana' && solanaPublicKey) {
         // Fetch SPL USDC balance
-        const response = await fetch(`/api/balance/usdc?address=${solanaPublicKey.toBase58()}&chain=solana`)
+        const solanaAddress = solanaPublicKey.toBase58()
+        console.log('Fetching Solana USDC for address:', solanaAddress)
+        const response = await fetch(`/api/balance/usdc?address=${solanaAddress}&chain=solana`)
         const data = await response.json()
+        console.log('Solana USDC balance:', data)
         setUsdcBalance(data.balance || 0)
+      } else {
+        console.log('No wallet connected for chain:', market.chain)
+        setUsdcBalance(0)
       }
     } catch (error) {
       console.error('Failed to fetch USDC balance:', error)

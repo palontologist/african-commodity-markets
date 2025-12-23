@@ -22,9 +22,10 @@ export function MarketPredictionCard({ prediction, onStaked }: MarketPredictionC
   const [odds, setOdds] = useState<{ yes: number; no: number } | null>(null)
   const [loading, setLoading] = useState(false)
 
+  // Reload odds when chain changes
   useEffect(() => {
     loadOdds()
-  }, [prediction.predictionId])
+  }, [prediction.predictionId, activeChain])
 
   async function loadOdds() {
     setLoading(true)
