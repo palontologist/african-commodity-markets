@@ -7,6 +7,7 @@ import { BlockchainProvider } from '@/components/blockchain/wallet-provider'
 import { SolanaWalletProvider } from '@/components/blockchain/solana-wallet-provider'
 import { ChainProvider } from '@/components/blockchain/chain-provider'
 import { UserTypeProvider } from '@/components/user-type-provider'
+import { UserProfileProvider } from '@/components/user-profile-provider'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -28,7 +29,9 @@ export default function RootLayout({
             <ChainProvider>
               <BlockchainProvider>
                 <SolanaWalletProvider>
-                  {children}
+                  <UserProfileProvider>
+                    {children}
+                  </UserProfileProvider>
                 </SolanaWalletProvider>
               </BlockchainProvider>
             </ChainProvider>

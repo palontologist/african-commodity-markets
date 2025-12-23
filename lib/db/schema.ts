@@ -354,3 +354,20 @@ export type NewUserDeal = typeof userDeals.$inferInsert;
 
 export type DealInquiry = typeof dealInquiries.$inferSelect;
 export type NewDealInquiry = typeof dealInquiries.$inferInsert;
+
+// User Profiles for multi-role system
+export const userProfiles = sqliteTable('user_profiles', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id),
+  walletAddress: text('wallet_address').notNull(),
+  roles: text('roles').notNull(), // JSON array: ["PUBLIC", "FARMER", "TRADER", "COOPERATIVE"]
+  activeRole: text('active_role').notNull().default('PUBLIC'),
+  dvcScore: integer('dvc_score').default(0), // Digital Verifiable Credentials score for farmers
+  kycVerified: integer('kyc_verified', { mode: 'boolean' }).default(false),
+  metadata: text('metadata'), // JSON object for role-specific data
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+});
+
+export type UserProfile = typeof userProfiles.$inferSelect;
+export type NewUserProfile = typeof userProfiles.$inferInsert;

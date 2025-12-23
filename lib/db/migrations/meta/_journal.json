@@ -15,6 +15,13 @@
       "when": 1760000000000,
       "tag": "0001_agent_schema",
       "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1766471699753,
+      "tag": "0002_little_reaper",
+      "breakpoints": true
     }
   ]
 }

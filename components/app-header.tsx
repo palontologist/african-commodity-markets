@@ -9,6 +9,7 @@ import { Button } from './ui/button'
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog'
 import { Menu, X } from 'lucide-react'
 import { useUserType } from './user-type-provider'
+import { RoleSwitcher } from './role-switcher'
 
 export function AppHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -116,6 +117,11 @@ export function AppHeader() {
             <div className="hidden sm:block">
               <WalletConnect />
             </div>
+            
+            {/* Role Switcher - Only shown when signed in */}
+            <SignedIn>
+              <RoleSwitcher />
+            </SignedIn>
             
             {/* Auth */}
             <SignedOut>
