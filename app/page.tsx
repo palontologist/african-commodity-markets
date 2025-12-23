@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch"
 import { AppHeader } from "@/components/app-header"
 import { StakeModal } from "@/components/markets/stake-modal"
 import Link from "next/link"
-import { TrendingUp, TrendingDown, Activity, DollarSign, Coffee, Leaf, Apple, Nut, Flower2, Palmtree, Sprout, LineChart, Users } from "lucide-react"
+import { TrendingUp, TrendingDown, Activity, DollarSign, Coffee, Leaf, Apple, Nut, Flower2, Palmtree, Sprout, LineChart, Users, ArrowRight, ExternalLink } from "lucide-react"
 import { getPrediction, type OnChainPrediction } from "@/lib/blockchain/polygon-client"
 import { type CommoditySymbol, type Region } from "@/lib/live-prices"
 import { useState, useEffect } from "react"
@@ -94,6 +94,11 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [stakeModalOpen, setStakeModalOpen] = useState(false)
   const [selectedMarket, setSelectedMarket] = useState<any>(null)
+  const [stakingStats, setStakingStats] = useState({
+    totalValueLocked: 2400000,
+    activeStakers: 1247,
+    averageAPY: 12.4,
+  })
 
   const handleUserTypeSelect = (type: 'farmer' | 'trader' | 'coop') => {
     setUserType(type)
@@ -142,6 +147,17 @@ export default function HomePage() {
           setLivePrices(pricesData)
         } catch (error) {
           console.error('Failed to fetch live prices:', error)
+        }
+
+        // Fetch staking stats
+        try {
+          const statsResponse = await fetch('/api/staking/stats')
+          if (statsResponse.ok) {
+            const stats = await statsResponse.json()
+            setStakingStats(stats)
+          }
+        } catch (error) {
+          console.error('Failed to fetch staking stats:', error)
         }
       } catch (error) {
         console.error('Failed to fetch data:', error)
@@ -544,6 +560,132 @@ export default function HomePage() {
             })}
           </div>
         )}
+
+        {/* USDC Staking Pools Section */}
+        <div className="mt-16 mb-12">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+              USDC Staking Pools
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Stake USDC directly in commodity-backed pools. Your staked amount tracks real commodity value.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {/* Available Pools Card */}
+            <Card className="border-gray-200 hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                  <DollarSign className="w-6 h-6 text-blue-600" />
+                </div>
+                <CardTitle className="text-xl">Available Pools</CardTitle>
+                <CardDescription className="text-base">
+                  Stake in multiple commodity pools simultaneously
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {COMMODITY_DATA.map((commodity) => (
+                    <Badge key={commodity.id} variant="secondary" className="text-xs">
+                      {commodity.name}
+                    </Badge>
+                  ))}
+                </div>
+                <Button asChild className="w-full">
+                  <Link href="/pools">View Pools</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Price-Linked Returns Card */}
+            <Card className="border-gray-200 hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                  <TrendingUp className="w-6 h-6 text-green-600" />
+                </div>
+                <CardTitle className="text-xl">Price-Linked Returns</CardTitle>
+                <CardDescription className="text-base">
+                  Value increases/decreases with real commodity prices
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">APY Range</p>
+                  <p className="text-2xl font-bold text-gray-900">8-15%</p>
+                  <p className="text-xs text-gray-500 mt-1">Based on commodity performance</p>
+                </div>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/settlements">View Returns</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Flexible Lock Periods Card */}
+            <Card className="border-gray-200 hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                  <Activity className="w-6 h-6 text-purple-600" />
+                </div>
+                <CardTitle className="text-xl">Flexible Lock Periods</CardTitle>
+                <CardDescription className="text-base">
+                  Choose your commitment level and maximize yields
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span className="text-sm font-medium">30 days</span>
+                    <span className="text-sm text-green-600">8% APY</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span className="text-sm font-medium">90 days</span>
+                    <span className="text-sm text-green-600">12% APY</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span className="text-sm font-medium">180 days</span>
+                    <span className="text-sm text-green-600">15% APY</span>
+                  </div>
+                </div>
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-gray-600 mb-2">
+                    <span className="font-semibold">Unstake Anytime</span><br />
+                    Early withdrawal fee: 2% (goes to pool)
+                  </p>
+                </div>
+                <Button asChild className="w-full bg-purple-600 hover:bg-purple-700">
+                  <Link href="/pools">Start Staking</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Staking Benefits Banner */}
+          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+            <CardContent className="pt-6 pb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div>
+                  <div className="text-3xl font-bold text-blue-600 mb-2">
+                    ${(stakingStats.totalValueLocked / 1000000).toFixed(1)}M
+                  </div>
+                  <p className="text-sm text-gray-600">Total Value Locked</p>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-purple-600 mb-2">
+                    {stakingStats.activeStakers.toLocaleString()}
+                  </div>
+                  <p className="text-sm text-gray-600">Active Stakers</p>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-green-600 mb-2">
+                    {stakingStats.averageAPY}%
+                  </div>
+                  <p className="text-sm text-gray-600">Average APY</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Footer CTA */}
         <Card className="mt-12 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
