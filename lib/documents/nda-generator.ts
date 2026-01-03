@@ -1,6 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { 
+  Document, 
+  Packer, 
+  Paragraph, 
+  TextRun, 
+  AlignmentType, 
+  HeadingLevel 
+} from 'docx';
 
 interface NDAData {
   disclosingParty: {
@@ -22,34 +30,318 @@ interface GeneratedDocument {
 }
 
 /**
- * Simple text replacement in DOCX file
- * This function reads the template and replaces placeholders
+ * Generate DOCX directly with the data (no template file reading needed)
+ * This ensures no duplication and clean formatting
  */
-async function fillDocxTemplate(templatePath: string, data: NDAData): Promise<Buffer> {
-  // Read the template file
-  const templateBuffer = fs.readFileSync(templatePath);
-  
-  // Convert buffer to string for replacement (simple approach)
-  // Note: This is a simplified approach. For complex DOCX, use docx-templates or mammoth
-  let content = templateBuffer.toString('binary');
-  
-  // Replace all placeholders
-  const replacements = {
-    '{{date}}': data.date,
-    '{{disclosingPartyName}}': data.disclosingParty.name,
-    '{{disclosingPartyAddress}}': data.disclosingParty.address,
-    '{{receivingPartyName}}': data.receivingParty.name,
-    '{{receivingPartyAddress}}': data.receivingParty.address,
-    '{{purpose}}': data.purpose,
-  };
+async function generateDocxDocument(data: NDAData): Promise<Buffer> {
+  const doc = new Document({
+    sections: [{
+      properties: {},
+      children: [
+        // Title
+        new Paragraph({
+          text: 'NON-DISCLOSURE AGREEMENT',
+          heading: HeadingLevel.HEADING_1,
+          alignment: AlignmentType.CENTER,
+          spacing: {
+            after: 400,
+          },
+        }),
 
-  // Replace all occurrences of each placeholder
-  Object.entries(replacements).forEach(([placeholder, value]) => {
-    const regex = new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-    content = content.replace(regex, value);
+        // Date
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: 'This Agreement is made on ',
+            }),
+            new TextRun({
+              text: data.date,
+              bold: true,
+            }),
+          ],
+          spacing: {
+            after: 200,
+          },
+        }),
+
+        // Between section
+        new Paragraph({
+          text: 'BETWEEN:',
+          bold: true,
+          spacing: {
+            before: 200,
+            after: 100,
+          },
+        }),
+
+        // Disclosing Party
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: data.disclosingParty.name,
+              bold: true,
+            }),
+            new TextRun({
+              text: ' (the "Disclosing Party")',
+            }),
+          ],
+          spacing: {
+            after: 50,
+          },
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: 'of ',
+            }),
+            new TextRun({
+              text: data.disclosingParty.address,
+              bold: true,
+            }),
+          ],
+          spacing: {
+            after: 200,
+          },
+        }),
+
+        // And section
+        new Paragraph({
+          text: 'AND',
+          bold: true,
+          spacing: {
+            after: 100,
+          },
+        }),
+
+        // Receiving Party
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: data.receivingParty.name,
+              bold: true,
+            }),
+            new TextRun({
+              text: ' (the "Receiving Party")',
+            }),
+          ],
+          spacing: {
+            after: 50,
+          },
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: 'of ',
+            }),
+            new TextRun({
+              text: data.receivingParty.address,
+              bold: true,
+            }),
+          ],
+          spacing: {
+            after: 400,
+          },
+        }),
+
+        // Section 1: Purpose
+        new Paragraph({
+          text: '1. PURPOSE',
+          heading: HeadingLevel.HEADING_2,
+          spacing: {
+            before: 300,
+            after: 200,
+          },
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: 'The parties wish to explore a business opportunity relating to ',
+            }),
+            new TextRun({
+              text: data.purpose,
+              bold: true,
+            }),
+            new TextRun({
+              text: '. In connection with this opportunity, the Disclosing Party may disclose certain confidential and proprietary information to the Receiving Party.',
+            }),
+          ],
+          spacing: {
+            after: 300,
+          },
+        }),
+
+        // Section 2: Confidential Information
+        new Paragraph({
+          text: '2. CONFIDENTIAL INFORMATION',
+          heading: HeadingLevel.HEADING_2,
+          spacing: {
+            before: 300,
+            after: 200,
+          },
+        }),
+
+        new Paragraph({
+          text: '"Confidential Information" means any information disclosed by the Disclosing Party to the Receiving Party, whether orally, in writing, or in any other form, that is designated as confidential or that reasonably should be understood to be confidential given the nature of the information and the circumstances of disclosure.',
+          spacing: {
+            after: 300,
+          },
+        }),
+
+        // Section 3: Obligations
+        new Paragraph({
+          text: '3. OBLIGATIONS',
+          heading: HeadingLevel.HEADING_2,
+          spacing: {
+            before: 300,
+            after: 200,
+          },
+        }),
+
+        new Paragraph({
+          text: 'The Receiving Party agrees to:',
+          spacing: {
+            after: 100,
+          },
+        }),
+
+        new Paragraph({
+          text: 'a) Keep the Confidential Information confidential and not disclose it to any third party;',
+          spacing: {
+            after: 100,
+            before: 100,
+          },
+          indent: {
+            left: 720,
+          },
+        }),
+
+        new Paragraph({
+          text: 'b) Use the Confidential Information only for the Purpose;',
+          spacing: {
+            after: 100,
+          },
+          indent: {
+            left: 720,
+          },
+        }),
+
+        new Paragraph({
+          text: 'c) Protect the Confidential Information with the same degree of care as it protects its own confidential information.',
+          spacing: {
+            after: 300,
+          },
+          indent: {
+            left: 720,
+          },
+        }),
+
+        // Section 4: Term
+        new Paragraph({
+          text: '4. TERM',
+          heading: HeadingLevel.HEADING_2,
+          spacing: {
+            before: 300,
+            after: 200,
+          },
+        }),
+
+        new Paragraph({
+          text: 'This Agreement shall remain in effect for a period of two (2) years from the date of execution.',
+          spacing: {
+            after: 400,
+          },
+        }),
+
+        // Signatures Section
+        new Paragraph({
+          text: 'SIGNATURES:',
+          bold: true,
+          spacing: {
+            before: 400,
+            after: 200,
+          },
+        }),
+
+        // Disclosing Party Signature
+        new Paragraph({
+          text: data.disclosingParty.name,
+          bold: true,
+          spacing: {
+            before: 200,
+            after: 100,
+          },
+        }),
+
+        new Paragraph({
+          text: 'Signature: _________________________',
+          spacing: {
+            after: 100,
+          },
+        }),
+
+        new Paragraph({
+          text: 'Date: _________________________',
+          spacing: {
+            after: 100,
+          },
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: 'Name: ',
+            }),
+            new TextRun({
+              text: data.disclosingParty.name,
+            }),
+          ],
+          spacing: {
+            after: 300,
+          },
+        }),
+
+        // Receiving Party Signature
+        new Paragraph({
+          text: data.receivingParty.name,
+          bold: true,
+          spacing: {
+            before: 200,
+            after: 100,
+          },
+        }),
+
+        new Paragraph({
+          text: 'Signature: _________________________',
+          spacing: {
+            after: 100,
+          },
+        }),
+
+        new Paragraph({
+          text: 'Date: _________________________',
+          spacing: {
+            after: 100,
+          },
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: 'Name: ',
+            }),
+            new TextRun({
+              text: data.receivingParty.name,
+            }),
+          ],
+        }),
+      ],
+    }],
   });
 
-  return Buffer.from(content, 'binary');
+  return await Packer.toBuffer(doc);
 }
 
 /**
@@ -339,17 +631,8 @@ export async function generateNDADocument(
         filename: `NDA-${data.disclosingParty.name.replace(/\s+/g, '_')}-${Date.now()}.pdf`,
       };
     } else {
-      // DOCX format
-      const templatePath = path.join(process.cwd(), 'docs', 'contracts', 'NON-DISCLOSURE AGREEMENT.docx');
-      
-      // Check if template exists
-      if (!fs.existsSync(templatePath)) {
-        // Create template if it doesn't exist
-        const { createNDATemplate } = await import('./create-nda-template');
-        await createNDATemplate();
-      }
-      
-      const buffer = await fillDocxTemplate(templatePath, data);
+      // DOCX format - generate directly without template
+      const buffer = await generateDocxDocument(data);
       
       return {
         buffer,
