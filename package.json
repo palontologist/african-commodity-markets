@@ -64,7 +64,6 @@
     "cmdk": "1.0.4",
     "date-fns": "4.1.0",
     "docx": "^9.5.1",
-    "docx-templates": "^4.15.0",
     "dotenv": "^17.2.2",
     "drizzle-orm": "^0.44.5",
     "elizaos": "^1.6.1",

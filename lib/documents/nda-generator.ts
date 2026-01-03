@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { 
   Document, 
@@ -616,6 +614,18 @@ async function generateNDAPDF(data: NDAData): Promise<Buffer> {
 }
 
 /**
+ * Sanitize filename to prevent path traversal and filesystem issues
+ */
+function sanitizeFilename(name: string): string {
+  // Remove any path components and special characters
+  return name
+    .replace(/[^a-zA-Z0-9_-]/g, '_')  // Replace special chars with underscore
+    .replace(/_{2,}/g, '_')            // Replace multiple underscores with single
+    .replace(/^_+|_+$/g, '')          // Trim underscores from start/end
+    .substring(0, 50);                // Limit length
+}
+
+/**
  * Generate NDA document in the requested format
  */
 export async function generateNDADocument(
@@ -623,12 +633,15 @@ export async function generateNDADocument(
   format: 'pdf' | 'docx'
 ): Promise<GeneratedDocument> {
   try {
+    const safeFilename = sanitizeFilename(data.disclosingParty.name);
+    const timestamp = Date.now();
+    
     if (format === 'pdf') {
       const buffer = await generateNDAPDF(data);
       return {
         buffer,
         mimeType: 'application/pdf',
-        filename: `NDA-${data.disclosingParty.name.replace(/\s+/g, '_')}-${Date.now()}.pdf`,
+        filename: `NDA-${safeFilename}-${timestamp}.pdf`,
       };
     } else {
       // DOCX format - generate directly without template
@@ -637,7 +650,7 @@ export async function generateNDADocument(
       return {
         buffer,
         mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        filename: `NDA-${data.disclosingParty.name.replace(/\s+/g, '_')}-${Date.now()}.docx`,
+        filename: `NDA-${safeFilename}-${timestamp}.docx`,
       };
     }
   } catch (error) {

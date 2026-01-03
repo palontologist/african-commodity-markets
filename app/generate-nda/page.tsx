@@ -78,12 +78,23 @@ export default function GenerateNDAPage() {
         throw new Error(error.message || 'Failed to generate document')
       }
 
+      // Get the filename from Content-Disposition header or use a safe default
+      const contentDisposition = response.headers.get('Content-Disposition')
+      let filename = `NDA-document.${format}`
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/)
+        if (filenameMatch) {
+          filename = filenameMatch[1]
+        }
+      }
+
       // Download the file
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `NDA-${formData.disclosingPartyName.replace(/\s+/g, '_')}.${format}`
+      a.download = filename
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
