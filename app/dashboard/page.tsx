@@ -179,6 +179,49 @@ function DashboardContent() {
         {/* Seller Dashboard for Farmers */}
         {userType === 'farmer' && (
           <>
+            {/* Quick Action Buttons for Farmers */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <Link href="/deals/new">
+                <Card className="border-primary/50 hover:border-primary hover:shadow-lg transition-all cursor-pointer h-full bg-primary/5">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg">List Your Commodities</CardTitle>
+                        <CardDescription>Create a new listing</CardDescription>
+                      </div>
+                      <Plus className="w-8 h-8 text-primary" />
+                    </div>
+                  </CardHeader>
+                </Card>
+              </Link>
+              <Link href="/deals/my">
+                <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg">My Listings</CardTitle>
+                        <CardDescription>View your active deals</CardDescription>
+                      </div>
+                      <Activity className="w-8 h-8 text-primary" />
+                    </div>
+                  </CardHeader>
+                </Card>
+              </Link>
+              <Link href="/grades">
+                <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg">Crop Grades</CardTitle>
+                        <CardDescription>Check quality standards</CardDescription>
+                      </div>
+                      <Award className="w-8 h-8 text-primary" />
+                    </div>
+                  </CardHeader>
+                </Card>
+              </Link>
+            </div>
+
             <SellerDashboard />
             
             {/* Show selected commodities prices if available */}
@@ -302,32 +345,35 @@ function DashboardContent() {
               </Card>
             )}
 
+            {/* Quick Actions for Traders */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <Link href="/">
                 <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
                   <CardHeader>
                     <LineChart className="w-8 h-8 text-primary mb-2" />
                     <CardTitle className="text-lg">Markets</CardTitle>
-                    <CardDescription>View all commodity markets</CardDescription>
+                    <CardDescription>Trade commodity markets</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
               <Link href="/insights">
-                <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <Card className="border-primary/50 hover:border-primary hover:shadow-lg transition-all cursor-pointer h-full bg-primary/5">
                   <CardHeader>
                     <BarChart3 className="w-8 h-8 text-primary mb-2" />
                     <CardTitle className="text-lg">AI Insights</CardTitle>
-                    <CardDescription>AI-powered analysis</CardDescription>
+                    <CardDescription>Get AI-powered analysis</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
-              <Card className="border-gray-200 hover:shadow-lg transition-shadow h-full">
-                <CardHeader>
-                  <Activity className="w-8 h-8 text-primary mb-2" />
-                  <CardTitle className="text-lg">Portfolio</CardTitle>
-                  <CardDescription>Your positions & history</CardDescription>
-                </CardHeader>
-              </Card>
+              <Link href="/deals">
+                <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader>
+                    <Activity className="w-8 h-8 text-primary mb-2" />
+                    <CardTitle className="text-lg">Browse Deals</CardTitle>
+                    <CardDescription>Find commodity deals</CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
             </div>
           </>
         )}
