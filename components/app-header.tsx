@@ -18,18 +18,11 @@ export function AppHeader() {
   const navLinks = (
     <>
       <Link 
-        href="/marketplace" 
+        href="/" 
         className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
         onClick={() => setMobileMenuOpen(false)}
       >
         Markets
-      </Link>
-      <Link 
-        href="/how-it-works" 
-        className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        How it Works
       </Link>
       {userType === 'farmer' && (
         <Link 
@@ -42,13 +35,6 @@ export function AppHeader() {
       )}
       {userType === 'coop' && (
         <>
-          <Link 
-            href="/marketplace" 
-            className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Marketplace
-          </Link>
           <Link 
             href="/wheat-maize-markets" 
             className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
@@ -65,7 +51,6 @@ export function AppHeader() {
           </Link>
         </>
       )}
-      {/* Dashboard link left visible; auth disabled so it behaves like a normal link */}
       <Link 
         href="/dashboard" 
         className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
@@ -78,17 +63,8 @@ export function AppHeader() {
         className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
         onClick={() => setMobileMenuOpen(false)}
       >
-        AI Insights
+        Insights
       </Link>
-      {userType !== 'coop' && (
-        <Link 
-          href="/whitepaper" 
-          className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
-          onClick={() => setMobileMenuOpen(false)}
-        >
-          Docs
-        </Link>
-      )}
     </>
   )
 

@@ -17,9 +17,26 @@ const UserTypeContext = createContext<UserTypeContextType | undefined>(undefined
 export function UserTypeProvider({ children }: { children: ReactNode }) {
   const [userType, setUserTypeState] = useState<UserType>(null)
   
-  // Load from localStorage on mount
+  // Load from localStorage on mount - check both onboarding and userType
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // First check if there's onboarding data with userType
+      const onboardingData = localStorage.getItem('onboarding')
+      if (onboardingData) {
+        try {
+          const parsed = JSON.parse(onboardingData)
+          if (parsed.userType && (parsed.userType === 'farmer' || parsed.userType === 'trader' || parsed.userType === 'coop')) {
+            setUserTypeState(parsed.userType)
+            // Also save to userType storage for consistency
+            localStorage.setItem('userType', parsed.userType)
+            return
+          }
+        } catch (e) {
+          console.error('Failed to parse onboarding data:', e)
+        }
+      }
+      
+      // Fallback to userType storage
       const stored = localStorage.getItem('userType') as UserType
       if (stored === 'farmer' || stored === 'trader' || stored === 'coop' || stored === null) {
         setUserTypeState(stored)
@@ -33,6 +50,17 @@ export function UserTypeProvider({ children }: { children: ReactNode }) {
     if (typeof window !== 'undefined') {
       if (type) {
         localStorage.setItem('userType', type)
+        // Also update onboarding data if it exists
+        const onboardingData = localStorage.getItem('onboarding')
+        if (onboardingData) {
+          try {
+            const parsed = JSON.parse(onboardingData)
+            parsed.userType = type
+            localStorage.setItem('onboarding', JSON.stringify(parsed))
+          } catch (e) {
+            console.error('Failed to update onboarding data:', e)
+          }
+        }
       } else {
         localStorage.removeItem('userType')
       }
