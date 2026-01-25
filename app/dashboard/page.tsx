@@ -8,6 +8,7 @@ import { Activity, TrendingUp, Bell, DollarSign, Sprout, LineChart, Users, Award
 import { useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useUserType } from '@/components/user-type-provider'
+import { SellerDashboard } from '@/components/dashboard/seller-dashboard'
 import Link from 'next/link'
 
 // Force dynamic rendering to avoid static generation issues with useSearchParams
@@ -108,46 +109,9 @@ function DashboardContent() {
           )}
         </div>
 
-        {/* Personalized Quick Actions */}
+        {/* Seller Dashboard for Farmers */}
         {userType === 'farmer' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <Link href="/grades">
-              <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
-                <CardHeader>
-                  <Award className="w-8 h-8 text-primary mb-2" />
-                  <CardTitle className="text-lg">Crop Grades</CardTitle>
-                  <CardDescription>View quality standards for your crops</CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
-            <Link href="/marketplace">
-              <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
-                <CardHeader>
-                  <DollarSign className="w-8 h-8 text-primary mb-2" />
-                  <CardTitle className="text-lg">Live Prices</CardTitle>
-                  <CardDescription>Check current market prices</CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
-            <Link href="/deals/new">
-              <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
-                <CardHeader>
-                  <FileText className="w-8 h-8 text-primary mb-2" />
-                  <CardTitle className="text-lg">List Harvest</CardTitle>
-                  <CardDescription>List your crops on marketplace</CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
-            <Link href="/insights">
-              <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
-                <CardHeader>
-                  <BarChart3 className="w-8 h-8 text-primary mb-2" />
-                  <CardTitle className="text-lg">AI Insights</CardTitle>
-                  <CardDescription>Get price predictions & advice</CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
-          </div>
+          <SellerDashboard />
         )}
 
         {userType === 'trader' && (

@@ -12,9 +12,31 @@ const isFarmerRoute = createRouteMatcher(['/farmer(.*)']);
 const isTraderRoute = createRouteMatcher(['/trader(.*)']);
 const isCooperativeRoute = createRouteMatcher(['/cooperative(.*)']);
 
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/onboarding',
+  '/api/webhooks',
+]);
+
 export default clerkMiddleware(async (auth, req) => {
   const session = await auth();
   const role = session.sessionClaims?.metadata?.role;
+  const { pathname } = req.nextUrl;
+
+  // Handle onboarding flow for authenticated users
+  if (session && !isPublicRoute(req)) {
+    // Check if user has completed onboarding
+    // This would typically come from your database
+    const onboardingCompleted = req.cookies.get('onboarding_completed')
+    
+    if (!onboardingCompleted && pathname !== "/onboarding") {
+      // Redirect to onboarding
+      const onboardingUrl = new URL("/onboarding", req.url)
+      return NextResponse.redirect(onboardingUrl)
+    }
+  }
 
   // Protect admin routes - only admins can access
   if (isAdminRoute(req) && role !== 'admin') {
