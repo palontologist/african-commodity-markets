@@ -6,7 +6,7 @@
 import { getTridgePrice as fetchTridgePrice } from './scrapers/tridge-scraper'
 import { getKAMISPrice } from './scrapers/kamis-scraper'
 
-export type CommoditySymbol = 'COFFEE' | 'COCOA' | 'COTTON' | 'CASHEW' | 'RUBBER' | 'GOLD' | 'TEA' | 'AVOCADO' | 'MACADAMIA' | 'WHEAT' | 'MAIZE'
+export type CommoditySymbol = 'COFFEE' | 'COCOA' | 'COTTON' | 'CASHEW' | 'RUBBER' | 'GOLD' | 'TEA' | 'AVOCADO' | 'MACADAMIA' | 'WHEAT' | 'MAIZE' | 'SUNFLOWER' | 'COPPER'
 export type Region = 'AFRICA' | 'LATAM'
 
 interface PriceData {
@@ -44,7 +44,9 @@ const WORLD_BANK_MAP: Partial<Record<CommoditySymbol, string>> = {
   'AVOCADO': 'PFRUVT',    // Fruits
   'MACADAMIA': 'PNUTS',   // Nuts
   'WHEAT': 'PWHEAMT',     // Wheat
-  'MAIZE': 'PMAIZMT'      // Maize (Corn)
+  'MAIZE': 'PMAIZMT',     // Maize (Corn)
+  'SUNFLOWER': 'PSUNO',   // Sunflower oil
+  'COPPER': 'PCOPP'       // Copper
 }
 
 // Cache for price data (5 minute TTL)
@@ -314,7 +316,9 @@ function getFallbackPrice(symbol: CommoditySymbol): PriceData {
     'AVOCADO': 2.80,      // USD per kg
     'MACADAMIA': 14.50,   // USD per kg
     'WHEAT': 173,         // USD per metric ton (from Alpha Vantage)
-    'MAIZE': 196          // USD per metric ton (from Alpha Vantage CORN)
+    'MAIZE': 196,         // USD per metric ton (from Alpha Vantage CORN)
+    'SUNFLOWER': 980,     // USD per metric ton (sunflower oil)
+    'COPPER': 9200        // USD per metric ton
   }
   
   console.warn(`Using fallback price for ${symbol}`)

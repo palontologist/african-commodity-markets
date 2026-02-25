@@ -1,0 +1,130 @@
+[
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_poRFeed", "type": "address" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      { "internalType": "int256", "name": "reserves_", "type": "int256" },
+      { "internalType": "uint256", "name": "claimed", "type": "uint256" }
+    ],
+    "name": "InsufficientReserves",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "updatedAt", "type": "uint256" }
+    ],
+    "name": "StaleReserveData",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "Unauthorized",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "oldFeed", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newFeed", "type": "address" }
+    ],
+    "name": "PoRFeedUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "bytes32", "name": "ipfsHash", "type": "bytes32" },
+      { "indexed": false, "internalType": "uint256", "name": "claimedQty", "type": "uint256" },
+      { "indexed": true, "internalType": "address", "name": "submitter", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256" }
+    ],
+    "name": "ProofSubmitted",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "getLatestReserve",
+    "outputs": [
+      { "internalType": "int256", "name": "reserveValue", "type": "int256" },
+      { "internalType": "uint256", "name": "updatedAt", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "ipfsHash", "type": "bytes32" }
+    ],
+    "name": "isVerified",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "poRFeed",
+    "outputs": [
+      { "internalType": "contract AggregatorV3Interface", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "", "type": "bytes32" }
+    ],
+    "name": "proofSubmitters",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "", "type": "bytes32" }
+    ],
+    "name": "proofTimestamps",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "", "type": "bytes32" }
+    ],
+    "name": "reserves",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "ipfsHash", "type": "bytes32" },
+      { "internalType": "uint256", "name": "claimedQty", "type": "uint256" }
+    ],
+    "name": "submitProof",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_newFeed", "type": "address" }
+    ],
+    "name": "updatePoRFeed",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

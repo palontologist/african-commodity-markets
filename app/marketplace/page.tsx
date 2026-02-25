@@ -29,6 +29,8 @@ export default function MarketplacePage() {
         { id: 'cotton', symbol: 'COTTON', name: 'Cotton', unit: '/lb' },
         { id: 'avocado', symbol: 'AVOCADO', name: 'Avocado', unit: '/kg' },
         { id: 'macadamia', symbol: 'MACADAMIA', name: 'Macadamia', unit: '/kg' },
+        { id: 'sunflower', symbol: 'SUNFLOWER', name: 'Sunflower', unit: '/MT' },
+        { id: 'copper', symbol: 'COPPER', name: 'Copper', unit: '/MT' },
       ]
 
       const fetchedPrices = await Promise.all(
