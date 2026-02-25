@@ -73,6 +73,8 @@ export default function NewDealPage() {
 
       if (data.success) {
         router.push(`/deals/${data.deal.id}`)
+      } else if (data.kycRequired) {
+        alert('KYC verification required. Please complete identity verification in your profile before listing a deal.')
       } else {
         alert(data.error || 'Failed to create deal')
       }

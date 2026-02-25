@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
-import { userDeals, dealInquiries } from '@/lib/db/schema';
+import { userDeals, dealInquiries, userProfiles } from '@/lib/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -95,6 +95,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields' },
         { status: 400 }
+      );
+    }
+
+    // KYC check: seller must have a verified profile before listing
+    const profile = await db
+      .select()
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, userId))
+      .limit(1);
+
+    if (!profile.length || !profile[0].kycVerified) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'KYC verification required. Please complete identity verification before listing a deal.',
+          kycRequired: true,
+        },
+        { status: 403 }
       );
     }
 
