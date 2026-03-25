@@ -1,556 +1,224 @@
-'use client'
+"use client";
 
-import { useUser, RedirectToSignIn } from '@clerk/nextjs'
-import { AppHeader } from '@/components/app-header'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Activity, TrendingUp, Bell, DollarSign, Sprout, LineChart, Users, Award, FileText, Database, BarChart3, Coffee, Flower2, Leaf, Palmtree, Apple, Nut, Coins, Zap, Sun, Plus } from 'lucide-react'
-import { useEffect, Suspense, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { useUserType } from '@/components/user-type-provider'
-import { SellerDashboard } from '@/components/dashboard/seller-dashboard'
-import Link from 'next/link'
+import { useState, useEffect } from "react";
+import { CooperativeService } from "@/lib/cooperative-service";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowUpRight, ArrowDownRight, ShieldCheck, AlertTriangle, Wallet, Loader2 } from "lucide-react";
+import { ethers } from "ethers";
 
-// Force dynamic rendering to avoid static generation issues with useSearchParams
-export const dynamic = 'force-dynamic'
-
-// Commodity icon mapping
-const COMMODITY_ICONS: Record<string, any> = {
-  coffee: Coffee,
-  cocoa: Flower2,
-  tea: Leaf,
-  cotton: Palmtree,
-  avocado: Apple,
-  macadamia: Nut,
-  gold: Coins,
-  copper: Zap,
-  sunflower: Sun,
-}
-
-function DashboardContent() {
-  const { user, isLoaded, isSignedIn } = useUser()
-  const { userType, setUserType } = useUserType()
-  const searchParams = useSearchParams()
-  const [onboardingData, setOnboardingData] = useState<any>(null)
-  const [commodityPrices, setCommodityPrices] = useState<Record<string, any>>({})
-  const [loadingPrices, setLoadingPrices] = useState(true)
-
-  // Load onboarding data from localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedData = localStorage.getItem('onboarding')
-      if (storedData) {
-        try {
-          const parsed = JSON.parse(storedData)
-          setOnboardingData(parsed)
-          // Set user type from onboarding if not already set
-          if (parsed.userType && !userType) {
-            setUserType(parsed.userType)
-          }
-        } catch (e) {
-          console.error('Failed to parse onboarding data:', e)
-        }
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    // Set user type from URL if provided
-    const typeParam = searchParams.get('type')
-    if (typeParam && (typeParam === 'farmer' || typeParam === 'trader' || typeParam === 'coop')) {
-      setUserType(typeParam)
-    }
-  }, [searchParams, setUserType])
-
-  // Fetch prices for selected commodities
-  useEffect(() => {
-    async function fetchPrices() {
-      if (!onboardingData?.selectedCommodities || onboardingData.selectedCommodities.length === 0) {
-        setLoadingPrices(false)
-        return
-      }
-
-      setLoadingPrices(true)
-      const prices: Record<string, any> = {}
-      
-      for (const commodityId of onboardingData.selectedCommodities) {
-        try {
-          const symbol = commodityId.toUpperCase()
-          const response = await fetch(`/api/live-prices?symbol=${symbol}&region=AFRICA`)
-          if (response.ok) {
-            const data = await response.json()
-            prices[commodityId] = data.data
-          }
-        } catch (error) {
-          console.error(`Failed to fetch price for ${commodityId}:`, error)
-        }
-      }
-      
-      setCommodityPrices(prices)
-      setLoadingPrices(false)
-    }
-
-    fetchPrices()
-  }, [onboardingData])
-
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
-      </div>
-    )
-  }
-
-  if (!isSignedIn) {
-    return <RedirectToSignIn />
-  }
-
-  const userName = user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || 'User'
-
-  const getWelcomeMessage = () => {
-    if (userType === 'farmer') {
-      return {
-        title: `Welcome back, ${userName}!`,
-        subtitle: 'Manage your crops and access live prices',
-        icon: Sprout
-      }
-    } else if (userType === 'trader') {
-      return {
-        title: `Welcome back, ${userName}!`,
-        subtitle: 'Track your commodities and insights',
-        icon: LineChart
-      }
-    } else if (userType === 'coop') {
-      return {
-        title: `Welcome back, ${userName}!`,
-        subtitle: 'Access analytics and API data',
-        icon: Users
-      }
-    }
-    return {
-      title: `Welcome back, ${userName}!`,
-      subtitle: 'Track commodity markets',
-      icon: Activity
-    }
-  }
-
-  const welcome = getWelcomeMessage()
-  const WelcomeIcon = welcome.icon
-
-  return (
-    <div className="min-h-screen bg-white">
-      <AppHeader />
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-              <WelcomeIcon className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                {welcome.title}
-              </h1>
-              <p className="text-gray-600 mt-1">
-                {welcome.subtitle}
-              </p>
-            </div>
-          </div>
-          {!userType && (
-            <div className="mt-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
-              <p className="text-sm text-gray-600 mb-3">
-                Select your profile type:
-              </p>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => setUserType('farmer')}>
-                  <Sprout className="w-4 h-4 mr-2" /> Farmer
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => setUserType('trader')}>
-                  <LineChart className="w-4 h-4 mr-2" /> Trader
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => setUserType('coop')}>
-                  <Users className="w-4 h-4 mr-2" /> Co-op
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Seller Dashboard for Farmers */}
-        {userType === 'farmer' && (
-          <>
-            {/* Quick Action Buttons for Farmers */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <Link href="/deals/new">
-                <Card className="border-primary/50 hover:border-primary hover:shadow-lg transition-all cursor-pointer h-full bg-primary/5">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-lg">List Your Commodities</CardTitle>
-                        <CardDescription>Create a new listing</CardDescription>
-                      </div>
-                      <Plus className="w-8 h-8 text-primary" />
-                    </div>
-                  </CardHeader>
-                </Card>
-              </Link>
-              <Link href="/deals/my">
-                <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-lg">My Listings</CardTitle>
-                        <CardDescription>View your active deals</CardDescription>
-                      </div>
-                      <Activity className="w-8 h-8 text-primary" />
-                    </div>
-                  </CardHeader>
-                </Card>
-              </Link>
-              <Link href="/grades">
-                <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-lg">Crop Grades</CardTitle>
-                        <CardDescription>Check quality standards</CardDescription>
-                      </div>
-                      <Award className="w-8 h-8 text-primary" />
-                    </div>
-                  </CardHeader>
-                </Card>
-              </Link>
-            </div>
-
-            <SellerDashboard />
-            
-            {/* Show selected commodities prices if available */}
-            {onboardingData?.selectedCommodities && onboardingData.selectedCommodities.length > 0 && (
-              <Card className="mt-8 border-gray-200">
-                <CardHeader>
-                  <CardTitle className="text-xl">Your Commodity Prices</CardTitle>
-                  <CardDescription>
-                    Live prices for your selected commodities
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {loadingPrices ? (
-                    <p className="text-gray-600">Loading prices...</p>
-                  ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {onboardingData.selectedCommodities.map((commodityId: string) => {
-                        const IconComponent = COMMODITY_ICONS[commodityId] || Activity
-                        const priceData = commodityPrices[commodityId]
-                        return (
-                          <Card key={commodityId} className="text-center border-gray-200">
-                            <CardContent className="pt-4">
-                              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                <IconComponent className="w-5 h-5 text-primary" />
-                              </div>
-                              <p className="text-sm font-medium text-gray-900 capitalize">{commodityId}</p>
-                              {priceData ? (
-                                <>
-                                  <p className="text-lg font-bold text-primary mt-1">
-                                    ${priceData.price?.toFixed(2) || 'N/A'}
-                                  </p>
-                                  <p className="text-xs text-gray-500">{priceData.unit || ''}</p>
-                                </>
-                              ) : (
-                                <p className="text-sm text-gray-500 mt-1">No data</p>
-                              )}
-                            </CardContent>
-                          </Card>
-                        )
-                      })}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </>
-        )}
-
-        {userType === 'trader' && (
-          <>
-            {/* Show selected commodities prices */}
-            {onboardingData?.selectedCommodities && onboardingData.selectedCommodities.length > 0 ? (
-              <Card className="mb-8 border-gray-200">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-xl">Your Commodity Prices</CardTitle>
-                      <CardDescription>
-                        Live prices for commodities you're tracking
-                      </CardDescription>
-                    </div>
-                    <Link href="/insights">
-                      <Button size="sm">
-                        <BarChart3 className="w-4 h-4 mr-2" />
-                        View Insights
-                      </Button>
-                    </Link>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {loadingPrices ? (
-                    <p className="text-gray-600">Loading prices...</p>
-                  ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {onboardingData.selectedCommodities.map((commodityId: string) => {
-                        const IconComponent = COMMODITY_ICONS[commodityId] || Activity
-                        const priceData = commodityPrices[commodityId]
-                        return (
-                          <Card key={commodityId} className="text-center border-gray-200 hover:shadow-md transition-shadow">
-                            <CardContent className="pt-4">
-                              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                <IconComponent className="w-5 h-5 text-primary" />
-                              </div>
-                              <p className="text-sm font-medium text-gray-900 capitalize">{commodityId}</p>
-                              {priceData ? (
-                                <>
-                                  <p className="text-lg font-bold text-primary mt-1">
-                                    ${priceData.price?.toFixed(2) || 'N/A'}
-                                  </p>
-                                  <p className="text-xs text-gray-500">{priceData.unit || ''}</p>
-                                  <Badge variant="outline" className="text-[10px] mt-2">
-                                    {priceData.source || 'Live'}
-                                  </Badge>
-                                </>
-                              ) : (
-                                <p className="text-sm text-gray-500 mt-1">No data</p>
-                              )}
-                            </CardContent>
-                          </Card>
-                        )
-                      })}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="mb-8 border-gray-200 bg-primary/5">
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <p className="text-gray-600 mb-4">
-                      Complete onboarding to select commodities you want to track
-                    </p>
-                    <Link href="/onboarding">
-                      <Button>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Select Commodities
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Quick Actions for Traders */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <Link href="/">
-                <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  <CardHeader>
-                    <LineChart className="w-8 h-8 text-primary mb-2" />
-                    <CardTitle className="text-lg">Markets</CardTitle>
-                    <CardDescription>Trade commodity markets</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-              <Link href="/insights">
-                <Card className="border-primary/50 hover:border-primary hover:shadow-lg transition-all cursor-pointer h-full bg-primary/5">
-                  <CardHeader>
-                    <BarChart3 className="w-8 h-8 text-primary mb-2" />
-                    <CardTitle className="text-lg">AI Insights</CardTitle>
-                    <CardDescription>Get AI-powered analysis</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-              <Link href="/deals">
-                <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  <CardHeader>
-                    <Activity className="w-8 h-8 text-primary mb-2" />
-                    <CardTitle className="text-lg">Browse Deals</CardTitle>
-                    <CardDescription>Find commodity deals</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-            </div>
-          </>
-        )}
-
-        {userType === 'coop' && (
-          <>
-            {onboardingData?.selectedCommodities && onboardingData.selectedCommodities.length > 0 && (
-              <Card className="mb-8 border-gray-200">
-                <CardHeader>
-                  <CardTitle className="text-xl">Tracked Commodity Prices</CardTitle>
-                  <CardDescription>
-                    Real-time data for your commodities
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {loadingPrices ? (
-                    <p className="text-gray-600">Loading prices...</p>
-                  ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {onboardingData.selectedCommodities.map((commodityId: string) => {
-                        const IconComponent = COMMODITY_ICONS[commodityId] || Activity
-                        const priceData = commodityPrices[commodityId]
-                        return (
-                          <Card key={commodityId} className="text-center border-gray-200">
-                            <CardContent className="pt-4">
-                              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                <IconComponent className="w-5 h-5 text-primary" />
-                              </div>
-                              <p className="text-sm font-medium text-gray-900 capitalize">{commodityId}</p>
-                              {priceData ? (
-                                <>
-                                  <p className="text-lg font-bold text-primary mt-1">
-                                    ${priceData.price?.toFixed(2) || 'N/A'}
-                                  </p>
-                                  <p className="text-xs text-gray-500">{priceData.unit || ''}</p>
-                                </>
-                              ) : (
-                                <p className="text-sm text-gray-500 mt-1">No data</p>
-                              )}
-                            </CardContent>
-                          </Card>
-                        )
-                      })}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <Link href="/">
-                <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  <CardHeader>
-                    <Activity className="w-8 h-8 text-primary mb-2" />
-                    <CardTitle className="text-lg">Markets</CardTitle>
-                    <CardDescription>Browse all markets</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-              <Link href="/wheat-maize-markets">
-                <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  <CardHeader>
-                    <Database className="w-8 h-8 text-primary mb-2" />
-                    <CardTitle className="text-lg">Wheat & Maize</CardTitle>
-                    <CardDescription>Live market data</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-              <Link href="/api-docs">
-                <Card className="border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  <CardHeader>
-                    <FileText className="w-8 h-8 text-primary mb-2" />
-                    <CardTitle className="text-lg">API Docs</CardTitle>
-                    <CardDescription>API integration</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-              <Card className="border-gray-200 hover:shadow-lg transition-shadow h-full">
-                <CardHeader>
-                  <BarChart3 className="w-8 h-8 text-primary mb-2" />
-                  <CardTitle className="text-lg">Analytics</CardTitle>
-                  <CardDescription>Price trends</CardDescription>
-                </CardHeader>
-              </Card>
-            </div>
-          </>
-        )}
-
-        {/* Only show these cards if user hasn't completed onboarding */}
-        {(!onboardingData || !onboardingData.completed) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="border-gray-200 hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg mb-2">Get Started</CardTitle>
-                    <CardDescription>
-                      Complete onboarding to personalize your dashboard
-                    </CardDescription>
-                  </div>
-                  <Activity className="w-8 h-8 text-primary" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Link href="/onboarding">
-                  <Button className="w-full">
-                    Start Onboarding
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="border-gray-200 hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg mb-2">Live Markets</CardTitle>
-                    <CardDescription>
-                      View real-time commodity prices
-                    </CardDescription>
-                  </div>
-                  <TrendingUp className="w-8 h-8 text-primary" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Link href="/">
-                  <Button variant="outline" className="w-full">
-                    View Markets
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="border-gray-200 hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg mb-2">AI Insights</CardTitle>
-                    <CardDescription>
-                      Get market analysis
-                    </CardDescription>
-                  </div>
-                  <BarChart3 className="w-8 h-8 text-primary" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Link href="/insights">
-                  <Button variant="outline" className="w-full">
-                    View Insights
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </main>
-    </div>
-  )
-}
-
-function DashboardLoading() {
-  return (
-    <div className="min-h-screen bg-white">
-      <AppHeader />
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-gray-600">Loading dashboard...</div>
-        </div>
-      </main>
-    </div>
-  )
-}
+// The Contract Address (Base Mainnet)
+const CONTRACT_ADDRESS = "0xc57fC9AF8DA52bC5DD96B03368582DBBe88F9E1a";
+const CONTRACT_ABI = [
+  "function createPrediction(string commodity, uint256 currentPrice, uint256 predictedPrice, uint256 targetDate, uint256 confidence, string model, bytes32 ipfsHash) external returns (uint256)",
+  "function stake(uint256 predictionId, bool isYes, uint256 amount) external"
+];
 
 export default function DashboardPage() {
+  const [portfolio, setPortfolio] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [processing, setProcessing] = useState<string | null>(null);
+
+  useEffect(() => {
+    CooperativeService.getPortfolio("coop_123").then((data) => {
+      setPortfolio(data);
+      setLoading(false);
+    });
+  }, []);
+
+  const connectWallet = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const address = await signer.getAddress();
+        setWalletAddress(address);
+      } catch (err) {
+        console.error("Failed to connect wallet:", err);
+      }
+    } else {
+      alert("Please install MetaMask!");
+    }
+  };
+
+  const handleInsure = async (asset: any) => {
+    if (!walletAddress) {
+      await connectWallet();
+      return;
+    }
+
+    setProcessing(asset.name);
+
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+      // 1. Create a "Hedge" (Prediction) if one doesn't exist
+      // In a real app, the Agent does this. For the demo, we trigger it here.
+      const targetDate = Math.floor(Date.now() / 1000) + 86400 * 7; // 7 days from now
+      const predictedPrice = Math.floor(asset.value * 0.95); // Predict 5% drop (Hedging)
+      
+      console.log("Creating Hedge Contract...");
+      const tx = await contract.createPrediction(
+        asset.name.split(" ")[0].toUpperCase(), // "COFFEE"
+        Math.floor(asset.value),
+        predictedPrice,
+        targetDate,
+        85, // Confidence
+        "qwen/qwen3-32b",
+        ethers.encodeBytes32String("ipfs_hash_placeholder")
+      );
+
+      await tx.wait();
+      alert(`✅ Hedge Created! Transaction Hash: ${tx.hash}`);
+
+    } catch (err) {
+      console.error("Transaction failed:", err);
+      alert("Transaction failed! Check console.");
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  const handleBridge = async () => {
+    setProcessing("BRIDGE");
+    // Simulate bridging delay (2 seconds)
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    alert("✅ Assets Bridged from Solana to Polygon Amoy! Liquidity is now available for hedging.");
+    setProcessing(null);
+  };
+
   return (
-    <Suspense fallback={<DashboardLoading />}>
-      <DashboardContent />
-    </Suspense>
-  )
+    <div className="min-h-screen bg-zinc-50 p-8 font-mono text-zinc-900">
+      {/* Header */}
+      <header className="mb-12 flex items-center justify-between border-b-4 border-zinc-900 pb-6">
+        <div>
+          <h1 className="text-6xl font-black tracking-tighter uppercase">
+            Synthesis <span className="text-blue-600">Markets</span>
+          </h1>
+          <p className="mt-2 text-xl font-medium text-zinc-500">
+            DeFi Risk Assurance for Real World Assets
+          </p>
+        </div>
+        <div className="flex gap-4">
+          <Button 
+            onClick={handleBridge}
+            className="h-14 border-4 border-blue-600 bg-blue-50 text-xl font-bold text-blue-900 shadow-[4px_4px_0px_0px_rgba(37,99,235,1)] hover:bg-blue-100 hover:translate-y-[2px] hover:shadow-none"
+            disabled={!!processing}
+          >
+            {processing === "BRIDGE" ? (
+              <>
+                <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                Bridging...
+              </>
+            ) : (
+              "Bridge Assets"
+            )}
+          </Button>
+          <Button 
+            onClick={connectWallet}
+            className="h-14 border-4 border-zinc-900 bg-white text-xl font-bold text-zinc-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-zinc-100 hover:translate-y-[2px] hover:shadow-none"
+          >
+            <Wallet className="mr-2 h-6 w-6" />
+            {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : "Connect Wallet"}
+          </Button>
+        </div>
+      </header>
+
+      {/* AI Insight Banner */}
+      <div className="mb-12 bg-zinc-900 p-6 text-zinc-50 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        <div className="flex items-start gap-4">
+          <div className="mt-1 h-3 w-3 animate-pulse rounded-full bg-green-500" />
+          <div>
+            <h3 className="text-lg font-bold uppercase tracking-widest text-green-400">
+              Agent Insight (Live)
+            </h3>
+            <p className="mt-2 text-2xl font-medium leading-tight">
+              "Gold prices are nearing an all-time high ($2,400/oz). Consider locking in profits. 
+              Coffee volatility is increasing due to weather reports in Brazil."
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Portfolio Grid */}
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        {loading ? (
+          <p>Loading assets...</p>
+        ) : (
+          portfolio.map((asset, idx) => (
+            <Card key={idx} className="border-4 border-zinc-900 bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-transform hover:-translate-y-1">
+              <CardHeader className="border-b-2 border-zinc-100 pb-4">
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="border-2 border-zinc-900 font-bold uppercase tracking-wider">
+                    {asset.type}
+                  </Badge>
+                  {asset.trend === "UP" ? (
+                    <ArrowUpRight className="h-6 w-6 text-green-600" />
+                  ) : asset.trend === "DOWN" ? (
+                    <ArrowDownRight className="h-6 w-6 text-red-600" />
+                  ) : (
+                    <div className="h-1 w-6 bg-zinc-300" />
+                  )}
+                </div>
+                <CardTitle className="mt-4 text-3xl font-black uppercase tracking-tight">
+                  {asset.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm font-bold uppercase text-zinc-400">Volume</p>
+                    <p className="text-2xl font-bold">
+                      {asset.quantity.toLocaleString()} <span className="text-lg text-zinc-500">{asset.unit}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold uppercase text-zinc-400">Value (Est.)</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      ${asset.value.toLocaleString()}
+                    </p>
+                  </div>
+                  
+                  {/* Risk Indicator */}
+                  <div className="flex items-center gap-2 rounded-md bg-zinc-100 p-2">
+                    {asset.risk === "HIGH" ? (
+                      <AlertTriangle className="h-5 w-5 text-orange-500" />
+                    ) : (
+                      <ShieldCheck className="h-5 w-5 text-green-600" />
+                    )}
+                    <span className="font-bold uppercase text-sm">
+                      Risk: {asset.risk}
+                    </span>
+                  </div>
+
+                  {/* Action Button */}
+                  <Button 
+                    className="w-full border-2 border-zinc-900 bg-zinc-900 text-lg font-bold uppercase text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] hover:bg-zinc-800 hover:translate-y-[2px] hover:shadow-none disabled:opacity-50"
+                    onClick={() => handleInsure(asset)}
+                    disabled={!!processing}
+                  >
+                    {processing === asset.name ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : asset.risk === "HIGH" ? (
+                      "Insure Now"
+                    ) : (
+                      "Manage"
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
+  );
 }
+

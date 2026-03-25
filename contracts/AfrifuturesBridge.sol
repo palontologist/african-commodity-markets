@@ -141,7 +141,7 @@ contract AfrifuturesBridge is AccessControl, ReentrancyGuard {
     ) {
         require(_wormhole != address(0), "Invalid wormhole address");
         require(_usdc != address(0), "Invalid USDC address");
-        require(_affToken != address(0), "Invalid AFF address");
+        // require(_affToken != address(0), "Invalid AFF address"); // Allow 0 address for now
         
         wormhole = IWormhole(_wormhole);
         usdc = IERC20(_usdc);

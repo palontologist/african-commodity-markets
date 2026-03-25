@@ -36,8 +36,8 @@ contract CommodityPriceOracle is Ownable {
     string[] public supportedCommodities;
     address[] public authorizedUpdaterList;
     
-    uint256 public constant STALENESS_THRESHOLD = 3600; // 1 hour in seconds
-    uint256 public constant MIN_CONFIDENCE = 50;        // Minimum confidence score
+    uint256 public STALENESS_THRESHOLD = 3600; // 1 hour in seconds
+    uint256 public MIN_CONFIDENCE = 50;        // Minimum confidence score
     uint256 public constant PRICE_DECIMALS = 2;           // 2 decimal places for cents
     
     // ============ Events ============
@@ -135,25 +135,25 @@ contract CommodityPriceOracle is Ownable {
     /**
      * @notice Batch update multiple commodity prices
      * @param commodities Array of commodity symbols
-     * @param prices Array of prices in cents
+     * @param newPrices Array of prices in cents
      * @param confidences Array of confidence scores
      * @param source Data source name
      */
     function batchUpdatePrices(
         string[] memory commodities,
-        uint256[] memory prices,
+        uint256[] memory newPrices,
         uint256[] memory confidences,
         string memory source
     ) external {
         require(authorizedUpdaters[msg.sender], "Not authorized");
         require(
-            commodities.length == prices.length && 
-            prices.length == confidences.length,
+            commodities.length == newPrices.length && 
+            newPrices.length == confidences.length,
             "Array lengths must match"
         );
         
         for (uint256 i = 0; i < commodities.length; i++) {
-            try this.updatePrice(commodities[i], prices[i], confidences[i], source) {
+            try this.updatePrice(commodities[i], newPrices[i], confidences[i], source) {
                 // Continue on success
             } catch {
                 // Log and continue with next commodity
@@ -251,7 +251,7 @@ contract CommodityPriceOracle is Ownable {
      * @notice Check if price is fresh
      * @param commodity Commodity symbol
      */
-    function isPriceFresh(string memory commodity) external view returns (bool) {
+    function isPriceFresh(string memory commodity) public view returns (bool) {
         PriceData memory priceData = prices[commodity];
         return (block.timestamp - priceData.timestamp) <= STALENESS_THRESHOLD;
     }
