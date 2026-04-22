@@ -15,6 +15,12 @@ module.exports = {
     },
   },
   networks: {
+    // Base Mainnet (L2)
+    base: {
+      url: "https://mainnet.base.org",
+      accounts: [process.env.AGENT_PRIVATE_KEY || ""], 
+      chainId: 8453,
+    },
     // Polygon Amoy Testnet (Mumbai is deprecated)
     amoy: {
       url: process.env.POLYGON_AMOY_RPC || "https://rpc-amoy.polygon.technology",

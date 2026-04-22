@@ -34,13 +34,9 @@ async function main() {
   let AFF_TOKEN = process.env.NEXT_PUBLIC_AFF_TOKEN_POLYGON
   
   if (!AFF_TOKEN || AFF_TOKEN === ethers.ZeroAddress) {
-    console.log('\n📦 Deploying AFF Token...')
-    const AFFToken = await ethers.getContractFactory('AFFToken')
-    const affToken = await AFFToken.deploy(deployer.address)
-    await affToken.waitForDeployment()
-    AFF_TOKEN = await affToken.getAddress()
-    console.log('✅ AFF Token deployed to:', AFF_TOKEN)
-    console.log('   Initial supply: 1,000,000,000 AFF')
+    console.log('\n⚠️ Skipping AFF Token deployment due to low funds.')
+    console.log('   Using Zero Address for now (Bridge will work for USDC only).')
+    AFF_TOKEN = ethers.ZeroAddress
   } else {
     console.log('✅ Using existing AFF Token:', AFF_TOKEN)
   }

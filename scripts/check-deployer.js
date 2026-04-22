@@ -9,15 +9,20 @@ async function main() {
   }
   
   const balance = await ethers.provider.getBalance(deployer.address)
-  const network = await ethers.provider.getNetwork()
   
   console.log('━'.repeat(60))
   console.log('👤 Deployer Account')
   console.log('━'.repeat(60))
   console.log('Address:', deployer.address)
   console.log('Balance:', ethers.formatEther(balance), 'MATIC')
-  console.log('Network:', network.name)
-  console.log('Chain ID:', network.chainId.toString())
+  
+  try {
+      const network = await ethers.provider.getNetwork();
+      console.log('Network:', network.name)
+      console.log('Chain ID:', network.chainId)
+  } catch (e) {
+      console.log('Network: Unknown (Error fetching)')
+  }
   console.log('━'.repeat(60))
   
   if (balance === 0n) {
@@ -27,7 +32,6 @@ async function main() {
     console.log('Enter:', deployer.address)
   } else {
     console.log('\n✅ Wallet is funded and ready!')
-    console.log('You have enough MATIC to deploy contracts.')
   }
 }
 
