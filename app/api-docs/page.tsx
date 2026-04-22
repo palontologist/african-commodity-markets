@@ -49,31 +49,31 @@ export default function ApiDocsPage() {
             </div>
             <div>
               <h1 className="text-4xl font-bold text-gray-900">API Documentation</h1>
-              <p className="text-gray-600 mt-2">
-                Connect and consume real-time commodity price data for wheat and maize
-              </p>
+      <p className="text-gray-600 mt-2">
+        Connect and consume real-time commodity price data for African commodities including wheat, maize, coffee, cocoa, and more
+      </p>
             </div>
           </div>
         </div>
 
-        {/* Quick Start */}
-        <Card className="mb-8 border-primary/20 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Terminal className="w-5 h-5" />
-              Quick Start
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-700 mb-4">
-              Get started with our API in minutes. All endpoints are publicly accessible for GET requests.
-            </p>
-            <CodeBlock
-              id="quickstart"
-              code={`curl "https://your-domain.com/api/oracle/wheat-maize"`}
-            />
-          </CardContent>
-        </Card>
+         {/* Quick Start */}
+         <Card className="mb-8 border-primary/20 bg-primary/5">
+           <CardHeader>
+             <CardTitle className="flex items-center gap-2">
+               <Terminal className="w-5 h-5" />
+               Quick Start
+             </CardTitle>
+           </CardHeader>
+           <CardContent>
+             <p className="text-gray-700 mb-4">
+               Get started with our API in minutes. All endpoints are publicly accessible for GET requests.
+             </p>
+             <CodeBlock
+               id="quickstart"
+               code={`curl "https://your-domain.com/api/live-prices?symbols=COFFEE,COCOA,WHEAT,MAIZE"`}
+             />
+           </CardContent>
+         </Card>
 
         {/* Base URL */}
         <Card className="mb-8">
@@ -277,19 +277,161 @@ for item in data['data']:
           </Card>
         </div>
 
+        {/* Enterprise B2B API */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl mb-2">Enterprise B2B API</CardTitle>
+                <CardDescription>
+                  Professional-grade commodity prices and risk analytics for finance companies
+                </CardDescription>
+              </div>
+              <Badge className="bg-green-600">$500/month</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Get Prices with Risk Analytics</h3>
+              <CodeBlock
+                id="b2b-prices"
+                code={`curl "https://your-domain.com/api/b2b/prices?symbols=COFFEE,COCOA" \\
+  -H "X-API-Key: afr_your_api_key_here"`}
+              />
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Response includes</h3>
+              <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                <li>Current price with confidence score</li>
+                <li>Volatility index (annualized)</li>
+                <li>Trend signal (BULLISH/BEARISH/SIDEWAYS)</li>
+                <li>Risk signal (BUY/SELL/HOLD)</li>
+                <li>7-day and 30-day price changes</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Example Response</h3>
+              <CodeBlock
+                id="b2b-response"
+                language="json"
+                code={`{
+  "success": true,
+  "tier": "PREMIUM",
+  "data": {
+    "region": "AFRICA",
+    "prices": [
+      {
+        "symbol": "COFFEE",
+        "success": true,
+        "price": { "current": 3.65, "currency": "USD", "source": "KAMIS" },
+        "risk": {
+          "volatility": 0.28,
+          "volatilityLabel": "MODERATE",
+          "confidenceScore": 0.75,
+          "confidenceLabel": "HIGH",
+          "trend": "BULLISH",
+          "trendStrength": 0.65,
+          "shortTermChange": 0.032,
+          "mediumTermChange": 0.087,
+          "riskSignal": "BUY",
+          "narrative": "Coffee prices showing bullish momentum..."
+        }
+      }
+    ]
+  },
+  "quota": { "used": 150, "limit": 100000, "remaining": 99850 }
+}`}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pricing Tiers */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="text-2xl">Pricing Plans</CardTitle>
+            <CardDescription>
+              Choose the plan that fits your data needs
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-4 gap-4">
+              <div className="border rounded-lg p-4">
+                <h4 className="font-semibold">Free</h4>
+                <p className="text-2xl font-bold mt-2">$0</p>
+                <p className="text-sm text-gray-500">10k requests/mo</p>
+                <ul className="text-sm mt-4 space-y-2">
+                  <li>Basic prices</li>
+                  <li>100/hr rate limit</li>
+                </ul>
+              </div>
+              <div className="border rounded-lg p-4">
+                <h4 className="font-semibold">Basic</h4>
+                <p className="text-2xl font-bold mt-2">$150</p>
+                <p className="text-sm text-gray-500">50k requests/mo</p>
+                <ul className="text-sm mt-4 space-y-2">
+                  <li>Full prices</li>
+                  <li>Risk analytics</li>
+                  <li>1k/hr rate limit</li>
+                </ul>
+              </div>
+              <div className="border rounded-lg p-4 border-primary">
+                <h4 className="font-semibold">Premium</h4>
+                <p className="text-2xl font-bold mt-2">$500</p>
+                <p className="text-sm text-gray-500">100k requests/mo</p>
+                <ul className="text-sm mt-4 space-y-2">
+                  <li>All commodities</li>
+                  <li>Risk analytics</li>
+                  <li>Historical data</li>
+                  <li>5k/hr rate limit</li>
+                </ul>
+              </div>
+              <div className="border rounded-lg p-4">
+                <h4 className="font-semibold">Enterprise</h4>
+                <p className="text-2xl font-bold mt-2">Custom</p>
+                <p className="text-sm text-gray-500">Unlimited</p>
+                <ul className="text-sm mt-4 space-y-2">
+                  <li>Dedicated support</li>
+                  <li>SLA guarantee</li>
+                  <li>Custom endpoints</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Supported Commodities */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="text-2xl">Supported Commodities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-3 gap-4">
+              {['COFFEE', 'COCOA', 'COTTON', 'CASHEW', 'RUBBER', 'GOLD', 'TEA', 'AVOCADO', 'MACADAMIA', 'WHEAT', 'MAIZE', 'SUNFLOWER', 'COPPER'].map((c) => (
+                <div key={c} className="flex items-center gap-2">
+                  <Database className="w-4 h-4 text-primary" />
+                  <span>{c}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* CTA */}
-        <Card className="bg-primary/5 border-primary/20">
+        <Card className="bg-primary/5 border-primary/20 mt-8">
           <CardContent className="pt-8 pb-8 text-center">
             <h3 className="text-2xl font-bold text-gray-900 mb-3">Ready to Integrate?</h3>
             <p className="text-gray-600 mb-6">
-              Start consuming real-time wheat and maize price data in your applications
+              Get reliable East African commodity data your Bloomberg can't match
             </p>
             <div className="flex gap-4 justify-center">
               <Button asChild className="bg-primary hover:bg-primary/90">
-                <a href="/api/oracle/wheat-maize" target="_blank">Test API</a>
+                <a href="/api/b2b/prices?apiKey=afr_demo">Try Demo</a>
               </Button>
               <Button asChild variant="outline" className="border-primary text-primary">
-                <a href="/marketplace">View Live Markets</a>
+                <a href="/enterprise">Get API Key</a>
               </Button>
             </div>
           </CardContent>

@@ -3,21 +3,13 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { AppHeader } from "@/components/app-header"
-import { StakeModal } from "@/components/markets/stake-modal"
 import Link from "next/link"
-import { TrendingUp, TrendingDown, Activity, DollarSign, Coffee, Leaf, Apple, Nut, Flower2, Palmtree, Sprout, LineChart, Users, ArrowRight, ExternalLink, Coins, Zap, Sun } from "lucide-react"
-import { getPrediction, type OnChainPrediction } from "@/lib/blockchain/polygon-client"
-import { type CommoditySymbol, type Region } from "@/lib/live-prices"
+import { TrendingUp, TrendingDown, Activity, Coffee, Leaf, Flower2, Palmtree, Apple, Nut, Coins, Zap, Sun, Settings } from "lucide-react"
+import { getLivePrice, type CommoditySymbol, type Region } from "@/lib/live-prices"
 import { useState, useEffect } from "react"
-import { useUserType } from "@/components/user-type-provider"
-import { useRouter } from "next/navigation"
 
-export const dynamic = 'force-dynamic'
-
-// Commodity data structure matching market page
+// Commodity data structure with grade and location information
 const COMMODITY_DATA = [
   {
     id: "coffee",
@@ -26,6 +18,7 @@ const COMMODITY_DATA = [
     icon: Coffee,
     description: "SCA score-based futures",
     grade: "Specialty 84+",
+    unit: "/lb",
     color: "bg-amber-100 text-amber-800",
     countries: { AFRICA: ["Ethiopia", "Kenya", "Uganda"], LATAM: ["Brazil", "Colombia", "Honduras"] },
   },
@@ -36,6 +29,7 @@ const COMMODITY_DATA = [
     icon: Flower2,
     description: "Grade I & II futures",
     grade: "Grade I",
+    unit: "/MT",
     color: "bg-orange-100 text-orange-800",
     countries: { AFRICA: ["Ghana", "Ivory Coast", "Nigeria"], LATAM: ["Ecuador", "Peru", "Dominican Republic"] },
   },
@@ -46,6 +40,7 @@ const COMMODITY_DATA = [
     icon: Leaf,
     description: "CTC grades prediction market",
     grade: "BOP Grade",
+    unit: "/kg",
     color: "bg-green-100 text-green-800",
     countries: { AFRICA: ["Kenya", "Malawi", "Tanzania"], LATAM: ["Argentina"] },
   },
@@ -56,6 +51,7 @@ const COMMODITY_DATA = [
     icon: Palmtree,
     description: "Grade A & B futures",
     grade: "Grade A",
+    unit: "/lb",
     color: "bg-blue-100 text-blue-800",
     countries: { AFRICA: ["Egypt", "Burkina Faso", "Mali"], LATAM: ["Brazil", "Argentina"] },
   },
@@ -66,6 +62,7 @@ const COMMODITY_DATA = [
     icon: Apple,
     description: "Export grade predictions",
     grade: "Grade A",
+    unit: "/kg",
     color: "bg-emerald-100 text-emerald-800",
     countries: { AFRICA: ["Kenya", "South Africa"], LATAM: ["Mexico", "Peru", "Chile"] },
   },
@@ -76,6 +73,7 @@ const COMMODITY_DATA = [
     icon: Nut,
     description: "MQA quality standards",
     grade: "MQA_I",
+    unit: "/kg",
     color: "bg-orange-100 text-orange-800",
     countries: { AFRICA: ["South Africa", "Kenya", "Malawi"], LATAM: ["Guatemala", "Costa Rica"] },
   },
@@ -86,6 +84,7 @@ const COMMODITY_DATA = [
     icon: Coins,
     description: "Precious metals futures",
     grade: "24K",
+    unit: "/oz",
     color: "bg-yellow-100 text-yellow-800",
     countries: { AFRICA: ["South Africa", "Ghana", "Mali"], LATAM: ["Peru", "Mexico", "Brazil"] },
   },
@@ -96,6 +95,7 @@ const COMMODITY_DATA = [
     icon: Zap,
     description: "Industrial metals trading",
     grade: "Grade A",
+    unit: "/MT",
     color: "bg-red-100 text-red-800",
     countries: { AFRICA: ["Zambia", "DRC", "South Africa"], LATAM: ["Chile", "Peru", "Mexico"] },
   },
@@ -106,662 +106,324 @@ const COMMODITY_DATA = [
     icon: Sun,
     description: "Oil seeds and commodities",
     grade: "Grade A",
+    unit: "/MT",
     color: "bg-yellow-100 text-yellow-800",
     countries: { AFRICA: ["South Africa", "Kenya", "Uganda"], LATAM: ["Argentina", "Brazil", "Ukraine"] },
   },
 ]
 
 export default function HomePage() {
-  const { setUserType, userType } = useUserType()
-  const router = useRouter()
-  const [selectedRegion, setSelectedRegion] = useState<Region>('AFRICA')
-  const [selectedCommodity, setSelectedCommodity] = useState<string>('all')
-  const [selectedCountry, setSelectedCountry] = useState<string>('all')
-  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('all')
-  const [isLive, setIsLive] = useState(true)
-  const [predictions, setPredictions] = useState<OnChainPrediction[]>([])
   const [livePrices, setLivePrices] = useState<Record<string, any>>({})
   const [loading, setLoading] = useState(true)
-  const [stakeModalOpen, setStakeModalOpen] = useState(false)
-  const [selectedMarket, setSelectedMarket] = useState<any>(null)
-  const [stakingStats, setStakingStats] = useState({
-    totalValueLocked: 2400000,
-    activeStakers: 1247,
-    averageAPY: 12.4,
-  })
-
-  const handleUserTypeSelect = (type: 'farmer' | 'trader' | 'coop') => {
-    setUserType(type)
-    // Navigate to personalized dashboard or show relevant features
-    router.push(`/dashboard?type=${type}`)
-  }
+  const [selectedRegion, setSelectedRegion] = useState<Region>('AFRICA')
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchLivePrices() {
       try {
-        // Fetch recent on-chain predictions
-        const fetchedPredictions: OnChainPrediction[] = []
-        for (let i = 0; i < 10; i++) {
-          try {
-            const prediction = await getPrediction(i)
-            // Filter out invalid/empty predictions
-            if (
-              prediction.commodity && 
-              prediction.commodity !== '' &&
-              Number(prediction.predictedPrice) > 0 &&
-              Number(prediction.targetDate) > 0
-            ) {
-              fetchedPredictions.push(prediction)
-            }
-          } catch (error) {
-            break
-          }
-        }
-        setPredictions(fetchedPredictions)
-
-        // Fetch live prices for all commodities
+        setLoading(true)
+        setError(null)
+        
         const symbols = COMMODITY_DATA.map(c => c.symbol).join(',')
-        try {
-          const response = await fetch(`/api/live-prices?symbols=${symbols}&region=${selectedRegion}`)
-          const data = await response.json()
-          
-          const pricesData: Record<string, any> = {}
-          if (data.data && Array.isArray(data.data)) {
-            data.data.forEach((price: any, index: number) => {
-              if (price) {
-                const commodityId = COMMODITY_DATA[index].id
-                pricesData[commodityId] = price
-              }
-            })
-          }
-          setLivePrices(pricesData)
-        } catch (error) {
-          console.error('Failed to fetch live prices:', error)
+        const response = await fetch(`/api/live-prices?symbols=${symbols}&region=${selectedRegion}`)
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch live prices')
         }
-
-        // Fetch staking stats
-        try {
-          const statsResponse = await fetch('/api/staking/stats')
-          if (statsResponse.ok) {
-            const stats = await statsResponse.json()
-            setStakingStats(stats)
-          }
-        } catch (error) {
-          console.error('Failed to fetch staking stats:', error)
+        
+        const data = await response.json()
+        
+        const pricesData: Record<string, any> = {}
+        if (data.data && Array.isArray(data.data)) {
+          data.data.forEach((price: any, index: number) => {
+            if (price) {
+              const commodityId = COMMODITY_DATA[index].id
+              pricesData[commodityId] = price
+            }
+          })
         }
-      } catch (error) {
-        console.error('Failed to fetch data:', error)
+        
+        setLivePrices(pricesData)
+      } catch (err) {
+        console.error('Error fetching live prices:', err)
+        setError('Unable to load live price data. Please try again later.')
       } finally {
         setLoading(false)
       }
     }
-    fetchData()
+    
+    fetchLivePrices()
   }, [selectedRegion])
 
-  // Filter commodities by region
-  const filteredCommodities = COMMODITY_DATA.filter(c => {
-    if (selectedCommodity !== 'all' && c.id !== selectedCommodity) return false
-    return c.countries[selectedRegion].length > 0
-  })
+  const handleRegionChange = (region: Region) => {
+    setSelectedRegion(region)
+  }
 
-  // Calculate statistics
-  const totalActiveMarkets = filteredCommodities.length * 3 // Average 3 markets per commodity
-  const totalVolume = predictions.reduce((sum, p) => sum + Number(p.yesStakes + p.noStakes), 0)
-  const avgReturn = selectedRegion === 'AFRICA' ? '+14.7%' : '+11.3%'
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <AppHeader />
+        <main className="container mx-auto px-4 py-16">
+          <div className="text-center">
+            <Activity className="w-16 h-16 text-gray-400 mx-auto mb-6 animate-spin" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading live commodity prices...</h3>
+            <p className="text-gray-600">Fetching real-time data from African markets</p>
+          </div>
+        </main>
+      </div>
+    )
+  }
 
-  // Handle opening stake modal with market data
-  const handleStakeClick = (commodity: typeof COMMODITY_DATA[0]) => {
-    const priceData = livePrices[commodity.id]
-    const currentPrice = priceData?.price || 0
-    
-    // Create a market object for the stake modal
-    const market = {
-      id: `market-${commodity.id}-${Date.now()}`,
-      commodity: commodity.symbol,
-      question: `Will ${commodity.name} reach $${(currentPrice * 1.15).toFixed(2)} by December 31, 2025?`,
-      thresholdPrice: Math.round(currentPrice * 1.15 * 100), // 15% increase as threshold
-      expiryTime: new Date('2025-12-31').getTime(),
-      yesPool: Math.random() * 100 + 50, // Mock pool data
-      noPool: Math.random() * 75 + 25,
-      chain: 'polygon' as const, // Default to Polygon, can be changed
-      resolved: false,
-    }
-    
-    setSelectedMarket(market)
-    setStakeModalOpen(true)
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white">
+        <AppHeader />
+        <main className="container mx-auto px-4 py-16">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen bg-white">
       <AppHeader />
+      
+      {/* Region Selector */}
+      <div className="px-4 py-6 bg-gray-50">
+        <div className="container mx-auto">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Live African Commodity Prices
+            </h1>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-600">Region:</span>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant={selectedRegion === 'AFRICA' ? 'outline' : 'default'}
+                  size="sm"
+                  onClick={() => handleRegionChange('AFRICA')}
+                  className="text-sm px-3 py-1"
+                >
+                  Africa
+                </Button>
+                <Button 
+                  variant={selectedRegion === 'LATAM' ? 'outline' : 'default'}
+                  size="sm"
+                  onClick={() => handleRegionChange('LATAM')}
+                  className="text-sm px-3 py-1"
+                >
+                  Latin America
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      {/* Live Price Grid */}
       <main className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
-        <div className="mb-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-12">
-            <div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
-                Trade the future of African commodities.
-              </h1>
-              <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">
-                Discover real prices, share risks, and unlock instant capital for African commodity markets.
-              </p>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-                <Button asChild size="lg" className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
-                  <Link href="/marketplace">Browse Markets</Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/10 w-full sm:w-auto">
-                  <Link href="/how-it-works">How it Works</Link>
-                </Button>
-              </div>
-            </div>
-            <div className="relative">
-              {/* Abstract illustrations */}
-              <div className="relative h-64 lg:h-80">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl blur-3xl"></div>
-                <div className="relative bg-white rounded-xl p-8 shadow-lg border border-primary/10">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="text-sm text-gray-600">USDC</p>
-                      <p className="text-2xl font-bold text-gray-900">$1,234.56</p>
-                    </div>
-                    <TrendingUp className="w-8 h-8 text-primary" />
-                  </div>
-                  <div className="h-24 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg flex items-center justify-center">
-                    <LineChart className="w-12 h-12 text-primary" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Feature Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-            <Card 
-              className={`border-gray-200 hover:shadow-lg transition-all cursor-pointer ${userType === 'farmer' ? 'border-primary border-2 bg-primary/5' : ''}`}
-              onClick={() => handleUserTypeSelect('farmer')}
-            >
-              <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <Sprout className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle className="text-xl">For Farmers</CardTitle>
-                <CardDescription className="text-base">
-                  Access real-time prices and secure advance payments.
-                </CardDescription>
-                {userType === 'farmer' && (
-                  <div className="mt-4 pt-4 border-t space-y-2">
-                    <Link href="/grades" className="block text-sm text-primary hover:underline">📊 Crop Grades</Link>
-                    <Link href="/marketplace" className="block text-sm text-primary hover:underline">💰 Live Prices</Link>
-                    <Link href="/oracle" className="block text-sm text-primary hover:underline">🔗 Price Oracles</Link>
-                    <Link href="/deals/new" className="block text-sm text-primary hover:underline">📝 List on Marketplace</Link>
-                    <Link href="/insights" className="block text-sm text-primary hover:underline">🤖 AI Insights</Link>
-                  </div>
-                )}
-              </CardHeader>
-            </Card>
-
-            <Card 
-              className={`border-gray-200 hover:shadow-lg transition-all cursor-pointer ${userType === 'trader' ? 'border-primary border-2 bg-primary/5' : ''}`}
-              onClick={() => handleUserTypeSelect('trader')}
-            >
-              <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <LineChart className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle className="text-xl">For Traders</CardTitle>
-                <CardDescription className="text-base">
-                  Hedge risks and discover fair market prices.
-                </CardDescription>
-                {userType === 'trader' && (
-                  <div className="mt-4 pt-4 border-t space-y-2">
-                    <Link href="/marketplace" className="block text-sm text-primary hover:underline">📈 Prediction Markets</Link>
-                    <Link href="/oracle" className="block text-sm text-primary hover:underline">🔗 Price Oracles</Link>
-                    <Link href="/insights" className="block text-sm text-primary hover:underline">🤖 AI Insights</Link>
-                    <Link href="/dashboard" className="block text-sm text-primary hover:underline">💼 Trading Dashboard</Link>
-                  </div>
-                )}
-              </CardHeader>
-            </Card>
-
-            <Card 
-              className={`border-gray-200 hover:shadow-lg transition-all cursor-pointer ${userType === 'coop' ? 'border-primary border-2 bg-primary/5' : ''}`}
-              onClick={() => handleUserTypeSelect('coop')}
-            >
-              <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <Users className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle className="text-xl">For Co-ops</CardTitle>
-                <CardDescription className="text-base">
-                  Pool risks and access better financing terms.
-                </CardDescription>
-                {userType === 'coop' && (
-                  <div className="mt-4 pt-4 border-t space-y-2">
-                    <Link href="/marketplace" className="block text-sm text-primary hover:underline">📈 Marketplace</Link>
-                    <Link href="/oracle" className="block text-sm text-primary hover:underline">🔗 Price Oracles</Link>
-                    <Link href="/wheat-maize-markets" className="block text-sm text-primary hover:underline">🌾 Wheat & Maize Markets</Link>
-                    <Link href="/api-docs" className="block text-sm text-primary hover:underline">📚 API Documentation</Link>
-                    <Link href="/dashboard" className="block text-sm text-primary hover:underline">📊 Analytics Dashboard</Link>
-                  </div>
-                )}
-              </CardHeader>
-            </Card>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid gap-6">
+          {/* Header with stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <Card className="border-gray-200">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Active Markets</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{totalActiveMarkets}</p>
+                    <p className="text-sm text-gray-600 font-medium">Markets Live</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {Object.keys(livePrices).length}
+                    </p>
                   </div>
                   <Activity className="w-8 h-8 text-primary" />
                 </div>
               </CardContent>
             </Card>
-
+            
             <Card className="border-gray-200">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 font-medium">Commodities</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{filteredCommodities.length}</p>
-                  </div>
-                  <TrendingUp className="w-8 h-8 text-primary" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-gray-200">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 font-medium">Total Volume</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">
-                      ${(totalVolume / 1_000_000).toFixed(1)}M
+                    <p className="text-2xl font-bold text-gray-900">
+                      {COMMODITY_DATA.length}
                     </p>
                   </div>
-                  <DollarSign className="w-8 h-8 text-primary" />
+                  <Settings className="w-8 h-8 text-primary" />
                 </div>
               </CardContent>
             </Card>
-
+            
             <Card className="border-gray-200">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Avg. Return</p>
-                    <p className="text-2xl font-bold text-primary mt-1">{avgReturn}</p>
+                    <p className="text-sm text-gray-600 font-medium">Regions</p>
+                    <p className="text-2xl font-bold text-gray-900">2</p>
+                  </div>
+                  <Settings className="w-8 h-8 text-primary" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-gray-200">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 font-medium">Last Updated</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {new Date().toLocaleTimeString()}
+                    </p>
                   </div>
                   <TrendingUp className="w-8 h-8 text-primary" />
                 </div>
               </CardContent>
             </Card>
           </div>
-        </div>
 
-        {/* Filters and Toggle */}
-        <div className="mb-6 space-y-4">
-          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:gap-4">
-            {/* Commodity Filter */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-1 sm:flex-initial">
-              <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Commodity:</label>
-              <Select value={selectedCommodity} onValueChange={setSelectedCommodity}>
-                <SelectTrigger className="w-full sm:w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  {COMMODITY_DATA.map((commodity) => (
-                    <SelectItem key={commodity.id} value={commodity.id}>
-                      {commodity.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Country Filter */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-1 sm:flex-initial">
-              <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Country:</label>
-              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                <SelectTrigger className="w-full sm:w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  {selectedRegion === 'AFRICA' ? (
-                    <>
-                      <SelectItem value="kenya">Kenya</SelectItem>
-                      <SelectItem value="ghana">Ghana</SelectItem>
-                      <SelectItem value="ethiopia">Ethiopia</SelectItem>
-                      <SelectItem value="nigeria">Nigeria</SelectItem>
-                      <SelectItem value="south-africa">South Africa</SelectItem>
-                    </>
-                  ) : (
-                    <>
-                      <SelectItem value="brazil">Brazil</SelectItem>
-                      <SelectItem value="colombia">Colombia</SelectItem>
-                      <SelectItem value="ecuador">Ecuador</SelectItem>
-                      <SelectItem value="peru">Peru</SelectItem>
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Timeframe Filter */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-1 sm:flex-initial">
-              <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Timeframe:</label>
-              <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe}>
-                <SelectTrigger className="w-full sm:w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="quarterly">Quarterly</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Settled/Live Toggle */}
-            <div className="flex items-center gap-3 sm:ml-auto justify-center sm:justify-start">
-              <span className={`text-sm font-medium ${!isLive ? 'text-gray-900' : 'text-gray-500'}`}>
-                Settled
-              </span>
-              <Switch
-                checked={isLive}
-                onCheckedChange={setIsLive}
-                className="data-[state=checked]:bg-primary"
-              />
-              <span className={`text-sm font-medium ${isLive ? 'text-primary' : 'text-gray-500'}`}>
-                Live
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Commodity Markets - Kalshi Style Cards */}
-        {loading ? (
-          <Card className="border-gray-200">
-            <CardContent className="pt-12 pb-12">
-              <div className="text-center">
-                <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4 animate-spin" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading markets...</h3>
-                <p className="text-gray-600">Fetching live data from {selectedRegion}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredCommodities.map((commodity) => {
-              const IconComponent = commodity.icon
+          {/* Commodity Price Cards */}
+          <div className="grid gap-6">
+            {COMMODITY_DATA.map((commodity) => {
               const priceData = livePrices[commodity.id]
               const currentPrice = priceData?.price || 0
-              const change = ((Math.random() - 0.5) * 20).toFixed(1) // Mock change
-              const isPositive = parseFloat(change) > 0
-              const unit = commodity.id === 'coffee' ? '/lb' : '/kg'
-              const activeMarkets = Math.floor(Math.random() * 3) + 2 // 2-4 markets
-              const volume = (currentPrice * activeMarkets * 50000).toFixed(0)
+              const change = priceData?.change || ((Math.random() - 0.5) * 4) // Mock change for demo
+              const isPositive = change >= 0
               
               return (
-                <Card key={commodity.id} className="hover:shadow-lg transition-shadow duration-200 border-gray-200">
+                <Card 
+                  key={commodity.id} 
+                  className="hover:shadow-lg transition-shadow duration-200 border-gray-200 cursor-pointer"
+                  onClick={() => {
+                    // Navigate to commodity detail page
+                    window.location.href = `/prices/${commodity.id}?region=${selectedRegion}`
+                  }}
+                >
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                          <IconComponent className="w-6 h-6 text-primary" />
+                          <commodity.icon className="w-6 h-6 text-primary" />
                         </div>
                         <div>
                           <CardTitle className="text-xl">{commodity.name}</CardTitle>
-                          <CardDescription>{commodity.description}</CardDescription>
+                          <CardDescription className="text-sm text-gray-500">
+                            {commodity.description}
+                          </CardDescription>
                         </div>
                       </div>
-                      <Badge className={commodity.color}>{commodity.grade}</Badge>
+                       <Badge className={`${commodity.color} text-xs font-medium px-3 py-1`}>
+                         {commodity.grade}
+                       </Badge>
                     </div>
                   </CardHeader>
+                  
                   <CardContent className="space-y-4">
                     {/* Price Section */}
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-gray-600">Current Price</p>
-                        <p className="text-2xl font-bold text-gray-900">
-                          ${currentPrice.toFixed(2)}{unit}
+                        <p className="text-3xl font-bold text-gray-900">
+                          ${currentPrice.toFixed(2)}{commodity.unit}
                         </p>
                       </div>
                       <div className="flex items-center space-x-2">
                         {isPositive ? (
-                          <TrendingUp className="w-4 h-4 text-green-600" />
+                          <TrendingUp className="w-5 h-5 text-green-600" />
                         ) : (
-                          <TrendingDown className="w-4 h-4 text-red-600" />
+                          <TrendingDown className="w-5 h-5 text-red-600" />
                         )}
                         <span className={`font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                          {isPositive ? '+' : ''}{change}%
+                          {isPositive ? '+' : ''}{change.toFixed(2)}%
                         </span>
                       </div>
                     </div>
 
-                    {/* Markets in this region */}
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-xs text-gray-600 mb-2">Available in:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {commodity.countries[selectedRegion].map((country) => (
-                          <Badge key={country} variant="secondary" className="text-xs">
+                    {/* Location Badges */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-xs text-gray-600 mb-2 font-medium">
+                        Available in:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {commodity.countries[selectedRegion].map((country, index) => (
+                          <Badge 
+                            key={`${commodity.id}-${country}-${index}`} 
+                            variant="secondary"
+                            className="text-xs px-2 py-1"
+                          >
                             {country}
                           </Badge>
                         ))}
                       </div>
                     </div>
 
-                    {/* Stats */}
+                    {/* Additional Info */}
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="text-gray-600">24h Volume</p>
-                        <p className="font-semibold text-gray-900">${(parseInt(volume) / 1000).toFixed(0)}K</p>
+                        <p className="text-gray-600">Source</p>
+                        <p className="font-medium text-gray-900">
+                          {priceData?.source || 'Market Data'}
+                        </p>
                       </div>
                       <div>
-                        <p className="text-gray-600">Active Markets</p>
-                        <p className="font-semibold text-gray-900">{activeMarkets}</p>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="pt-2 border-t">
-                      <div className="flex space-x-2">
-                        <Button 
-                          asChild
-                          className="flex-1"
-                        >
-                          <Link href={`/marketplace/${commodity.id}?region=${selectedRegion}`}>
-                            View Markets
-                          </Link>
-                        </Button>
-                        <Button asChild variant="outline">
-                          <Link href={`/prices/${commodity.id}`}>
-                            Price Chart
-                          </Link>
-                        </Button>
+                        <p className="text-gray-600">Updated</p>
+                        <p className="font-medium text-gray-900">
+                          {priceData ? 
+                            new Date(priceData.timestamp).toLocaleTimeString() : 
+                            'Just now'
+                          }
+                        </p>
                       </div>
                     </div>
                   </CardContent>
+                  
+                  {/* Footer CTA */}
+                  <div className="px-4 pt-4">
+                    <Button 
+                      variant="outline"
+                      className="w-full text-sm"
+                    >
+                      View Details →
+                    </Button>
+                  </div>
                 </Card>
               )
             })}
           </div>
-        )}
-
-        {/* Price Discovery & Risk Sharing Section */}
-        <div className="mt-16 mb-12">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
-              Price Discovery & Risk Sharing
-            </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Access transparent pricing and share risks across the African commodity value chain.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {/* Real-Time Price Discovery Card */}
-            <Card className="border-gray-200 hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                  <TrendingUp className="w-6 h-6 text-blue-600" />
-                </div>
-                <CardTitle className="text-xl">Real-Time Prices</CardTitle>
-                <CardDescription className="text-base">
-                  Access live market prices from multiple sources
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {COMMODITY_DATA.slice(0, 6).map((commodity) => (
-                    <Badge key={commodity.id} variant="secondary" className="text-xs">
-                      {commodity.name}
-                    </Badge>
-                  ))}
-                </div>
-                <Button asChild className="w-full">
-                  <Link href="/marketplace">View Prices</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Risk Sharing Mechanisms Card */}
-            <Card className="border-gray-200 hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                  <Activity className="w-6 h-6 text-green-600" />
-                </div>
-                <CardTitle className="text-xl">Risk Sharing</CardTitle>
-                <CardDescription className="text-base">
-                  Distribute risks across multiple market participants
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">Risk Coverage</p>
-                  <p className="text-2xl font-bold text-gray-900">Up to 85%</p>
-                  <p className="text-xs text-gray-500 mt-1">Of price volatility risk</p>
-                </div>
-                <Button asChild variant="outline" className="w-full">
-                  <Link href="/risk-sharing">Learn More</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* On-Chain Price Oracles Card */}
-            <Card className="border-gray-200 hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                  <DollarSign className="w-6 h-6 text-purple-600" />
-                </div>
-                <CardTitle className="text-xl">Price Oracles</CardTitle>
-                <CardDescription className="text-base">
-                  Blockchain-verified price feeds for smart contracts
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                    <span className="text-sm font-medium">Update Frequency</span>
-                    <span className="text-sm text-green-600">Every 5 min</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                    <span className="text-sm font-medium">Confidence Score</span>
-                    <span className="text-sm text-green-600">95%+</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                    <span className="text-sm font-medium">Data Sources</span>
-                    <span className="text-sm text-green-600">3+</span>
-                  </div>
-                </div>
-                <div className="pt-2 border-t">
-                  <p className="text-xs text-gray-600 mb-2">
-                    <span className="font-semibold">Tamper-Proof</span><br />
-                    Cryptographically secured price data
-                  </p>
-                </div>
-                <Button asChild className="w-full bg-purple-600 hover:bg-purple-700">
-                  <Link href="/oracles">View Oracles</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Platform Benefits Banner */}
-          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-            <CardContent className="pt-6 pb-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                <div>
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
-                    {filteredCommodities.length}
-                  </div>
-                  <p className="text-sm text-gray-600">Commodities Tracked</p>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-purple-600 mb-2">
-                    24/7
-                  </div>
-                  <p className="text-sm text-gray-600">Price Updates</p>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-green-600 mb-2">
-                    95%+
-                  </div>
-                  <p className="text-sm text-gray-600">Data Accuracy</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
-
-        {/* Footer CTA */}
-        <Card className="mt-12 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
-          <CardContent className="pt-8 pb-8">
-            <div className="text-center max-w-2xl mx-auto">
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                Ready to start trading?
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Connect your wallet to trade on {selectedRegion === 'AFRICA' ? 'African' : 'Latin American'} commodity markets.
-                Low fees, instant settlement, and AI-powered insights.
-              </p>
-              <div className="flex items-center justify-center gap-4">
-                <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
-                  <Link href="/dashboard">Connect Wallet</Link>
-                </Button>
-                <Button asChild variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/10">
-                  <Link href="/marketplace">Browse Marketplace</Link>
-                </Button>
-                <Button asChild variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/10">
-                  <Link href="/oracle">View Price Oracles</Link>
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </main>
 
-      {/* Stake Modal */}
-      {selectedMarket && (
-        <StakeModal
-          market={selectedMarket}
-          open={stakeModalOpen}
-          onOpenChange={setStakeModalOpen}
-          onSuccess={() => {
-            console.log('Stake successful!')
-            // Refresh data after successful stake
-            // You can add logic here to refetch predictions and prices
-          }}
-        />
-      )}
+      {/* Call to Action Section */}
+      <div className="px-4 py-12 bg-gray-50">
+        <div className="container mx-auto text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            Access Institutional-Grade Commodity Data
+          </h2>
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            Real-time prices, grade-specific data, and location-based insights for African commodities.
+            Used by traders, financiers, and agribusinesses across the continent.
+          </p>
+          <div className="flex flex-col md:flex-row justify-center gap-4">
+            <Button 
+              asChild 
+              className="bg-primary hover:bg-primary/90 px-6 py-3"
+            >
+              <Link href="/api-docs">Get API Access</Link>
+            </Button>
+            <Button 
+              asChild 
+              variant="outline"
+              className="border-primary text-primary hover:bg-primary/10 px-6 py-3"
+            >
+              <Link href="/marketplace">Explore Markets</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

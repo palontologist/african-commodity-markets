@@ -2,55 +2,16 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
-import { WalletConnect } from './unified-wallet-connect'
-import { ChainSelector } from './blockchain/chain-selector'
+import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import { Button } from './ui/button'
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog'
 import { Menu, X } from 'lucide-react'
-import { useUserType } from './user-type-provider'
-import { RoleSwitcher } from './role-switcher'
 
 export function AppHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { userType } = useUserType()
 
   const navLinks = (
     <>
-      <Link 
-        href="/" 
-        className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        Markets
-      </Link>
-      {userType === 'farmer' && (
-        <Link 
-          href="/grades" 
-          className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
-          onClick={() => setMobileMenuOpen(false)}
-        >
-          Crop Grades
-        </Link>
-      )}
-      {userType === 'coop' && (
-        <>
-          <Link 
-            href="/wheat-maize-markets" 
-            className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Wheat & Maize
-          </Link>
-          <Link 
-            href="/api-docs" 
-            className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            API Docs
-          </Link>
-        </>
-      )}
       <Link 
         href="/dashboard" 
         className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
@@ -59,11 +20,25 @@ export function AppHeader() {
         Dashboard
       </Link>
       <Link 
-        href="/insights" 
+        href="/oracle" 
         className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
         onClick={() => setMobileMenuOpen(false)}
       >
-        Insights
+        Oracle
+      </Link>
+      <Link 
+        href="/enterprise" 
+        className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50 font-medium"
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        Enterprise
+      </Link>
+      <Link 
+        href="/api-docs" 
+        className="text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        API Docs
       </Link>
     </>
   )
@@ -82,92 +57,79 @@ export function AppHeader() {
             {navLinks}
           </nav>
           
-          {/* Right side: Actions */}
-          <div className="flex items-center gap-2 sm:gap-4">
-            {/* Chain Selector - Hidden on very small screens */}
-            <div className="hidden sm:block">
-              <ChainSelector />
-            </div>
-            
-            {/* Wallet Connect - Responsive sizing */}
-            <div className="hidden sm:block">
-              <WalletConnect />
-            </div>
-            
-            {/* Role Switcher - Only shown when signed in */}
-            <SignedIn>
-              <RoleSwitcher />
-            </SignedIn>
-            
-            {/* Auth */}
-            <SignedOut>
-              <SignInButton mode="modal">
-                <Button variant="outline" size="sm" className="hidden sm:flex">
-                  Sign In
-                </Button>
-              </SignInButton>
-            </SignedOut>
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
-            
-            {/* Mobile Menu Button */}
-            <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="md:hidden"
-                  aria-label="Toggle menu"
-                >
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md w-[calc(100%-2rem)] p-0 top-4 right-4 left-auto translate-x-0 translate-y-0 max-h-[calc(100vh-2rem)] overflow-y-auto">
-                <div className="flex flex-col">
-                  {/* Mobile Menu Header */}
-                  <div className="flex items-center justify-between p-4 border-b">
-                    <span className="text-lg font-bold text-primary">Menu</span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="h-8 w-8"
-                    >
-                      <X className="h-5 w-5" />
-                    </Button>
-                  </div>
-                  
-                  {/* Mobile Navigation Links */}
-                  <nav className="flex flex-col p-4 space-y-1">
-                    {navLinks}
-                  </nav>
-                  
-                  {/* Mobile Actions */}
-                  <div className="border-t p-4 space-y-3">
-                    <div className="block sm:hidden">
-                      <ChainSelector />
-                    </div>
-                    <div className="block sm:hidden">
-                      <WalletConnect />
-                    </div>
-                    <SignedOut>
-                      <SignInButton mode="modal">
-                        <Button className="w-full bg-primary hover:bg-primary/90" onClick={() => setMobileMenuOpen(false)}>
-                          Sign In
-                        </Button>
-                      </SignInButton>
-                    </SignedOut>
-                    <SignedIn>
-                      <div className="flex items-center justify-center">
-                        <UserButton afterSignOutUrl="/" />
-                      </div>
-                    </SignedIn>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
+           {/* Right side: Actions */}
+           <div className="flex items-center gap-2 sm:gap-4">
+             {/* Auth */}
+             <SignedOut>
+               <div className="flex items-center gap-2">
+                 <Button variant="outline" size="sm" className="hidden sm:flex">
+                   Sign In
+                 </Button>
+                 <Button variant="default" size="sm" className="hidden sm:flex bg-primary hover:bg-primary/90">
+                   Sign Up
+                 </Button>
+               </div>
+             </SignedOut>
+             <SignedIn>
+               <div className="hidden sm:flex">
+                 <UserButton />
+               </div>
+             </SignedIn>
+             
+             {/* Mobile Menu Button */}
+             <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+               <DialogTrigger asChild>
+                 <Button
+                   variant="ghost"
+                   size="icon"
+                   className="md:hidden"
+                   aria-label="Toggle menu"
+                 >
+                   <Menu className="h-6 w-6" />
+                 </Button>
+               </DialogTrigger>
+               <DialogContent className="sm:max-w-md w-[calc(100%-2rem)] p-0 top-4 right-4 left-auto translate-x-0 translate-y-0 max-h-[calc(100vh-2rem)] overflow-y-auto">
+                 <div className="flex flex-col">
+                   {/* Mobile Menu Header */}
+                   <div className="flex items-center justify-between p-4 border-b">
+                     <span className="text-lg font-bold text-primary">Menu</span>
+                     <Button
+                       variant="ghost"
+                       size="icon"
+                       onClick={() => setMobileMenuOpen(false)}
+                       className="h-8 w-8"
+                     >
+                       <X className="h-5 w-5" />
+                     </Button>
+                   </div>
+                   
+                   {/* Mobile Navigation Links */}
+                   <nav className="flex flex-col p-4 space-y-1">
+                     {navLinks}
+                   </nav>
+                   
+                   {/* Mobile Actions */}
+                   <div className="border-t p-4 space-y-3">
+                     <SignedOut>
+                       <div className="flex flex-col space-y-2">
+                         <Button className="w-full bg-primary hover:bg-primary/90" onClick={() => setMobileMenuOpen(false)}>
+                           Sign In
+                         </Button>
+                         <Button className="w-full bg-primary hover:bg-primary/90" onClick={() => setMobileMenuOpen(false)}>
+                           Sign Up
+                         </Button>
+                       </div>
+                     </SignedOut>
+                     <SignedIn>
+                       <div className="flex items-center justify-center">
+                         <UserButton />
+                       </div>
+                     </SignedIn>
+                   </div>
+                 </div>
+               </DialogContent>
+             </Dialog>
+           </div>
         </div>
       </div>
     </header>

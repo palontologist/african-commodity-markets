@@ -21,16 +21,18 @@ interface PriceData {
 // Uses COMMODITIES function for actual commodity data
 // Note: Not all commodities are available - verified working endpoints only
 const ALPHA_VANTAGE_COMMODITIES: Record<string, { 
-  function: string
-  unit: 'cents_per_lb' | 'dollar_per_mt' | 'usd_per_oz'
-  displayUnit: string
+   function: string
+   unit: 'cents_per_lb' | 'dollar_per_mt' | 'usd_per_oz'
+   displayUnit: string
 }> = {
-  'COFFEE': { function: 'COFFEE', unit: 'cents_per_lb', displayUnit: 'USD/lb' },
-  'WHEAT': { function: 'WHEAT', unit: 'dollar_per_mt', displayUnit: 'USD/MT' },
-  'MAIZE': { function: 'CORN', unit: 'dollar_per_mt', displayUnit: 'USD/MT' },
-  'COTTON': { function: 'COTTON', unit: 'cents_per_lb', displayUnit: 'USD/lb' },
-  // COCOA not available in Alpha Vantage
-  // GOLD uses a different API
+   'COFFEE': { function: 'COFFEE', unit: 'cents_per_lb', displayUnit: 'USD/lb' },
+   'WHEAT': { function: 'WHEAT', unit: 'dollar_per_mt', displayUnit: 'USD/MT' },
+   'MAIZE': { function: 'CORN', unit: 'dollar_per_mt', displayUnit: 'USD/MT' },
+   'COTTON': { function: 'COTTON', unit: 'cents_per_lb', displayUnit: 'USD/lb' },
+   // COCOA not available in Alpha Vantage
+   // GOLD uses a different API
+   // SUNFLOWER not available in Alpha Vantage
+   // COPPER: { function: 'COPPER', unit: 'cents_per_lb', displayUnit: 'USD/lb' }, // Not consistently available
 }
 
 const WORLD_BANK_MAP: Partial<Record<CommoditySymbol, string>> = {

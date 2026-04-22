@@ -7,11 +7,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { WalletConnect } from "@/components/wallet-connect"
 import { TrendingUp, TrendingDown, ArrowLeft, Info, BarChart3, Clock, Activity, DollarSign, Users } from "lucide-react"
 import Link from "next/link"
-import { notFound } from "next/navigation"
+import { notFound, useParams } from "next/navigation"
 import { MarketPredictionCard } from "@/components/blockchain/market-prediction-card"
 import { getPrediction, type OnChainPrediction } from "@/lib/blockchain/polygon-client"
 import { type CommoditySymbol } from "@/lib/live-prices"
 import { useState, useEffect } from "react"
+
+// Commodity symbol mapping
+const COMMODITY_MAP: Record<string, CommoditySymbol> = {
+  'coffee': 'COFFEE',
+  'cocoa': 'COCOA',
+  'cotton': 'COTTON',
+  'cashew': 'CASHEW',
+  'rubber': 'RUBBER',
+  'gold': 'GOLD',
+  'tea': 'COFFEE', // Fallback - add TEA to live-prices.ts if needed
+  'avocado': 'COFFEE', // Fallback
+  'macadamia': 'CASHEW', // Fallback
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -360,30 +373,9 @@ const commodityDataLatam: CommodityDataMap = {
   },
 }
 
-interface PageProps {
-  params: {
-    commodity: string
-  }
-  searchParams: {
-    region?: string
-  }
-}
-
-// Commodity symbol mapping
-const COMMODITY_MAP: Record<string, CommoditySymbol> = {
-  'coffee': 'COFFEE',
-  'cocoa': 'COCOA',
-  'cotton': 'COTTON',
-  'cashew': 'CASHEW',
-  'rubber': 'RUBBER',
-  'gold': 'GOLD',
-  'tea': 'COFFEE', // Fallback - add TEA to live-prices.ts if needed
-  'avocado': 'COFFEE', // Fallback
-  'macadamia': 'CASHEW', // Fallback
-}
-
 // Client Component - Fetch blockchain data on mount
-export default function CommodityPage({ params, searchParams }: PageProps) {
+export default function CommodityPage({ searchParams }: { searchParams: { region?: string } }) {
+  const params = useParams<{ commodity: string }>()
   const commodityKey = params.commodity.toLowerCase()
   const region = searchParams.region?.toUpperCase() === 'LATAM' ? 'LATAM' : 'AFRICA'
   const commoditySymbol = COMMODITY_MAP[commodityKey] || 'COFFEE'
