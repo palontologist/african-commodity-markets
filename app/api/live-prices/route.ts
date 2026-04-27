@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const symbolParam = searchParams.get('symbol')
   const symbolsParam = searchParams.get('symbols')
-  const region = (searchParams.get('region')?.toUpperCase() || 'AFRICA') as Region
+  const region = (searchParams.get('region')?.toUpperCase() as Region) || 'AFRICA'
 
   try {
     if (symbolsParam) {

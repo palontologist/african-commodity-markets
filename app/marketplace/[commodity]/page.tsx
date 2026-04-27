@@ -10,21 +10,21 @@ import Link from "next/link"
 import { notFound, useParams } from "next/navigation"
 import { MarketPredictionCard } from "@/components/blockchain/market-prediction-card"
 import { getPrediction, type OnChainPrediction } from "@/lib/blockchain/polygon-client"
-import { type CommoditySymbol } from "@/lib/live-prices"
+import { type CommoditySymbol, type Region } from "@/lib/live-prices"
 import { useState, useEffect } from "react"
 
 // Commodity symbol mapping
 const COMMODITY_MAP: Record<string, CommoditySymbol> = {
-  'coffee': 'COFFEE',
-  'cocoa': 'COCOA',
-  'cotton': 'COTTON',
-  'cashew': 'CASHEW',
-  'rubber': 'RUBBER',
-  'gold': 'GOLD',
-  'tea': 'COFFEE', // Fallback - add TEA to live-prices.ts if needed
-  'avocado': 'COFFEE', // Fallback
-  'macadamia': 'CASHEW', // Fallback
-}
+   'coffee': 'COFFEE',
+   'cocoa': 'COCOA',
+   'cotton': 'COTTON',
+   'cashew': 'CASHEW',
+   'rubber': 'RUBBER',
+   'gold': 'GOLD',
+   'tea': 'TEA',
+   'avocado': 'AVOCADO',
+   'macadamia': 'MACADAMIA',
+ }
 
 export const dynamic = 'force-dynamic'
 
@@ -377,14 +377,14 @@ const commodityDataLatam: CommodityDataMap = {
 export default function CommodityPage({ searchParams }: { searchParams: { region?: string } }) {
   const params = useParams<{ commodity: string }>()
   const commodityKey = params.commodity.toLowerCase()
-  const region = searchParams.region?.toUpperCase() === 'LATAM' ? 'LATAM' : 'AFRICA'
+const region = searchParams.region?.toUpperCase() as Region || 'AFRICA'
   const commoditySymbol = COMMODITY_MAP[commodityKey] || 'COFFEE'
   
   const [livePrice, setLivePrice] = useState<{ price: number; unit?: string; source: string } | null>(null)
   const [predictions, setPredictions] = useState<OnChainPrediction[]>([])
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState(false)
-
+ 
   useEffect(() => {
     async function fetchData() {
       try {
