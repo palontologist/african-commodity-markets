@@ -8,6 +8,7 @@ import { SolanaWalletProvider } from '@/components/blockchain/solana-wallet-prov
 import { ChainProvider } from '@/components/blockchain/chain-provider'
 import { UserTypeProvider } from '@/components/user-type-provider'
 import { UserProfileProvider } from '@/components/user-profile-provider'
+import { ContactFooter } from '@/components/contact-footer'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -30,7 +31,10 @@ export default function RootLayout({
               <BlockchainProvider>
                 <SolanaWalletProvider>
                   <UserProfileProvider>
-                    {children}
+                    <div className="flex flex-col min-h-screen">
+                      {children}
+                      <ContactFooter />
+                    </div>
                   </UserProfileProvider>
                 </SolanaWalletProvider>
               </BlockchainProvider>

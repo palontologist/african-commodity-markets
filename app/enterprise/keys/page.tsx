@@ -1,299 +1,169 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AppHeader } from "@/components/app-header"
-import { Key, Plus, Copy, Trash2, Check, AlertTriangle } from "lucide-react"
+import { Mail, Building2, Users, CheckCircle, ArrowRight } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useUser } from "@clerk/nextjs"
 
 export default function EnterpriseKeysPage() {
   const { user, isLoaded } = useUser()
-  const [keys, setKeys] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [creating, setCreating] = useState(false)
-  const [newKeyName, setNewKeyName] = useState('')
-  const [newKey, setNewKey] = useState<string | null>(null)
-  const [copied, setCopied] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [formData, setFormData] = useState({
+    companyName: '',
+    contactName: '',
+    email: '',
+  })
 
+  // Pre-fill email if user is signed in
   useEffect(() => {
-    if (isLoaded && user) {
-      fetchKeys()
+    if (user?.primaryEmailAddress) {
+      setFormData(prev => ({
+        ...prev,
+        email: user.primaryEmailAddress?.emailAddress || ''
+      }))
     }
-  }, [isLoaded, user])
+  }, [user])
 
-  async function fetchKeys() {
-    try {
-      const res = await fetch('/api/enterprise/api-keys')
-      const data = await res.json()
-      if (data.success) {
-        setKeys(data.keys || [])
-      }
-    } catch (e) {
-      console.error('Failed to fetch keys:', e)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function createKey() {
-    if (!newKeyName.trim()) return
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitting(true)
     
-    setCreating(true)
-    setError(null)
-    setNewKey(null)
+    // In production, this would send to your backend/CRM
+    await new Promise(resolve => setTimeout(resolve, 1500))
     
-    try {
-      const res = await fetch('/api/enterprise/api-keys', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newKeyName,
-          tier: 'FREE',
-        }),
-      })
-      const data = await res.json()
-      
-      if (data.success) {
-        setNewKey(data.key.apiKey)
-        fetchKeys()
-      } else {
-        setError(data.error || 'Failed to create key')
-      }
-    } catch (e: any) {
-      setError(e.message)
-    } finally {
-      setCreating(false)
-    }
+    setSubmitting(false)
+    setSubmitted(true)
   }
 
-  async function revokeKey(keyId: number) {
-    if (!confirm('Are you sure you want to revoke this API key?')) return
-    
-    try {
-      const res = await fetch(`/api/enterprise/api-keys?keyId=${keyId}`, {
-        method: 'DELETE',
-      })
-      const data = await res.json()
-      if (data.success) {
-        fetchKeys()
-      }
-    } catch (e) {
-      console.error('Failed to revoke key:', e)
-    }
-  }
-
-  function copyKey(key: string) {
-    navigator.clipboard.writeText(key)
-    setCopied(key)
-    setTimeout(() => setCopied(null), 2000)
-  }
-
-  const tierColors: Record<string, string> = {
-    FREE: 'bg-gray-100 text-gray-800',
-    BASIC: 'bg-blue-100 text-blue-800',
-    PREMIUM: 'bg-primary/20 text-primary',
-    ENTERPRISE: 'bg-purple-100 text-purple-800',
-  }
-
-  if (!isLoaded || loading) {
+  if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-[#0A0A0A]">
         <AppHeader />
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-gray-500">Loading...</div>
+          <div className="text-center text-[#9CA3AF]">Loading...</div>
         </div>
       </div>
     )
   }
 
-  if (!user) {
+  if (submitted) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-[#0A0A0A]">
         <AppHeader />
-        <div className="container mx-auto px-4 py-8">
-          <Card>
-            <CardContent className="pt-8 pb-8 text-center">
-              <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Sign in required</h2>
-              <p className="text-gray-600 mb-4">
-                Please sign in to manage your API keys
+        <main className="container mx-auto px-4 py-16 max-w-2xl">
+          <Card className="border-[#2C2C2C] bg-[#141414]">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-[#FE5102]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-8 h-8 text-[#FE5102]" />
+              </div>
+              <h2 className="text-2xl font-bold text-[#E8E8E8] mb-2">
+                Request Received
+              </h2>
+              <p className="text-[#9CA3AF] mb-6">
+                Thanks for your interest! We'll review your request and get back to you within 24 hours.
               </p>
+              <div className="flex gap-3 justify-center">
+                <Button asChild className="bg-[#FE5102] hover:bg-[#FE5102]/90">
+                  <a href="/dashboard">Go to Dashboard</a>
+                </Button>
+                <Button variant="outline" asChild className="border-[#2C2C2C] text-[#E8E8E8] hover:bg-[#252525]">
+                  <a href="/api-docs">View API Docs</a>
+                </Button>
+              </div>
             </CardContent>
           </Card>
-        </div>
+        </main>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#0A0A0A]">
       <AppHeader />
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">API Keys</h1>
-          <p className="text-gray-600">
-            Manage your B2B API keys for accessing commodity price data
+      <main className="container mx-auto px-4 py-8 max-w-2xl">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-[#E8E8E8] mb-2">Request API Access</h1>
+          <p className="text-[#9CA3AF]">
+            Get real-time Kenya Coffee price data for your organization
           </p>
         </div>
 
-        {/* Create New Key */}
-        <Card className="mb-8">
+        <Card className="border-[#2C2C2C] bg-[#141414]">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plus className="w-5 h-5" />
-              Create New API Key
-            </CardTitle>
-            <CardDescription>
-              Generate a new API key to access the B2B price data endpoints
+            <CardTitle className="text-[#E8E8E8]">Access Request Form</CardTitle>
+            <CardDescription className="text-[#9CA3AF]">
+              Fill in your details and we'll get back to you within 24 hours
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <Label htmlFor="keyName">Key Name</Label>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="companyName" className="text-[#E8E8E8]">
+                  <Building2 className="w-4 h-4 inline mr-1 text-[#FE5102]" />
+                  Company / Organization *
+                </Label>
                 <Input
-                  id="keyName"
-                  placeholder="e.g., Production, Development, Testing"
-                  value={newKeyName}
-                  onChange={(e) => setNewKeyName(e.target.value)}
+                  id="companyName"
+                  placeholder="Acme Trading Ltd"
+                  required
+                  value={formData.companyName}
+                  onChange={(e) => setFormData({...formData, companyName: e.target.value})}
+                  className="bg-[#1C1C1C] border-[#2C2C2C] text-[#E8E8E8] placeholder:text-[#666]"
                 />
               </div>
-              <div className="flex items-end">
-                <Button 
-                  onClick={createKey} 
-                  disabled={creating || !newKeyName.trim()}
-                >
-                  {creating ? 'Creating...' : 'Create Key'}
-                </Button>
-              </div>
-            </div>
-            
-            {error && (
-              <div className="mt-4 text-red-500 text-sm">{error}</div>
-            )}
-            
-            {newKey && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center gap-2 text-green-700 mb-2">
-                  <Check className="w-4 h-4" />
-                  API Key Created
-                </div>
-                <p className="text-sm text-green-600 mb-2">
-                  Copy this key now - you won't be able to see it again!
-                </p>
-                <div className="flex gap-2">
-                  <code className="flex-1 p-2 bg-white border rounded font-mono text-sm break-all">
-                    {newKey}
-                  </code>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => copyKey(newKey)}
-                  >
-                    {copied === newKey ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
-        {/* Existing Keys */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Key className="w-5 h-5" />
-              Your API Keys
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {keys.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                No API keys yet. Create one above to get started.
+              <div className="space-y-2">
+                <Label htmlFor="contactName" className="text-[#E8E8E8]">
+                  <Users className="w-4 h-4 inline mr-1 text-[#FE5102]" />
+                  Your Name *
+                </Label>
+                <Input
+                  id="contactName"
+                  placeholder="John Doe"
+                  required
+                  value={formData.contactName}
+                  onChange={(e) => setFormData({...formData, contactName: e.target.value})}
+                  className="bg-[#1C1C1C] border-[#2C2C2C] text-[#E8E8E8] placeholder:text-[#666]"
+                />
               </div>
-            ) : (
-              <div className="space-y-4">
-                {keys.map((key: any) => (
-                  <div 
-                    key={key.id} 
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold">{key.name}</span>
-                        <Badge className={tierColors[key.tier] || 'bg-gray-100'}>
-                          {key.tier}
-                        </Badge>
-                        {!key.isActive && (
-                          <Badge variant="destructive">Revoked</Badge>
-                        )}
-                      </div>
-                      <div className="text-sm text-gray-500 mt-1">
-                        {key.apiKey} • Created {new Date(key.createdAt).toLocaleDateString()}
-                      </div>
-                      {key.monthlyQuota && (
-                        <div className="text-xs text-gray-400 mt-1">
-                          {key.currentUsage || 0} / {key.monthlyQuota} requests used this month
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => copyKey(key.apiKey.replace(/^afr_/, 'afr_'))}
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                      {key.isActive && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => revokeKey(key.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
-        {/* Quick Start */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Quick Start</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">Get all prices</h4>
-                <code className="block p-3 bg-gray-900 text-gray-100 rounded text-sm overflow-x-auto">
-                  curl "https://your-domain.com/api/b2b/prices?symbols=COFFEE,COCOA" ^
-                  -H "X-API-Key: afr_your_key_here"
-                </code>
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-[#E8E8E8]">
+                  <Mail className="w-4 h-4 inline mr-1 text-[#FE5102]" />
+                  Business Email *
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="john@acmetrading.com"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="bg-[#1C1C1C] border-[#2C2C2C] text-[#E8E8E8] placeholder:text-[#666]"
+                />
               </div>
-              <div>
-                <h4 className="font-semibold mb-2">Get East African coffee</h4>
-                <code className="block p-3 bg-gray-900 text-gray-100 rounded text-sm overflow-x-auto">
-                  curl "https://your-domain.com/api/b2b/africa?country=ALL" ^
-                  -H "X-API-Key: afr_your_key_here"
-                </code>
-              </div>
-            </div>
+
+              <Button 
+                type="submit" 
+                className="w-full bg-[#FE5102] hover:bg-[#FE5102]/90 text-white"
+                disabled={submitting}
+              >
+                {submitting ? (
+                  'Submitting...'
+                ) : (
+                  <>
+                    Submit Request <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
+                )}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </main>

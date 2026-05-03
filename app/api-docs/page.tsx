@@ -431,7 +431,7 @@ for item in data['data']:
                 <a href="/api/b2b/prices?apiKey=afr_demo">Try Demo</a>
               </Button>
               <Button asChild variant="outline" className="border-primary text-primary">
-                <a href="/enterprise">Get API Key</a>
+                <a href="/enterprise/keys">Request Access</a>
               </Button>
             </div>
           </CardContent>
