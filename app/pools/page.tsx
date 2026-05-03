@@ -111,8 +111,23 @@ export default function PoolsPage() {
   const [lockPeriod, setLockPeriod] = useState('90')
   const [userStakes, setUserStakes] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [stakingStats, setStakingStats] = useState({
+    totalValueLocked: 2400000,
+    activeStakers: 1194,
+    averageAPY: 12.4,
+  })
 
   useEffect(() => {
+    // Fetch real staking stats
+    fetch('/api/staking/stats')
+      .then(res => res.json())
+      .then(data => {
+        setStakingStats(data)
+      })
+      .catch(err => {
+        console.error('Failed to fetch staking stats:', err)
+      })
+
     if (walletConnected) {
       // Fetch user's stakes from API
       // TODO: Implement actual API call
@@ -191,7 +206,7 @@ export default function PoolsPage() {
                 <div>
                   <p className="text-sm text-gray-600 font-medium">Total TVL</p>
                   <p className="text-2xl font-bold text-blue-600 mt-1">
-                    ${(POOLS.reduce((sum, p) => sum + p.tvl, 0) / 1000000).toFixed(2)}M
+                    ${(stakingStats.totalValueLocked / 1000000).toFixed(2)}M
                   </p>
                 </div>
                 <DollarSign className="w-8 h-8 text-blue-500" />
@@ -204,7 +219,7 @@ export default function PoolsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 font-medium">Avg APY</p>
-                  <p className="text-2xl font-bold text-green-600 mt-1">12.4%</p>
+                  <p className="text-2xl font-bold text-green-600 mt-1">{stakingStats.averageAPY}%</p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-green-500" />
               </div>
@@ -217,7 +232,7 @@ export default function PoolsPage() {
                 <div>
                   <p className="text-sm text-gray-600 font-medium">Total Stakers</p>
                   <p className="text-2xl font-bold text-purple-600 mt-1">
-                    {POOLS.reduce((sum, p) => sum + p.stakers, 0).toLocaleString()}
+                    {stakingStats.activeStakers.toLocaleString()}
                   </p>
                 </div>
                 <Wallet className="w-8 h-8 text-purple-500" />
