@@ -8,7 +8,7 @@ export default function TraderPage() {
   
   useEffect(() => {
     // Store role and redirect to unified dashboard
-    localStorage.setItem('user_type', 'trader')
+    localStorage.setItem('userType', 'trader')
     router.push('/dashboard')
   }, [router])
 

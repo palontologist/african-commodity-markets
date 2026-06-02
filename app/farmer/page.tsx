@@ -8,7 +8,7 @@ export default function FarmerPage() {
   
   useEffect(() => {
     // Store role and redirect to unified dashboard
-    localStorage.setItem('user_type', 'farmer')
+    localStorage.setItem('userType', 'farmer')
     router.push('/dashboard')
   }, [router])
 

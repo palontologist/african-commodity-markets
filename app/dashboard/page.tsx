@@ -13,7 +13,7 @@ export default function UnifiedDashboard() {
   const [userType, setUserType] = useState<string>('trader')
 
   useEffect(() => {
-    const saved = localStorage.getItem('user_type')
+    const saved = localStorage.getItem('userType')
     if (saved) setUserType(saved)
   }, [])
 
