@@ -126,6 +126,7 @@ export function OnboardingFlow() {
                 className="w-full text-gray-500"
                 onClick={() => {
                   localStorage.setItem('userType', 'trader')
+                  localStorage.setItem('onboarding', JSON.stringify({ completed: true, userType: 'trader' }))
                   router.push('/dashboard')
                 }}
               >
