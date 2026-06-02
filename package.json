@@ -18,6 +18,7 @@
     "@clerk/nextjs": "^6.32.0",
     "@coral-xyz/anchor": "^0.30.1",
     "@elizaos/core": "^1.6.1",
+    "@fhenixprotocol/cofhe-contracts": "^0.1.4",
     "@hookform/resolvers": "^3.10.0",
     "@libsql/client": "^0.15.15",
     "@openzeppelin/contracts": "^5.4.0",
@@ -99,6 +100,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
+    "@fhenixprotocol/cofhe-mock-contracts": "^0.3.1",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@nomicfoundation/hardhat-verify": "^2.1.1",
     "@tailwindcss/postcss": "^4.1.9",
