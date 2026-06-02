@@ -33,12 +33,12 @@ export default function HomePage() {
   const [userType, setUserType] = useState<string | null>(null)
 
   useEffect(() => {
-    const saved = localStorage.getItem('user_type')
+    const saved = localStorage.getItem('userType')
     if (saved) setUserType(saved)
   }, [])
 
   const selectType = (type: string) => {
-    localStorage.setItem('user_type', type)
+    localStorage.setItem('userType', type)
     setUserType(type)
   }
 
@@ -108,7 +108,7 @@ export default function HomePage() {
           <Button asChild className="bg-[#FE5102] hover:bg-[#FE5102]/90">
             <Link href="/dashboard">Go to Dashboard</Link>
           </Button>
-          <Button variant="outline" onClick={() => {localStorage.removeItem('user_type'); setUserType(null)}} className="border-[#2C2C2C] text-[#E8E8E8] hover:bg-[#252525]">
+          <Button variant="outline" onClick={() => {localStorage.removeItem('userType'); setUserType(null)}} className="border-[#2C2C2C] text-[#E8E8E8] hover:bg-[#252525]">
             Change Role
           </Button>
         </div>

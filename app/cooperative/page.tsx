@@ -8,7 +8,7 @@ export default function CooperativePage() {
   
   useEffect(() => {
     // Store role and redirect to unified dashboard
-    localStorage.setItem('user_type', 'cooperative')
+    localStorage.setItem('userType', 'cooperative')
     router.push('/dashboard')
   }, [router])
 

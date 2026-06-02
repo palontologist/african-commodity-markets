@@ -50,8 +50,8 @@ export function OnboardingFlow() {
 
   const handleContinue = () => {
     if (selectedRole) {
-      localStorage.setItem('user_type', selectedRole)
-      localStorage.setItem('onboarding', JSON.stringify({ completed: true, role: selectedRole }))
+      localStorage.setItem('userType', selectedRole)
+      localStorage.setItem('onboarding', JSON.stringify({ completed: true, userType: selectedRole }))
       router.push('/dashboard')
     }
   }
@@ -125,7 +125,8 @@ export function OnboardingFlow() {
                 variant="ghost" 
                 className="w-full text-gray-500"
                 onClick={() => {
-                  localStorage.setItem('user_type', 'trader')
+                  localStorage.setItem('userType', 'trader')
+                  localStorage.setItem('onboarding', JSON.stringify({ completed: true, userType: 'trader' }))
                   router.push('/dashboard')
                 }}
               >
