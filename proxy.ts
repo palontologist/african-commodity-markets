@@ -5,6 +5,9 @@ const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
   '/watchlist(.*)',
   '/profile(.*)',
+  '/consult(.*)',
+  '/enterprise(.*)',
+  '/farmer(.*)',
 ]);
 
 const isAdminRoute = createRouteMatcher(['/admin(.*)']);
@@ -18,6 +21,8 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/onboarding',
   '/api/webhooks',
+  '/api/live-prices(.*)',
+  '/api/oracle/wheat-maize(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

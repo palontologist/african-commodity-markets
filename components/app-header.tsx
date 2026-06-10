@@ -2,17 +2,19 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useUser, UserButton } from '@clerk/nextjs'
 import { Button } from './ui/button'
-import { Menu, X, Home, BarChart3, Shield, Database } from 'lucide-react'
+import { Menu, X, Home, BarChart3, Database, Phone, Users } from 'lucide-react'
 
 export function AppHeader() {
+  const { isSignedIn } = useUser()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/dashboard', label: 'Dashboard', icon: BarChart3 },
     { href: '/prices', label: 'Prices', icon: Database },
-    { href: '/pools', label: 'Protection', icon: Shield },
+    { href: '/consult', label: 'Protection', icon: Phone },
   ]
 
   return (
@@ -39,9 +41,13 @@ export function AppHeader() {
           
           {/* Right side */}
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/sign-in">Sign In</Link>
-            </Button>
+            {isSignedIn ? (
+              <UserButton afterSignOutUrl="/" />
+            ) : (
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/sign-in">Sign In</Link>
+              </Button>
+            )}
             
             {/* Mobile Menu Button */}
             <Button

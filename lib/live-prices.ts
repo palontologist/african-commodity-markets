@@ -5,8 +5,8 @@
 
 import { getKAMISPrice } from './scrapers/kamis-scraper'
 
-export type CommoditySymbol = 'COFFEE'
-export type Region = 'AFRICA'
+export type CommoditySymbol = 'COFFEE' | 'WHEAT' | 'MAIZE'
+export type Region = 'AFRICA' | 'LATAM'
 
 interface PriceData {
   price: number
@@ -18,15 +18,19 @@ interface PriceData {
 
 // Alpha Vantage commodity function mappings
 const ALPHA_VANTAGE_COMMODITIES: Record<string, { 
-   function: string
-   unit: 'cents_per_lb'
-   displayUnit: string
+    function: string
+    unit: 'cents_per_lb'
+    displayUnit: string
 }> = {
-   'COFFEE': { function: 'COFFEE', unit: 'cents_per_lb', displayUnit: 'USD/lb' },
+    'COFFEE': { function: 'COFFEE', unit: 'cents_per_lb', displayUnit: 'USD/lb' },
+    'WHEAT': { function: 'WHEAT', unit: 'cents_per_lb', displayUnit: 'USD/bu' },
+    'MAIZE': { function: 'MAIZE', unit: 'cents_per_lb', displayUnit: 'USD/bu' },
 }
 
 const WORLD_BANK_MAP: Partial<Record<CommoditySymbol, string>> = {
   'COFFEE': 'PCOFFOTM',
+  'WHEAT': 'PXNPLFSH',
+  'MAIZE': 'PLTNFAROU', // Far Eastern maize prices
 }
 
 // Cache for price data (5 minute TTL)
@@ -189,7 +193,9 @@ async function getWorldBankPrice(symbol: CommoditySymbol): Promise<PriceData | n
  */
 function getFallbackPrice(symbol: CommoditySymbol): PriceData {
   const fallbackPrices: Record<CommoditySymbol, number> = {
-    'COFFEE': 3.63,
+    'COFFEE': 3.63,      // Kenya AA coffee (USD/lb)
+    'WHEAT': 6.50,      // Global wheat average (USD/bu)
+    'MAIZE': 5.25,      // Global maize average (USD/bu)
   }
   
   console.warn(`Using fallback price for ${symbol}`)
