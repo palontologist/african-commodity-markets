@@ -86,6 +86,6 @@ async function main() {
   } catch (error) {
     console.log(`⚠️ Hedge Failed (likely insufficient funds or gas): ${error.message}`);
   }
-}
+};
 
 main().catch(console.error);

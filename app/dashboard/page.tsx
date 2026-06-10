@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { AppHeader } from '@/components/app-header'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -10,11 +10,13 @@ import Link from 'next/link'
 import PriceChart from '@/components/charts/price-chart'
 
 export default function UnifiedDashboard() {
-  const [userType, setUserType] = useState<string>('trader')
-
   useEffect(() => {
     const saved = localStorage.getItem('userType')
-    if (saved) setUserType(saved)
+    if (saved) {
+      console.log('User type loaded:', saved)
+    } else {
+      console.log('No saved user type, using default')
+    }
   }, [])
 
   return (
@@ -23,19 +25,10 @@ export default function UnifiedDashboard() {
       
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
-            <Badge variant="outline" className="capitalize border-[#FE5102] text-[#FE5102]">
-              {userType}
-            </Badge>
-            <Badge variant="outline" className="border-green-500 text-green-500 text-xs">
-              <Activity className="w-3 h-3 mr-1" />
-              Live
-            </Badge>
-          </div>
-          <h1 className="text-3xl font-bold text-[#E8E8E8] mb-1">Dashboard</h1>
-          <p className="text-[#9CA3AF]">Real-time Kenya Coffee prices and market data</p>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-[#E8E8E8] mb-1">Dashboard</h1>
+        <p className="text-[#9CA3AF]">Real-time Kenya Commodity prices and market data</p>
+      </div>
 
         {/* Price Chart */}
         <div className="mb-6">

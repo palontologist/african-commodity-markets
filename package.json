@@ -15,7 +15,6 @@
     "seed:markets": "tsx scripts/seed-markets.ts"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.4.2",
     "@coral-xyz/anchor": "^0.30.1",
     "@elizaos/core": "^1.6.1",
     "@fhenixprotocol/cofhe-contracts": "^0.1.4",

@@ -6,32 +6,7 @@ const nextConfig = {
       ...config.optimization,
       nodeEnv: false,
       minimize: true,
-      usedExports: true,
     };
-    
-    if (!isServer) {
-      config.optimization.splitChunks = {
-        ...config.optimization.splitChunks,
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          vendor: {
-            filename: 'vendor.js',
-            chunks: 'all',
-            test: /node_modules/,
-            priority: 20,
-            enforce: true,
-          },
-          common: {
-            minChunks: 2,
-            priority: 10,
-            reuseExistingChunk: true,
-            filename: 'common.js',
-            enforce: true,
-          }
-        }
-      };
-    }
     
     return config;
   },
@@ -43,7 +18,7 @@ const nextConfig = {
   },
   experimental: {
     // Optimize for production builds
-    optimizePackageImports: ['@clerk/nextjs', 'lucide-react', '@radix-ui/*'],
+    optimizePackageImports: ['lucide-react', '@radix-ui/*'],
   },
 };
 

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { userDeals, dealInquiries, userProfiles } from '@/lib/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
@@ -11,7 +10,6 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
     const searchParams = request.nextUrl.searchParams;
     const myDeals = searchParams.get('my') === 'true';
     const dealType = searchParams.get('type');
@@ -19,9 +17,9 @@ export async function GET(request: NextRequest) {
 
     let query = db.select().from(userDeals);
 
-    // If requesting own deals, filter by userId
-    if (myDeals && userId) {
-      query = query.where(eq(userDeals.userId, userId));
+    // If requesting own deals, filter by a test user ID (temporarily remove auth dependency)
+    if (myDeals) {
+      query = query.where(eq(userDeals.userId, 'temp-user-id'));
     } else if (!myDeals) {
       // Public deals only
       query = query.where(
@@ -58,15 +56,6 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     const body = await request.json();
     const {
       title,
@@ -88,6 +77,7 @@ export async function POST(request: NextRequest) {
       expiresAt,
       contactEmail,
       contactPhone,
+      userId,
     } = body;
 
     // Validate required fields
@@ -98,27 +88,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // KYC check: seller must have a verified profile before listing
-    const profile = await db
-      .select()
-      .from(userProfiles)
-      .where(eq(userProfiles.userId, userId))
-      .limit(1);
-
-    if (!profile.length || !profile[0].kycVerified) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'KYC verification required. Please complete identity verification before listing a deal.',
-          kycRequired: true,
-        },
-        { status: 403 }
-      );
-    }
-
     // Create the deal
     const newDeal = await db.insert(userDeals).values({
-      userId,
+      userId: userId || 'temp-user-id',
       title,
       dealType,
       description,

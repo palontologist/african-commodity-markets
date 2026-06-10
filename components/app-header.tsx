@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import { Button } from './ui/button'
 import { Menu, X, Home, BarChart3, Shield, Database } from 'lucide-react'
 
@@ -40,14 +39,9 @@ export function AppHeader() {
           
           {/* Right side */}
           <div className="flex items-center gap-3">
-            <SignedOut>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/sign-in">Sign In</Link>
-              </Button>
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/sign-in">Sign In</Link>
+            </Button>
             
             {/* Mobile Menu Button */}
             <Button
