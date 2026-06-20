@@ -103,7 +103,28 @@ export const COMMODITY_CONTEXT: Record<CommoditySymbol, string> = {
 - Tree maturation timeline (7-10 years to full yield)
 - Processing capacity constraints
 - Competition with Australia
-- Premium pricing for in-shell vs kernel`
+- Premium pricing for in-shell vs kernel`,
+
+  WHEAT: `Global wheat markets are crucial for food security. Key factors:
+- Climate change impacts on growing regions
+- Geopolitical tensions affecting Black Sea exports
+- Government subsidies and price controls
+- Ethanol demand in the US
+- Storage and transportation costs`,
+
+  MAIZE: `Maize is a staple crop globally. Key factors:
+- US production dominates global supply
+- Ethanol demand in the US
+- Climate variability affecting yields
+- Feed demand from livestock sector
+- Government support programs`,
+
+  COPPER: `Copper is a key industrial metal with growing demand. Key factors:
+- Electric vehicle and renewable energy demand growth
+- Mining output from African producers (DRC, Zambia)
+- Chinese industrial demand and inventory levels
+- Global infrastructure investment trends
+- Supply chain disruptions and refining capacity`,
 }
 
 /**

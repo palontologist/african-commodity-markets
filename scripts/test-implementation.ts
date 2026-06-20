@@ -4,7 +4,7 @@
  */
 
 import { ethers } from "ethers"
-import { getLivePrice, getAllCommodityPrices } from '../lib/hybrid-pricing-client'
+import { getLivePrice } from '../lib/live-prices'
 
 // Contract ABIs (simplified for testing)
 const ORACLE_ABI = [
@@ -40,7 +40,12 @@ async function testLivePrices() {
     console.log("✅ African Coffee Price:", coffeePrice)
     
     // Get all prices
-    const allPrices = await getAllCommodityPrices()
+    const commoditySymbols: Array<'COFFEE' | 'COCOA' | 'TEA' | 'GOLD' | 'AVOCADO' | 'MACADAMIA' | 'WHEAT' | 'MAIZE' | 'COPPER'> = ['COFFEE', 'COCOA', 'TEA', 'GOLD', 'AVOCADO', 'MACADAMIA', 'WHEAT', 'MAIZE', 'COPPER']
+    const allPrices: Record<string, { price: number; source: string }> = {}
+    for (const symbol of commoditySymbols) {
+      const data = await getLivePrice(symbol)
+      if (data) allPrices[symbol] = { price: data.price, source: data.source }
+    }
     console.log("✅ Total Commodities with Prices:", Object.keys(allPrices).length)
     
     console.log("\n📈 Price Examples:")
@@ -59,7 +64,7 @@ async function testContractIntegration() {
   console.log("\n🏗️  Testing Contract Integration...")
   
   // Connect to local fork or testnet
-  const provider = new ethers.providers.JsonRpcProvider(process.env.POLYGON_AMOY_RPC)
+  const provider = new ethers.JsonRpcProvider(process.env.POLYGON_AMOY_RPC)
   
   // Test addresses (these would come from deployment)
   const oracleAddress = process.env.NEXT_PUBLIC_COMMODITY_PRICE_ORACLE_ADDRESS || "0x0000000000000000000000000000000000000000000"
@@ -133,7 +138,7 @@ async function testMarketCreation() {
     scenarios.forEach(scenario => {
       const threshold = scenario.threshold / 100 // Convert back to dollars
       const currentRisk = ((threshold - currentPrice) / currentPrice * 100).toFixed(1)
-      console.log(`${scenario.name}: ${currentRisk > 0 ? '+' : ''}${currentRisk}% price movement needed`)
+      console.log(`${scenario.name}: ${parseFloat(currentRisk) > 0 ? '+' : ''}${currentRisk}% price movement needed`)
     })
     
     return true

@@ -19,7 +19,7 @@ async function main() {
     
     if (data.success && data.data.length > 0) {
       console.log('   ✅ Wheat and Maize Prices:')
-      data.data.forEach(price => {
+      data.data.forEach((price: any) => {
         console.log(`      ${price.commodity}:`)
         console.log(`         Price: ${price.price} ${price.currency}`)
         console.log(`         Source: ${price.source}`)
@@ -106,7 +106,7 @@ async function main() {
     
     if (multiData.success && Array.isArray(multiData.data)) {
       console.log('   ✅ Batch Results:')
-      multiData.data.forEach(item => {
+      multiData.data.forEach((item: any) => {
         console.log(`      ${item.commodity}: ${item.price} ${item.currency} (${item.source})`)
       })
     } else if (multiData.success) {

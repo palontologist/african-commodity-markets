@@ -5,8 +5,8 @@
 
 import { getKAMISPrice } from './scrapers/kamis-scraper'
 
-export type CommoditySymbol = 'COFFEE' | 'WHEAT' | 'MAIZE'
-export type Region = 'AFRICA' | 'LATAM'
+export type CommoditySymbol = 'COFFEE' | 'COCOA' | 'TEA' | 'GOLD' | 'AVOCADO' | 'MACADAMIA' | 'WHEAT' | 'MAIZE' | 'COPPER'
+export type Region = 'AFRICA' | 'LATAM' | 'GLOBAL'
 
 interface PriceData {
   price: number
@@ -194,9 +194,15 @@ async function getWorldBankPrice(symbol: CommoditySymbol): Promise<PriceData | n
 function getFallbackPrice(symbol: CommoditySymbol): PriceData {
   const fallbackPrices: Record<CommoditySymbol, number> = {
     'COFFEE': 3.63,      // Kenya AA coffee (USD/lb)
+    'COCOA': 2500,      // West Africa cocoa (USD/ton)
+    'TEA': 2.50,        // Kenya tea (USD/kg)
+    'GOLD': 1800,       // African gold (USD/oz)
+    'AVOCADO': 0.80,    // Kenya avocado (USD/kg)
+    'MACADAMIA': 15.00, // Kenya macadamia (USD/kg)
     'WHEAT': 6.50,      // Global wheat average (USD/bu)
     'MAIZE': 5.25,      // Global maize average (USD/bu)
-  }
+    'COPPER': 8500,     // Copper (USD/ton)
+  };
   
   console.warn(`Using fallback price for ${symbol}`)
   
