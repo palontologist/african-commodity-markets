@@ -125,7 +125,7 @@ async function main() {
   const balance = await provider.getBalance(address)
   console.log(`💰 Balance: ${ethers.formatEther(balance)} MATIC\n`)
 
-  if (balance === 0n) {
+  if (balance === BigInt(0)) {
     console.log('❌ Insufficient balance. Get test MATIC from: https://faucet.polygon.technology/')
     process.exit(1)
   }

@@ -87,7 +87,7 @@ export async function getOraclePrice(
       confidence,
       timestamp,
       updater: '0x0', // Would need to query from storage
-      updateCount: 0n,
+      updateCount: BigInt(0),
     }
   } catch (error) {
     console.error('Error fetching oracle price:', error)
