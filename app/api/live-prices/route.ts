@@ -96,9 +96,9 @@ async function fetchHistoricalPrices(commodityCode: string, days: number = 365) 
       .limit(500)
 
     return records.map(p => ({
-      date: p.commodityPrices.priceDate,
-      price: p.commodityPrices.price,
-      source: p.commodityPrices.source
+      date: p.commodity_prices.priceDate,
+      price: p.commodity_prices.price,
+      source: p.commodity_prices.source
     }))
   } catch (error) {
     console.error(`Error fetching historical prices for ${commodityCode}:`, error)
@@ -271,14 +271,14 @@ async function getWheatData(source?: string | null, historical: boolean = false)
         }
       }
     } else {
-      priceData = await getLivePrice('WHEAT', 'AFRICA')
-      priceData.type = 'wheat'
+      priceData = { ...await getLivePrice('WHEAT', 'AFRICA'), type: 'wheat' }
     }
 
     if (!priceData) {
       return null
     }
 
+    let historicalData
     if (historical && db) {
       const historicalPrices = await db
         .select()
@@ -293,10 +293,10 @@ async function getWheatData(source?: string | null, historical: boolean = false)
         .orderBy(desc(commodityPrices.priceDate))
         .limit(30)
 
-      priceData.historicalData = historicalPrices.map(p => ({
-        date: p.commodityPrices.priceDate,
-        price: p.commodityPrices.price,
-        source: p.commodityPrices.source
+      historicalData = historicalPrices.map(p => ({
+        date: p.commodity_prices.priceDate,
+        price: p.commodity_prices.price,
+        source: p.commodity_prices.source
       }))
     }
 
@@ -304,7 +304,8 @@ async function getWheatData(source?: string | null, historical: boolean = false)
       commodity: 'WHEAT',
       ...priceData,
       cached: false,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
+      ...(historicalData && { historicalData })
     }
   } catch (error) {
     console.error('Error getting wheat data:', error)
@@ -355,14 +356,14 @@ async function getMaizeData(source?: string | null, historical: boolean = false)
         }
       }
     } else {
-      priceData = await getLivePrice('MAIZE', 'AFRICA')
-      priceData.type = 'maize'
+      priceData = { ...await getLivePrice('MAIZE', 'AFRICA'), type: 'maize' }
     }
 
     if (!priceData) {
       return null
     }
 
+    let historicalData
     if (historical && db) {
       const historicalPrices = await db
         .select()
@@ -377,10 +378,10 @@ async function getMaizeData(source?: string | null, historical: boolean = false)
         .orderBy(desc(commodityPrices.priceDate))
         .limit(30)
 
-      priceData.historicalData = historicalPrices.map(p => ({
-        date: p.commodityPrices.priceDate,
-        price: p.commodityPrices.price,
-        source: p.commodityPrices.source
+      historicalData = historicalPrices.map(p => ({
+        date: p.commodity_prices.priceDate,
+        price: p.commodity_prices.price,
+        source: p.commodity_prices.source
       }))
     }
 
@@ -388,7 +389,8 @@ async function getMaizeData(source?: string | null, historical: boolean = false)
       commodity: 'MAIZE',
       ...priceData,
       cached: false,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
+      ...(historicalData && { historicalData })
     }
   } catch (error) {
     console.error('Error getting maize data:', error)
