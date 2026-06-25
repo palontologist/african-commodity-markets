@@ -97,8 +97,7 @@ async function getWheatData(source?: string | null, historical: boolean = false)
         }
       }
     } else {
-      priceData = await getLivePrice('WHEAT', 'AFRICA')
-      priceData.type = 'wheat'
+      priceData = { ...await getLivePrice('WHEAT', 'AFRICA'), type: 'wheat' }
     }
 
     if (!priceData) {
@@ -164,8 +163,7 @@ async function getMaizeData(source?: string | null, historical: boolean = false)
         }
       }
     } else {
-      priceData = await getLivePrice('MAIZE', 'AFRICA')
-      priceData.type = 'maize'
+      priceData = { ...await getLivePrice('MAIZE', 'AFRICA'), type: 'maize' }
     }
 
     if (!priceData) {
