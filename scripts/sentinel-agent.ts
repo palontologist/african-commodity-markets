@@ -54,7 +54,8 @@ async function main() {
   }
 }
 
-// async function executeHedge... (keep as is)
+/*
+async function executeHedge(contract: ethers.Contract, asset: string, currentPrice: number) {
   console.log(`🛡️ INITIATING AUTONOMOUS HEDGE for ${asset}...`);
   
   try {
@@ -87,5 +88,6 @@ async function main() {
     console.log(`⚠️ Hedge Failed (likely insufficient funds or gas): ${error.message}`);
   }
 };
+*/
 
 main().catch(console.error);

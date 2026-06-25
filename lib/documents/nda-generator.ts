@@ -64,8 +64,12 @@ async function generateDocxDocument(data: NDAData): Promise<Buffer> {
 
         // Between section
         new Paragraph({
-          text: 'BETWEEN:',
-          bold: true,
+          children: [
+            new TextRun({
+              text: 'BETWEEN:',
+              bold: true,
+            }),
+          ],
           spacing: {
             before: 200,
             after: 100,
@@ -105,8 +109,12 @@ async function generateDocxDocument(data: NDAData): Promise<Buffer> {
 
         // And section
         new Paragraph({
-          text: 'AND',
-          bold: true,
+          children: [
+            new TextRun({
+              text: 'AND',
+              bold: true,
+            }),
+          ],
           spacing: {
             after: 100,
           },
@@ -255,8 +263,12 @@ async function generateDocxDocument(data: NDAData): Promise<Buffer> {
 
         // Signatures Section
         new Paragraph({
-          text: 'SIGNATURES:',
-          bold: true,
+          children: [
+            new TextRun({
+              text: 'SIGNATURES:',
+              bold: true,
+            }),
+          ],
           spacing: {
             before: 400,
             after: 200,
@@ -265,8 +277,12 @@ async function generateDocxDocument(data: NDAData): Promise<Buffer> {
 
         // Disclosing Party Signature
         new Paragraph({
-          text: data.disclosingParty.name,
-          bold: true,
+          children: [
+            new TextRun({
+              text: data.disclosingParty.name,
+              bold: true,
+            }),
+          ],
           spacing: {
             before: 200,
             after: 100,
@@ -303,8 +319,12 @@ async function generateDocxDocument(data: NDAData): Promise<Buffer> {
 
         // Receiving Party Signature
         new Paragraph({
-          text: data.receivingParty.name,
-          bold: true,
+          children: [
+            new TextRun({
+              text: data.receivingParty.name,
+              bold: true,
+            }),
+          ],
           spacing: {
             before: 200,
             after: 100,

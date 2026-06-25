@@ -59,19 +59,21 @@ export async function listRecentPredictions(options: {
   region?: string
   limit?: number
 } = {}): Promise<CommodityPrediction[]> {
-  let query = db().select().from(commodityPredictions).orderBy(desc(commodityPredictions.asOf))
+  const query = db()
+    .select()
+    .from(commodityPredictions)
+    .orderBy(desc(commodityPredictions.asOf))
 
   if (options.commodityId) {
-    query = query.where(eq(commodityPredictions.commodityId, options.commodityId))
+    query.where(eq(commodityPredictions.commodityId, options.commodityId))
   }
 
   if (options.region) {
-    const whereClause = eq(commodityPredictions.region, options.region)
-    query = query.where(whereClause)
+    query.where(eq(commodityPredictions.region, options.region))
   }
 
   if (options.limit) {
-    query = query.limit(options.limit)
+    query.limit(options.limit)
   }
 
   return query

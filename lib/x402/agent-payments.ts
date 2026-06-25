@@ -76,6 +76,10 @@ export const TRADE_FEE_PERCENTAGE: Record<string, number> = {
 
 export async function getAgentBalance(agentId: string): Promise<number> {
   try {
+    if (!db) {
+      return 0;
+    }
+    
     const [agent] = await db.select()
       .from(agents)
       .where(eq(agents.id, agentId))
@@ -90,6 +94,10 @@ export async function getAgentBalance(agentId: string): Promise<number> {
 
 export async function deductBalance(agentId: string, amount: number): Promise<boolean> {
   try {
+    if (!db) {
+      return false;
+    }
+    
     const currentBalance = await getAgentBalance(agentId);
     
     if (currentBalance < amount) {
@@ -113,6 +121,10 @@ export async function deductBalance(agentId: string, amount: number): Promise<bo
 
 export async function addBalance(agentId: string, amount: number): Promise<boolean> {
   try {
+    if (!db) {
+      return false;
+    }
+    
     await db.update(agents)
       .set({
         platformFeesOwed: sql`${agents.platformFeesOwed} + ${amount}`,
@@ -270,6 +282,10 @@ export async function processAgentPayment(
   txHash?: string
 ): Promise<ProcessPaymentResult> {
   try {
+    if (!db) {
+      return { success: false, error: 'Database not available' };
+    }
+    
     // If txHash provided, verify on-chain payment
     if (txHash) {
       const recipientAddress = process.env.PLATFORM_WALLET_ADDRESS || '0x0000000000000000000000000000000000000000';
@@ -308,6 +324,10 @@ export async function topUpAgentBalance(
   txHash: string
 ): Promise<ProcessPaymentResult> {
   try {
+    if (!db) {
+      return { success: false, error: 'Database not available' };
+    }
+    
     // Verify the deposit transaction
     const recipientAddress = process.env.PLATFORM_WALLET_ADDRESS || '0x0000000000000000000000000000000000000000';
     const verification = await verifyOnChainPayment(txHash, amount, recipientAddress);
@@ -351,6 +371,10 @@ export async function checkPaymentRequirement(
   endpoint: string,
   request: Request
 ): Promise<PaymentCheckResult> {
+  if (!db) {
+    return { requiresPayment: true, reason: 'Database not available' };
+  }
+  
   // Get agent tier
   const [agent] = await db.select()
     .from(agents)

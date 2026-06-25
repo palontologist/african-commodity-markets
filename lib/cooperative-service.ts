@@ -1,4 +1,4 @@
-import { db } from "@/db"; // Assuming Drizzle setup
+import { db } from "@/lib/db"; // Assuming Drizzle setup
 import { eq, sql } from "drizzle-orm";
 // We'll need to define these schemas in your db/schema.ts later, but for now I'll mock the types
 // to show the structure.

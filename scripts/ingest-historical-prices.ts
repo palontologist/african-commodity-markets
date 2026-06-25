@@ -61,6 +61,11 @@ async function ingestCommodity(symbol: CommoditySymbol) {
     return
   }
 
+  if (!db) {
+    console.log(`⚠️  Skipping ${symbol} - database not available`)
+    return
+  }
+
   console.log(`\n📊 Ingesting ${symbol}...`)
 
   try {
@@ -147,13 +152,17 @@ async function main() {
   
   // Print summary
   console.log('\n📈 Summary:')
-  for (const commodity of commodities) {
-    const count = await db
-      .select()
-      .from(historicalPrices)
-      .where(eq(historicalPrices.commodityId, commodity))
+  if (db) {
+    for (const commodity of commodities) {
+      const count = await db
+        .select()
+        .from(historicalPrices)
+        .where(eq(historicalPrices.commodityId, commodity))
 
-    console.log(`   ${commodity}: ${count.length} records`)
+      console.log(`   ${commodity}: ${count.length} records`)
+    }
+  } else {
+    console.log('   Database not available - skipping summary')
   }
 
   process.exit(0)

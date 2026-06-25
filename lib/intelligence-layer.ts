@@ -6,7 +6,7 @@
  * for the research-to-trade stack.
  */
 
-import { Database } from '@libsql/client';
+import { createClient } from '@libsql/client';
 
 export interface CommodityMarketData {
   commodity: string;
@@ -37,7 +37,7 @@ export interface IntelligenceSignal {
 export interface TradeRecommendation {
   id: string;
   commodity: string;
-  action: 'buy' | 'sell' | 'hold' | 'arbitrage';
+  action: 'buy' | 'sell' | 'arbitrage';
   entryPrice: number;
   exitPrice: number;
   positionSize: number;
@@ -51,7 +51,7 @@ export interface TradeRecommendation {
 }
 
 export class AfricaCommoditiesIntelligence {
-  private db: Database | null = null;
+  private db: any | null = null;
   private priceCache: Map<string, CommodityMarketData> = new Map();
   private signals: Map<string, IntelligenceSignal[]> = new Map();
   
@@ -70,7 +70,7 @@ export class AfricaCommoditiesIntelligence {
     COPPER: { min: 3, max: 10, usd: true },
   };
 
-  constructor(database?: Database) {
+  constructor(database?: any) {
     this.db = database || null;
   }
 
@@ -279,7 +279,7 @@ export class AfricaCommoditiesIntelligence {
       case 'trend':
         return signals.some(s => s.description.includes('uptrend')) ? 'buy' : 'sell';
       default:
-        return 'hold';
+        return 'sell';
     }
   }
 

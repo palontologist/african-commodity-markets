@@ -23,6 +23,16 @@
 
 import { Plugin, Action, Memory, State, IAgentRuntime } from '@elizaos/core'
 
+interface AfrifuturesSettings {
+    baseUrl?: string
+    name?: string
+    wallet?: string
+    agentId?: string
+    apiKey?: string
+    capabilities?: string[]
+    feeTier?: string
+}
+
 // Action definitions
 export const registerAgentAction: Action = {
     name: 'AFRIFUTURES_REGISTER_AGENT',
@@ -35,7 +45,7 @@ export const registerAgentAction: Action = {
         return /register|join|create.*agent/i.test(content)
     },
     handler: async (runtime: IAgentRuntime, message: Memory) => {
-        const settings = runtime.settings?.afrifutures
+        const settings = runtime.character.settings?.afrifutures as AfrifuturesSettings | undefined
         if (!settings?.baseUrl) {
             return { success: false, error: 'Afrifutures not configured' }
         }
@@ -72,7 +82,7 @@ export const postOrderAction: Action = {
         return /order|buy|sell|trade|post/i.test(content)
     },
     handler: async (runtime: IAgentRuntime, message: Memory) => {
-        const settings = runtime.settings?.afrifutures
+        const settings = runtime.character.settings?.afrifutures as AfrifuturesSettings | undefined
         if (!settings?.baseUrl || !settings?.agentId) {
             return { success: false, error: 'Afrifutures not configured' }
         }
@@ -95,8 +105,8 @@ export const postOrderAction: Action = {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'X-API-Key': settings.apiKey,
-                    'X-Agent-ID': settings.agentId
+                    'X-API-Key': settings.apiKey ?? '',
+                    'X-Agent-ID': settings.agentId ?? ''
                 },
                 body: JSON.stringify({
                     agentId: settings.agentId,
@@ -125,7 +135,7 @@ export const executeTradeAction: Action = {
         return /trade|execute|deal|buy|sell/i.test(content)
     },
     handler: async (runtime: IAgentRuntime, message: Memory) => {
-        const settings = runtime.settings?.afrifutures
+        const settings = runtime.character.settings?.afrifutures as AfrifuturesSettings | undefined
         if (!settings?.baseUrl) {
             return { success: false, error: 'Afrifutures not configured' }
         }
@@ -135,7 +145,7 @@ export const executeTradeAction: Action = {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'X-API-Key': settings.apiKey
+                    'X-API-Key': settings.apiKey ?? ''
                 },
                 body: JSON.stringify(message.content)
             })
@@ -158,7 +168,7 @@ export const getMarketPriceAction: Action = {
         return /price|worth|value|cost/i.test(content)
     },
     handler: async (runtime: IAgentRuntime, message: Memory) => {
-        const settings = runtime.settings?.afrifutures
+        const settings = runtime.character.settings?.afrifutures as AfrifuturesSettings | undefined
         if (!settings?.baseUrl) {
             return { success: false, error: 'Afrifutures not configured' }
         }
@@ -198,7 +208,7 @@ export const getOrderBookAction: Action = {
         return /order.*book|orders|market.*depth/i.test(content)
     },
     handler: async (runtime: IAgentRuntime, message: Memory) => {
-        const settings = runtime.settings?.afrifutures
+        const settings = runtime.character.settings?.afrifutures as AfrifuturesSettings | undefined
         if (!settings?.baseUrl) {
             return { success: false, error: 'Afrifutures not configured' }
         }
@@ -213,11 +223,11 @@ export const getOrderBookAction: Action = {
         try {
             const bidsRes = await fetch(
                 `${settings.baseUrl}/api/a2a/orders?commodity=${commodity}&side=BUY`,
-                { headers: { 'X-API-Key': settings.apiKey } }
+                { headers: { 'X-API-Key': settings.apiKey ?? '' } }
             )
             const asksRes = await fetch(
                 `${settings.baseUrl}/api/a2a/orders?commodity=${commodity}&side=SELL`,
-                { headers: { 'X-API-Key': settings.apiKey } }
+                { headers: { 'X-API-Key': settings.apiKey ?? '' } }
             )
 
             const bidsData = await bidsRes.json()

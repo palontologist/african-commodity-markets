@@ -3,7 +3,7 @@
  * Integrates with Groq LLM to generate price forecasts
  */
 
-import type { Plugin, Action, Memory, State, HandlerCallback, IAgentRuntime } from '@elizaos/core'
+import type { Plugin, Action, Memory, State, HandlerCallback, IAgentRuntime, ActionResult } from '@elizaos/core'
 import { runGroqChat } from '@/lib/agents/groq-client'
 import { buildPredictionPrompt, type PredictionHorizon, type PromptContext } from '@/lib/agents/prompts'
 import { getLivePrice, type CommoditySymbol, type Region } from '@/lib/live-prices'
@@ -55,7 +55,7 @@ export const predictPriceAction: Action = {
     _state?: State,
     _options?: Record<string, unknown>,
     callback?: HandlerCallback
-  ): Promise<boolean> => {
+  ): Promise<void | ActionResult | undefined> => {
     try {
       // Extract parameters from message
       const content = typeof message.content === 'string'
@@ -190,8 +190,6 @@ export const predictPriceAction: Action = {
       if (callback) {
         callback(response)
       }
-      
-      return true
     } catch (error) {
       console.error('Error generating prediction:', error)
       if (callback) {
@@ -200,18 +198,17 @@ export const predictPriceAction: Action = {
           error: error instanceof Error ? error.message : 'Unknown error'
         })
       }
-      return false
     }
   },
   
   examples: [
     [
       {
-        user: '{{user1}}',
+        name: '{{user1}}',
         content: { text: 'What is your short-term forecast for coffee prices in Africa?' }
       },
       {
-        user: '{{agent}}',
+        name: '{{agent}}',
         content: {
           text: 'COFFEE SHORT_TERM Prediction (AFRICA): $X.XX USD (85% confidence)\n\nCoffee prices are expected to rise moderately due to reduced yields from drought conditions in Ethiopia and strong European demand.',
           action: 'PREDICT_COMMODITY_PRICE'
@@ -220,11 +217,11 @@ export const predictPriceAction: Action = {
     ],
     [
       {
-        user: '{{user1}}',
+        name: '{{user1}}',
         content: { text: 'Can you predict cocoa prices for the next year in Latin America?' }
       },
       {
-        user: '{{agent}}',
+        name: '{{agent}}',
         content: {
           text: 'COCOA LONG_TERM Prediction (LATAM): $X.XX USD (72% confidence)\n\nLong-term outlook suggests stable to slightly declining prices as new plantations in Ecuador mature and Brazilian production increases.',
           action: 'PREDICT_COMMODITY_PRICE'

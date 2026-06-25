@@ -3,8 +3,8 @@
  * Provides actions and providers for fetching live prices and historical data
  */
 
-import type { Plugin, Action, Provider, Memory, State, HandlerCallback, IAgentRuntime } from '@elizaos/core'
-import { getLivePrice, type CommoditySymbol, type Region, type LivePrice } from '@/lib/live-prices'
+import type { Plugin, Action, Provider, Memory, State, HandlerCallback, IAgentRuntime, ActionResult, ProviderResult } from '@elizaos/core'
+import { getLivePrice, type CommoditySymbol, type Region } from '@/lib/live-prices'
 import { db } from '@/lib/db'
 import { commodityPrices } from '@/lib/db/schema'
 import { desc, eq, and, gte } from 'drizzle-orm'
@@ -41,7 +41,7 @@ export const fetchLivePriceAction: Action = {
     _state?: State,
     _options?: Record<string, unknown>,
     callback?: HandlerCallback
-  ): Promise<boolean> => {
+  ): Promise<void | ActionResult | undefined> => {
     try {
       // Extract commodity and region from message
       const content = typeof message.content === 'string'
@@ -55,7 +55,7 @@ export const fetchLivePriceAction: Action = {
       const region: Region = regionMatch?.[0].match(/latam|latin/i) ? 'LATAM' : 'AFRICA'
       
       // Fetch live price
-      const livePrice: LivePrice = await getLivePrice(symbol, region)
+      const livePrice = await getLivePrice(symbol, region)
       
       const response = {
         text: `Current ${symbol} price in ${region}: ${livePrice.price !== null ? `$${livePrice.price.toFixed(2)} ${livePrice.currency}` : 'unavailable'} (${livePrice.source})`,
@@ -65,8 +65,6 @@ export const fetchLivePriceAction: Action = {
       if (callback) {
         callback(response)
       }
-      
-      return true
     } catch (error) {
       console.error('Error fetching live price:', error)
       if (callback) {
@@ -75,18 +73,17 @@ export const fetchLivePriceAction: Action = {
           error: error instanceof Error ? error.message : 'Unknown error'
         })
       }
-      return false
     }
   },
   
   examples: [
     [
       {
-        user: '{{user1}}',
+        name: '{{user1}}',
         content: { text: 'What is the current price of coffee in Africa?' }
       },
       {
-        user: '{{agent}}',
+        name: '{{agent}}',
         content: { 
           text: 'Current COFFEE price in AFRICA: $X.XX USD (YahooFinance)',
           action: 'FETCH_LIVE_PRICE'
@@ -95,11 +92,11 @@ export const fetchLivePriceAction: Action = {
     ],
     [
       {
-        user: '{{user1}}',
+        name: '{{user1}}',
         content: { text: 'Check cocoa prices for Latin America' }
       },
       {
-        user: '{{agent}}',
+        name: '{{agent}}',
         content: { 
           text: 'Current COCOA price in LATAM: $X.XX USD (YahooFinance)',
           action: 'FETCH_LIVE_PRICE'
@@ -113,7 +110,9 @@ export const fetchLivePriceAction: Action = {
  * Provider: Historical commodity price data
  */
 export const historicalPriceProvider: Provider = {
-  get: async (runtime: IAgentRuntime, message: Memory, _state?: State): Promise<string | null> => {
+  name: 'historicalPrice',
+  description: 'Provides historical commodity price data for analysis',
+  get: async (runtime: IAgentRuntime, message: Memory, _state?: State): Promise<ProviderResult> => {
     try {
       const content = typeof message.content === 'string'
         ? message.content
@@ -121,7 +120,9 @@ export const historicalPriceProvider: Provider = {
       
       // Extract commodity from message
       const symbolMatch = content.match(/cocoa|coffee|tea|gold|avocado|macadamia/i)
-      if (!symbolMatch) return null
+      if (!symbolMatch) {
+        return { text: 'No commodity specified' }
+      }
       
       const symbol = symbolMatch[0].toUpperCase() as CommoditySymbol
       
@@ -146,7 +147,7 @@ export const historicalPriceProvider: Provider = {
       // }
       
       if (historicalPrices.length === 0) {
-        return `No historical price data available for ${symbol}`
+        return { text: `No historical price data available for ${symbol}` }
       }
       
       // Calculate statistics
@@ -163,22 +164,27 @@ export const historicalPriceProvider: Provider = {
       
       const trend = percentChange > 5 ? 'UP' : percentChange < -5 ? 'DOWN' : 'STABLE'
       
-      return JSON.stringify({
-        symbol,
-        dataPoints: historicalPrices.length,
-        avgPrice: avgPrice.toFixed(2),
-        volatility: (volatility * 100).toFixed(2) + '%',
-        trend,
-        percentChange: percentChange.toFixed(2) + '%',
-        latestPrice: latestPrice.toFixed(2),
-        priceRange: {
-          min: Math.min(...prices).toFixed(2),
-          max: Math.max(...prices).toFixed(2)
+      const result = {
+        text: `Historical price data for ${symbol}: ${historicalPrices.length} data points over the last 30 days. Average price: $${avgPrice.toFixed(2)}, Volatility: ${(volatility * 100).toFixed(2)}%, Trend: ${trend}, Change: ${percentChange.toFixed(2)}%`,
+        data: {
+          symbol,
+          dataPoints: historicalPrices.length,
+          avgPrice: avgPrice.toFixed(2),
+          volatility: (volatility * 100).toFixed(2) + '%',
+          trend,
+          percentChange: percentChange.toFixed(2) + '%',
+          latestPrice: latestPrice.toFixed(2),
+          priceRange: {
+            min: Math.min(...prices).toFixed(2),
+            max: Math.max(...prices).toFixed(2)
+          }
         }
-      })
+      }
+      
+      return result
     } catch (error) {
       console.error('Error fetching historical prices:', error)
-      return null
+      return { text: 'Failed to fetch historical price data' }
     }
   }
 }
@@ -187,7 +193,9 @@ export const historicalPriceProvider: Provider = {
  * Provider: Market context and metadata
  */
 export const marketContextProvider: Provider = {
-  get: async (_runtime: IAgentRuntime, message: Memory, _state?: State): Promise<string | null> => {
+  name: 'marketContext',
+  description: 'Provides market context and metadata for commodity trading regions',
+  get: async (_runtime: IAgentRuntime, message: Memory, _state?: State): Promise<ProviderResult> => {
     try {
       const content = typeof message.content === 'string'
         ? message.content
@@ -215,10 +223,13 @@ export const marketContextProvider: Provider = {
         }
       }
       
-      return JSON.stringify(context[region])
+      return {
+        text: `Market context for ${region}: ${region === 'AFRICA' ? 'Strong agricultural base with growing specialty crop exports' : 'Mature export infrastructure with established commodity futures markets'}. Key countries: ${context[region].keyCountries.join(', ')}. Major risks: ${context[region].risks}.`,
+        data: context[region]
+      }
     } catch (error) {
       console.error('Error fetching market context:', error)
-      return null
+      return { text: 'Failed to fetch market context' }
     }
   }
 }

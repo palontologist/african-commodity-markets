@@ -16,8 +16,8 @@ import {
 
 export interface ApiAuthResult {
   authenticated: boolean;
-  userId?: string;
-  tier?: string;
+  userId?: string | null;
+  tier?: string | null;
   requiresPayment?: boolean;
   paymentAmount?: number;
   error?: string;
@@ -28,13 +28,20 @@ export interface ApiAuthResult {
  */
 export async function validateApiKey(apiKey: string): Promise<ApiAuthResult> {
   try {
+    if (!db) {
+      return {
+        authenticated: false,
+        error: 'Database not available',
+      };
+    }
+    
     // Query database for API key
     const keys = await db.select()
       .from(enterpriseApiKeys)
       .where(
         and(
           eq(enterpriseApiKeys.apiKey, apiKey),
-          eq(enterpriseApiKeys.isActive, 1)
+          eq(enterpriseApiKeys.isActive, true)
         )
       )
       .limit(1);
@@ -58,7 +65,7 @@ export async function validateApiKey(apiKey: string): Promise<ApiAuthResult> {
 
     // Check rate limit (basic check - would need Redis for production)
     // For now, just check monthly quota
-    if (key.currentUsage >= key.monthlyQuota) {
+    if (key.currentUsage === null || key.monthlyQuota === null || key.currentUsage >= key.monthlyQuota) {
       return {
         authenticated: false,
         error: 'Monthly quota exceeded',
@@ -170,6 +177,10 @@ export async function logApiAccess(
   paymentTxId?: string
 ): Promise<void> {
   try {
+    if (!db) {
+      return;
+    }
+    
     await db.insert(apiAccessLogs).values({
       userId: userId || null,
       apiKey: apiKey || null,
@@ -199,6 +210,10 @@ export async function hasEndpointAccess(
   endpoint: string
 ): Promise<boolean> {
   try {
+    if (!db) {
+      return false;
+    }
+    
     const keys = await db.select()
       .from(enterpriseApiKeys)
       .where(eq(enterpriseApiKeys.apiKey, apiKey))

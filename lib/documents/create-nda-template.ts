@@ -47,8 +47,12 @@ export async function createNDATemplate() {
 
         // Between section
         new Paragraph({
-          text: 'BETWEEN:',
-          bold: true,
+          children: [
+            new TextRun({
+              text: 'BETWEEN:',
+              bold: true,
+            }),
+          ],
           spacing: {
             before: 200,
             after: 100,
@@ -88,8 +92,12 @@ export async function createNDATemplate() {
 
         // And section
         new Paragraph({
-          text: 'AND',
-          bold: true,
+          children: [
+            new TextRun({
+              text: 'AND',
+              bold: true,
+            }),
+          ],
           spacing: {
             after: 100,
           },
@@ -238,8 +246,12 @@ export async function createNDATemplate() {
 
         // Signatures Section
         new Paragraph({
-          text: 'SIGNATURES:',
-          bold: true,
+          children: [
+            new TextRun({
+              text: 'SIGNATURES:',
+              bold: true,
+            }),
+          ],
           spacing: {
             before: 400,
             after: 200,
@@ -248,8 +260,12 @@ export async function createNDATemplate() {
 
         // Disclosing Party Signature
         new Paragraph({
-          text: '{{disclosingPartyName}}',
-          bold: true,
+          children: [
+            new TextRun({
+              text: '{{disclosingPartyName}}',
+              bold: true,
+            }),
+          ],
           spacing: {
             before: 200,
             after: 100,
@@ -286,8 +302,12 @@ export async function createNDATemplate() {
 
         // Receiving Party Signature
         new Paragraph({
-          text: '{{receivingPartyName}}',
-          bold: true,
+          children: [
+            new TextRun({
+              text: '{{receivingPartyName}}',
+              bold: true,
+            }),
+          ],
           spacing: {
             before: 200,
             after: 100,

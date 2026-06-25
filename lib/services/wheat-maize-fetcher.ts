@@ -22,6 +22,10 @@ export interface FetchResult {
  */
 export async function fetchAndStoreWheatPrice(): Promise<FetchResult> {
   try {
+    if (!db) {
+      return { success: false, commodity: 'WHEAT', error: 'Database not available' }
+    }
+    
     const priceData = await getLivePrice('WHEAT', 'AFRICA')
     
     // Get wheat commodity ID
@@ -77,6 +81,10 @@ export async function fetchAndStoreWheatPrice(): Promise<FetchResult> {
  */
 export async function fetchAndStoreMaizePrice(): Promise<FetchResult> {
   try {
+    if (!db) {
+      return { success: false, commodity: 'MAIZE', error: 'Database not available' }
+    }
+    
     const priceData = await getLivePrice('MAIZE', 'AFRICA')
     
     // Get maize commodity ID
@@ -166,6 +174,14 @@ export async function fetchAndStorePrices(): Promise<FetchResult[]> {
  */
 export async function fetchAndStoreTridgePrices(): Promise<FetchResult[]> {
   try {
+    if (!db) {
+      return [{
+        success: false,
+        commodity: 'WHEAT,MAIZE',
+        error: 'Database not available'
+      }]
+    }
+    
     const tridgeData = await fetchTridgePrices()
     const results: FetchResult[] = []
     

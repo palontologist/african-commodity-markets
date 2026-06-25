@@ -3,7 +3,7 @@
  * Bootstraps ElizaOS agent with Groq LLM and commodity-specific plugins
  */
 
-import { AgentRuntime, elizaLogger, ModelProviderName, defaultCharacter } from '@elizaos/core'
+import { AgentRuntime, elizaLogger } from '@elizaos/core'
 import type { Character, Plugin } from '@elizaos/core'
 import { commodityDataPlugin } from './plugins/commodity-data'
 import { commodityPredictionPlugin } from './plugins/commodity-prediction'
@@ -13,8 +13,6 @@ import { commodityPredictionPlugin } from './plugins/commodity-prediction'
  * Defines the personality and behavior of the commodity trading agent
  */
 export const commodityCharacter: Character = {
-  ...defaultCharacter,
-  
   name: 'CommodityOracle',
   
   username: 'commodity_oracle',
@@ -26,42 +24,35 @@ export const commodityCharacter: Character = {
     'Helps traders, farmers, and investors make informed decisions in volatile commodity markets'
   ],
   
-  lore: [
-    'Has tracked African commodity markets for over a decade',
-    'Specializes in understanding the unique challenges of smallholder farmers',
-    'Advocates for transparent, permissionless markets that empower local producers',
-    'Believes in democratizing access to sophisticated market analysis',
-    'Trained on historical price data, agricultural reports, and economic indicators'
-  ],
   
   messageExamples: [
     [
       {
-        user: '{{user1}}',
+        name: '{{user1}}',
         content: { text: 'What are coffee prices looking like?' }
       },
       {
-        user: 'CommodityOracle',
+        name: 'CommodityOracle',
         content: { text: 'Current coffee prices in Africa are around $2.15/lb for Arabica futures. I can fetch the exact live quote if you specify a region. Would you like a forecast?' }
       }
     ],
     [
       {
-        user: '{{user1}}',
+        name: '{{user1}}',
         content: { text: 'Should I sell my cocoa harvest now or wait?' }
       },
       {
-        user: 'CommodityOracle',
+        name: 'CommodityOracle',
         content: { text: 'Let me analyze current cocoa prices and generate a short-term forecast for you. This will help determine optimal timing based on market conditions and upcoming supply factors.' }
       }
     ],
     [
       {
-        user: '{{user1}}',
+        name: '{{user1}}',
         content: { text: 'How does weather affect tea prices?' }
       },
       {
-        user: 'CommodityOracle',
+        name: 'CommodityOracle',
         content: { text: 'Weather is critical for tea yields, especially monsoon patterns in East Africa. Drought reduces output and pushes prices up, while excessive rain can harm quality. The Kenya tea auctions reflect these dynamics quickly. Would you like a specific forecast?' }
       }
     ]
@@ -169,15 +160,13 @@ export async function initializeCommodityAgent(options?: {
     
     // Create agent runtime
     agentRuntimeInstance = new AgentRuntime({
-      databaseAdapter: null as any, // We use our own Drizzle database
-      token: groqApiKey,
-      modelProvider: ModelProviderName.GROQ,
+      adapter: null as any, // We use our own Drizzle database
       character: commodityCharacter,
       plugins,
-      serverUrl: process.env.NEXTAUTH_URL || 'http://localhost:3000',
       fetch: fetch as any,
-      evaluators: [],
-      providers: []
+      settings: {
+        GROQ_API_KEY: groqApiKey
+      }
     })
     
     elizaLogger.success('Commodity Agent Runtime initialized successfully')
@@ -185,7 +174,7 @@ export async function initializeCommodityAgent(options?: {
     
     return agentRuntimeInstance
   } catch (error) {
-    elizaLogger.error('Failed to initialize agent runtime:', error)
+    elizaLogger.error('Failed to initialize agent runtime: ' + String(error))
     throw error
   }
 }
@@ -231,8 +220,9 @@ export async function processCommodityMessage(
           memory as any,
           undefined,
           undefined,
-          (response: any) => {
+          async (response: any) => {
             responseData = response
+            return []
           }
         )
         
@@ -250,7 +240,7 @@ export async function processCommodityMessage(
       response: 'I can help you with commodity price analysis and forecasts. Try asking about current prices or future predictions for cocoa, coffee, tea, gold, avocado, or macadamia nuts.'
     }
   } catch (error) {
-    elizaLogger.error('Error processing message:', error)
+    elizaLogger.error('Error processing message: ' + String(error))
     throw error
   }
 }

@@ -42,7 +42,7 @@ export function AppHeader() {
           {/* Right side */}
           <div className="flex items-center gap-3">
             {isSignedIn ? (
-              <UserButton afterSignOutUrl="/" />
+              <UserButton />
             ) : (
               <Button variant="outline" size="sm" asChild>
                 <Link href="/sign-in">Sign In</Link>

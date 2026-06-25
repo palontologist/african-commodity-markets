@@ -64,6 +64,18 @@ export const commodityPrices = sqliteTable('commodity_prices', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
 });
 
+// Historical Prices table (for World Bank data ingestion)
+export const historicalPrices = sqliteTable('historical_prices', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  commodityId: text('commodity_id').notNull(), // e.g., 'COFFEE', 'COCOA', 'TEA', 'GOLD'
+  price: real('price').notNull(),
+  date: integer('date', { mode: 'timestamp' }).notNull(),
+  source: text('source').notNull(), // Data source (e.g., 'World Bank')
+  region: text('region').notNull(), // e.g., 'AFRICA', 'LATAM'
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+});
+
 // Commodity Grades table
 export const commodityGrades = sqliteTable('commodity_grades', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -210,6 +222,9 @@ export type NewMarket = typeof markets.$inferInsert;
 export type CommodityPrice = typeof commodityPrices.$inferSelect;
 export type NewCommodityPrice = typeof commodityPrices.$inferInsert;
 
+export type HistoricalPrice = typeof historicalPrices.$inferSelect;
+export type NewHistoricalPrice = typeof historicalPrices.$inferInsert;
+
 export type CommodityGrade = typeof commodityGrades.$inferSelect;
 export type NewCommodityGrade = typeof commodityGrades.$inferInsert;
 
@@ -289,7 +304,7 @@ export const enterpriseApiKeys = sqliteTable('enterprise_api_keys', {
   monthlyQuota: integer('monthly_quota').default(10000), // monthly request quota
   currentUsage: integer('current_usage').default(0),
   allowedEndpoints: text('allowed_endpoints'), // JSON array of allowed endpoints
-  isActive: integer('is_active', { mode: 'boolean' }).default(1),
+  isActive: integer('is_active', { mode: 'boolean' }).default(true),
   expiresAt: integer('expires_at', { mode: 'timestamp' }),
   lastUsedAt: integer('last_used_at', { mode: 'timestamp' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
