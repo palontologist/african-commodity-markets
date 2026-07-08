@@ -7,16 +7,22 @@ function createDBClient() {
   const url = process.env.DATABASE_URL;
   const authToken = process.env.DATABASE_AUTH_TOKEN;
 
-  if (!url || !authToken) {
+  // Check for missing, undefined, or invalid environment variables
+  if (!url || !authToken || url === 'undefined' || authToken === 'undefined') {
     // Return a mock client for build-time when env vars are not available
     console.warn('Database environment variables not set. Using mock client.');
     return null;
   }
 
-  return createClient({
-    url,
-    authToken,
-  });
+  try {
+    return createClient({
+      url,
+      authToken,
+    });
+  } catch (error) {
+    console.error('Failed to create database client:', error);
+    return null;
+  }
 }
 
 const client = createDBClient();
