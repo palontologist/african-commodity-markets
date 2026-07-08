@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useUser, UserButton } from '@clerk/nextjs'
 import { Button } from './ui/button'
-import { Menu, X, Home, BarChart3, Database, Phone, Users } from 'lucide-react'
+import { Menu, X, Home, BarChart3, Database, Phone, Users, FileText } from 'lucide-react'
 
 export function AppHeader() {
   const { isSignedIn } = useUser()
@@ -15,6 +15,7 @@ export function AppHeader() {
     { href: '/dashboard', label: 'Dashboard', icon: BarChart3 },
     { href: '/prices', label: 'Prices', icon: Database },
     { href: '/consult', label: 'Protection', icon: Phone },
+    { href: '/deck', label: 'Pitch Deck', icon: FileText },
   ]
 
   return (

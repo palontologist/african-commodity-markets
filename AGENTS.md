@@ -11,6 +11,9 @@ The platform is currently focused on displaying live African commodity prices wi
 2. `/components/app-header.tsx` - Simplified navbar with auth focus
 3. `/lib/live-prices.ts` - Live price data fetching from multiple sources
 
+## Project Assets
+- Pitch Deck: `/home/palontologist/Downloads/afrifutures.pptx`
+
 ## Development Guidelines
 
 ### Styling
